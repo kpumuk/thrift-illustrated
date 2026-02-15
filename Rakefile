@@ -5,7 +5,7 @@ require "json_schemer"
 require "rake"
 
 BENCHMARK_REPORT_PATH = "tmp/benchmarks/latest.json"
-BENCHMARK_SCHEMA_PATH = "data/schemas/benchmark.schema.json"
+BENCHMARK_SCHEMA_PATH = "site/data/schemas/benchmark.schema.json"
 
 desc "Capture tutorial traffic and generate artifacts"
 task :capture do

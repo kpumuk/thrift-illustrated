@@ -17,7 +17,7 @@
 - `bundle exec rake test`
 - `bundle exec rake build`
 - `bundle exec rake check`
-- `mise run web` (then open `http://127.0.0.1:8000/site/`)
+- `mise run web` (then open `http://127.0.0.1:8000/`)
 
 These are skeleton tasks during bootstrap and are expected to be replaced with full implementations.
 

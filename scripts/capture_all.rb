@@ -43,7 +43,7 @@ class CaptureAll
   }.freeze
 
   STAGES = %w[capture record parse validate write verify].freeze
-  DEFAULT_OUTPUT = "data/captures"
+  DEFAULT_OUTPUT = "site/data/captures"
 
   def initialize(argv:, stdout: $stdout, stderr: $stderr, pwd: Dir.pwd)
     @argv = argv.dup
@@ -65,7 +65,7 @@ class CaptureAll
     ensure_environment!(repo_root)
 
     @artifact_writer = ThriftIllustrated::ArtifactWriter.new(base_dir: output_dir_for(repo_root))
-    @validator = ThriftIllustrated::ValidationPipeline.new(schema_dir: repo_root.join("data/schemas"))
+    @validator = ThriftIllustrated::ValidationPipeline.new(schema_dir: repo_root.join("site/data/schemas"))
     @parser = ThriftIllustrated::MessageParser.new
 
     combos_to_run.each do |combo_id|
@@ -507,7 +507,7 @@ class CaptureAll
     ensure_directory_writable!(out_dir)
 
     %w[manifest.schema.json combo.schema.json benchmark.schema.json runtime-error.schema.json].each do |schema_file|
-      schema_path = repo_root.join("data/schemas/#{schema_file}")
+      schema_path = repo_root.join("site/data/schemas/#{schema_file}")
       raise SetupError, "Missing schema file #{schema_path}" unless schema_path.file?
     end
   rescue SetupError

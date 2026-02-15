@@ -35,13 +35,14 @@ const MIME_TYPES = {
 async function main() {
   const options = parseArgs(process.argv.slice(2))
   const repoRoot = process.cwd()
+  const siteRoot = path.join(repoRoot, "site")
   const outputPath = path.resolve(repoRoot, options.outputPath)
-  const manifestPath = path.join(repoRoot, "data", "captures", "manifest.json")
+  const manifestPath = path.join(siteRoot, "data", "captures", "manifest.json")
   const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"))
   const comboIds = Array.isArray(manifest.combos) ? manifest.combos.map((combo) => combo.id) : []
 
   if (comboIds.length < 2) {
-    throw new Error("Benchmark requires at least two combos in data/captures/manifest.json.")
+    throw new Error("Benchmark requires at least two combos in site/data/captures/manifest.json.")
   }
 
   const chromePath = await resolveChromeBinary(options.chromeBin)
@@ -49,7 +50,7 @@ async function main() {
   let server = null
 
   if (!baseUrl) {
-    const started = await startStaticServer(repoRoot)
+    const started = await startStaticServer(siteRoot)
     server = started.server
     baseUrl = started.baseUrl
   }
@@ -61,9 +62,9 @@ async function main() {
       repoRoot
     })
 
-    const assetBudgetBytes = await measureAssetBudget({ repoRoot })
+    const assetBudgetBytes = await measureAssetBudget({ siteRoot })
     const comboArtifactBytes = await measureComboArtifactBudget({
-      repoRoot,
+      siteRoot,
       comboEntries: manifest.combos
     })
 
@@ -232,8 +233,18 @@ function executeCaptureRun({ outputDir, repoRoot }) {
   )
 }
 
-async function measureAssetBudget({ repoRoot }) {
-  const bytes = await directoryBytes(path.join(repoRoot, "site"))
+async function measureAssetBudget({ siteRoot }) {
+  const totalSiteBytes = await directoryBytes(siteRoot)
+  const dataDir = path.join(siteRoot, "data")
+  let dataBytes = 0
+  try {
+    dataBytes = await directoryBytes(dataDir)
+  } catch (error) {
+    if (!error || error.code !== "ENOENT") {
+      throw error
+    }
+  }
+  const bytes = Math.max(0, totalSiteBytes - dataBytes)
   return {
     observed: bytes,
     limit: ASSET_BUDGET_LIMIT_BYTES,
@@ -241,10 +252,10 @@ async function measureAssetBudget({ repoRoot }) {
   }
 }
 
-async function measureComboArtifactBudget({ repoRoot, comboEntries }) {
+async function measureComboArtifactBudget({ siteRoot, comboEntries }) {
   let observed = 0
   for (const combo of comboEntries) {
-    const filePath = path.join(repoRoot, "data", "captures", combo.file)
+    const filePath = path.join(siteRoot, "data", "captures", combo.file)
     const stats = await fs.stat(filePath)
     observed = Math.max(observed, stats.size)
   }
@@ -268,7 +279,7 @@ async function benchmarkComboSwitch({ baseUrl, chromePath, warmupRuns, measuredR
     const context = await browser.newContext()
     const page = await context.newPage()
     const firstCombo = comboIds[0]
-    await page.goto(`${baseUrl}/site/#combo=${encodeURIComponent(firstCombo)}&msg=0`, {
+    await page.goto(`${baseUrl}/#combo=${encodeURIComponent(firstCombo)}&msg=0`, {
       waitUntil: "domcontentloaded",
       timeout: NAVIGATION_TIMEOUT_MS
     })

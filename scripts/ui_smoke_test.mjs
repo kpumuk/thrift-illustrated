@@ -22,7 +22,8 @@ const MIME_TYPES = {
 
 async function main() {
   const repoRoot = process.cwd()
-  const manifestPath = path.join(repoRoot, "data", "captures", "manifest.json")
+  const siteRoot = path.join(repoRoot, "site")
+  const manifestPath = path.join(siteRoot, "data", "captures", "manifest.json")
   const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"))
   if (!Array.isArray(manifest.combos) || manifest.combos.length === 0) {
     throw new Error("Manifest does not contain combos for UI smoke tests.")
@@ -96,7 +97,7 @@ async function main() {
   try {
     for (const scenario of scenarios) {
       try {
-        await runScenario({ browser, repoRoot, scenario })
+        await runScenario({ browser, siteRoot, scenario })
         console.log(`PASS ${scenario.name}`)
       } catch (error) {
         failures.push({ scenario: scenario.name, message: error.message })
@@ -112,11 +113,11 @@ async function main() {
   }
 }
 
-async function runScenario({ browser, repoRoot, scenario }) {
-  const serverState = await startScenarioServer({ repoRoot, mode: scenario.mode })
+async function runScenario({ browser, siteRoot, scenario }) {
+  const serverState = await startScenarioServer({ siteRoot, mode: scenario.mode })
   const context = await browser.newContext()
   const page = await context.newPage()
-  const url = `${serverState.baseUrl}/site/${scenario.hash || ""}`
+  const url = `${serverState.baseUrl}/${scenario.hash || ""}`
 
   try {
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS })
@@ -157,8 +158,8 @@ async function runScenario({ browser, repoRoot, scenario }) {
   }
 }
 
-async function startScenarioServer({ repoRoot, mode }) {
-  const absoluteRoot = path.resolve(repoRoot)
+async function startScenarioServer({ siteRoot, mode }) {
+  const absoluteRoot = path.resolve(siteRoot)
   const server = createServer(async (request, response) => {
     if (!request.url) {
       response.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" })

@@ -87,7 +87,7 @@ class HealthCheck
     end
 
     success &&= run_check("browser_render") do
-      browser_url = "#{URI.join(base_uri.to_s, "site/")}#combo=#{URI.encode_www_form_component(@options.fetch(:combo))}&msg=#{@options.fetch(:msg)}"
+      browser_url = "#{URI.join(base_uri.to_s, "/")}#combo=#{URI.encode_www_form_component(@options.fetch(:combo))}&msg=#{@options.fetch(:msg)}"
       stdout, stderr, status = Open3.capture3(
         "bun",
         "run",
@@ -116,7 +116,7 @@ class HealthCheck
   def parse_options!
     parser = OptionParser.new do |opts|
       opts.banner = "Usage: bundle exec ruby scripts/health_check.rb --base-url <url> [options]"
-      opts.on("--base-url URL", "Base URL that serves /site and /data/captures") { |value| @options[:base_url] = value }
+      opts.on("--base-url URL", "Base URL that serves the site root and /data/captures") { |value| @options[:base_url] = value }
       opts.on("--combo ID", "Combo id for dataset/browser checks (default: #{DEFAULT_COMBO})") { |value| @options[:combo] = value }
       opts.on("--msg N", Integer, "Message index for browser check (default: #{DEFAULT_MSG})") { |value| @options[:msg] = value }
       opts.on("--timeout-ms N", Integer, "HTTP/browser timeout in milliseconds (default: #{DEFAULT_TIMEOUT_MS})") { |value| @options[:timeout_ms] = value }

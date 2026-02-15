@@ -5,7 +5,7 @@ require_relative "../scripts/lib/validation_pipeline"
 
 class ValidationPipelineTest < Minitest::Test
   def test_validate_all_success_for_valid_documents
-    pipeline = ThriftIllustrated::ValidationPipeline.new(schema_dir: "data/schemas")
+    pipeline = ThriftIllustrated::ValidationPipeline.new(schema_dir: "site/data/schemas")
 
     manifest = valid_manifest(message_count: 7)
     dataset = valid_dataset(methods: %w[ping add add calculate getStruct calculate zip])
@@ -16,7 +16,7 @@ class ValidationPipelineTest < Minitest::Test
   end
 
   def test_message_count_mismatch_detected
-    pipeline = ThriftIllustrated::ValidationPipeline.new(schema_dir: "data/schemas")
+    pipeline = ThriftIllustrated::ValidationPipeline.new(schema_dir: "site/data/schemas")
 
     manifest = valid_manifest(message_count: 7)
     dataset = valid_dataset(methods: %w[ping add add calculate getStruct calculate zip])
@@ -29,7 +29,7 @@ class ValidationPipelineTest < Minitest::Test
   end
 
   def test_tutorial_flow_mismatch_detected
-    pipeline = ThriftIllustrated::ValidationPipeline.new(schema_dir: "data/schemas")
+    pipeline = ThriftIllustrated::ValidationPipeline.new(schema_dir: "site/data/schemas")
 
     manifest = valid_manifest(message_count: 7)
     dataset = valid_dataset(methods: %w[ping add add calculate getStruct add zip])
@@ -41,7 +41,7 @@ class ValidationPipelineTest < Minitest::Test
   end
 
   def test_field_ordering_mismatch_detected
-    pipeline = ThriftIllustrated::ValidationPipeline.new(schema_dir: "data/schemas")
+    pipeline = ThriftIllustrated::ValidationPipeline.new(schema_dir: "site/data/schemas")
 
     manifest = valid_manifest(message_count: 7)
     dataset = valid_dataset(methods: %w[ping add add calculate getStruct calculate zip])

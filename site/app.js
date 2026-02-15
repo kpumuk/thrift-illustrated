@@ -1,4 +1,4 @@
-const DATA_ROOT = "../data/captures"
+const DATA_ROOT = "./data/captures"
 const MANIFEST_URL = `${DATA_ROOT}/manifest.json`
 
 const SUPPORTED_SCHEMA_VERSION = "1.0.0"

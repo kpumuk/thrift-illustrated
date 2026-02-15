@@ -11,4 +11,4 @@ vendor/bundle/
 node_modules/
 
 # Local capture orchestration placeholder output
-data/captures/*.run.json
+site/data/captures/*.run.json

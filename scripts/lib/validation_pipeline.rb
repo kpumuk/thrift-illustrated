@@ -13,7 +13,7 @@ module ThriftIllustrated
       end
     end
 
-    def initialize(schema_dir: "data/schemas")
+    def initialize(schema_dir: "site/data/schemas")
       @schema_dir = Pathname.new(schema_dir).expand_path
       @manifest_schemer = load_schema("manifest.schema.json")
       @combo_schemer = load_schema("combo.schema.json")
