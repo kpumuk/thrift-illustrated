@@ -570,6 +570,21 @@ function createInteractionModel(message, protocol) {
     interaction.bytesByField.set(field.key, [])
   }
 
+  const previousFieldIdByKey = new Map()
+  const lastFieldIdByParent = new Map()
+  const fieldsInWireOrder = [...fields].sort((left, right) => {
+    if (left.span[0] !== right.span[0]) return left.span[0] - right.span[0]
+    if (left.depth !== right.depth) return left.depth - right.depth
+    return left.key.localeCompare(right.key)
+  })
+  for (const field of fieldsInWireOrder) {
+    const parentKey = field.parentKey
+    previousFieldIdByKey.set(field.key, lastFieldIdByParent.get(parentKey) ?? null)
+    if (Number.isInteger(field.node.id)) {
+      lastFieldIdByParent.set(parentKey, field.node.id)
+    }
+  }
+
   const ordered = [...fields].sort((left, right) => {
     if (left.depth !== right.depth) return right.depth - left.depth
     const leftLen = left.span[1] - left.span[0]
@@ -601,14 +616,34 @@ function createInteractionModel(message, protocol) {
     if (start >= end) continue
 
     const groupId = `field:${field.key}`
+    const subfields = buildFieldSubfields({
+      protocol,
+      rawBytes,
+      field,
+      groupId,
+      start,
+      end,
+      previousFieldId: previousFieldIdByKey.get(field.key) ?? null
+    })
+
     interaction.groups.set(groupId, {
       id: groupId,
       type: "field",
       label: `Field ${field.node.name} (${field.node.ttype}, id=${field.node.id})`,
-      description: "Encodes this field on the wire, including field header bytes and value bytes.",
+      description: buildFieldGroupDescription({
+        protocol,
+        field,
+        start,
+        end,
+        previousFieldId: previousFieldIdByKey.get(field.key) ?? null
+      }),
       start,
-      end
+      end,
+      subfields
     })
+    for (const subfield of subfields) {
+      interaction.subfields.set(subfield.id, subfield)
+    }
     for (let index = start; index < end; index += 1) {
       interaction.groupByByte[index] = groupId
     }
@@ -658,6 +693,7 @@ function flattenFields(fields, parentKey = "f", depth = 0) {
     const key = `${parentKey}.${idx}`
     flat.push({
       key,
+      parentKey,
       node: field,
       span: Array.isArray(field.span) ? field.span : [0, 0],
       depth
@@ -738,7 +774,10 @@ function renderByteExplanation(interaction) {
   if (Array.isArray(group.subfields) && group.subfields.length > 0) {
     const breakdownTitle = document.createElement("div")
     breakdownTitle.className = "byte-subfields-title"
-    breakdownTitle.textContent = "Envelope subfields (hover to highlight bytes):"
+    breakdownTitle.textContent =
+      group.type === "envelope"
+        ? "Envelope subfields (hover to highlight bytes):"
+        : "Field subfields (hover to highlight bytes):"
     byteExplainerEl.append(breakdownTitle)
 
     const list = document.createElement("ul")
@@ -866,6 +905,176 @@ function assignFallbackGroups(interaction) {
         end: segmentEnd
       })
       segmentStart = null
+    }
+  }
+}
+
+function buildFieldGroupDescription({ protocol, field, previousFieldId }) {
+  const ttype = String(field.node.ttype ?? "value")
+  const fieldId = Number.isInteger(field.node.id) ? field.node.id : "?"
+
+  if (protocol === "binary") {
+    return `Binary field layout: 1-byte type tag, 2-byte big-endian field id (index = ${fieldId}), then ${ttype} value bytes.`
+  }
+
+  if (protocol === "compact") {
+    const previousText = Number.isInteger(previousFieldId) ? String(previousFieldId) : "previous field id"
+    return `Compact field layout: header byte carries type and id delta (from ${previousText}); when delta is 0, the field id follows as a zigzag varint, then ${ttype} value bytes.`
+  }
+
+  return "Encodes this field on the wire, including field header bytes and value bytes."
+}
+
+function buildFieldSubfields({ protocol, rawBytes, field, groupId, start, end, previousFieldId }) {
+  if (start >= end) return []
+
+  const subfields = []
+  const pushSubfield = (id, label, description, subStart, subEnd) => {
+    if (subStart >= subEnd) return
+    subfields.push({ id, label, description, start: subStart, end: subEnd })
+  }
+
+  if (protocol === "binary") {
+    const typeByte = byteAt(rawBytes, start)
+    pushSubfield(
+      `${groupId}.type_tag`,
+      "Field type tag",
+      typeByte === null
+        ? `1-byte binary type tag for ${field.node.ttype}.`
+        : `1-byte binary type tag: ${hexByte(typeByte)} (${binaryTypeName(typeByte)}).`,
+      start,
+      Math.min(start + 1, end)
+    )
+
+    const idStart = start + 1
+    const idEnd = Math.min(start + 3, end)
+    if (idStart < idEnd) {
+      const decodedId = idEnd - idStart === 2 ? readInt16BE(rawBytes, idStart) : null
+      const idText = decodedId === null ? "unknown" : String(decodedId)
+      pushSubfield(
+        `${groupId}.field_id`,
+        "Field id (index)",
+        `2-byte big-endian field id bytes. Decoded id: ${idText}.`,
+        idStart,
+        idEnd
+      )
+    }
+
+    const valueStart = Math.min(start + 3, end)
+    pushSubfield(
+      `${groupId}.value`,
+      "Field value bytes",
+      binaryValueHint(String(field.node.ttype ?? "value")),
+      valueStart,
+      end
+    )
+  } else if (protocol === "compact") {
+    const headerByte = byteAt(rawBytes, start)
+    const headerEnd = Math.min(start + 1, end)
+    const typeNibble = headerByte === null ? null : headerByte & 0x0f
+    const fieldIdDelta = headerByte === null ? null : (headerByte >> 4) & 0x0f
+
+    pushSubfield(
+      `${groupId}.header`,
+      "Field header byte",
+      headerByte === null
+        ? "Compact field header byte (type + field-id delta)."
+        : `Compact field header ${hexByte(headerByte)}: type=${compactTypeName(typeNibble)} (${typeNibble}), id delta=${fieldIdDelta}.`,
+      start,
+      headerEnd
+    )
+
+    let cursor = headerEnd
+    if (fieldIdDelta === 0) {
+      const idVarint = decodeCompactVarint(rawBytes, cursor, end)
+      if (idVarint.length > 0) {
+        const decodedFieldId = decodeCompactZigZag(idVarint.value)
+        pushSubfield(
+          `${groupId}.field_id_varint`,
+          "Field id varint",
+          `Explicit zigzag varint field id bytes. Decoded id: ${decodedFieldId}.`,
+          cursor,
+          cursor + idVarint.length
+        )
+        cursor += idVarint.length
+      }
+    } else if (fieldIdDelta !== null && fieldIdDelta > 0) {
+      const derivedId = Number.isInteger(previousFieldId) ? previousFieldId + fieldIdDelta : field.node.id
+      pushSubfield(
+        `${groupId}.field_id_delta`,
+        "Field id delta (in header)",
+        `Field id is encoded in header high nibble via delta ${fieldIdDelta}; decoded id: ${derivedId}.`,
+        start,
+        headerEnd
+      )
+    }
+
+    if (typeNibble === 0x01 || typeNibble === 0x02) {
+      pushSubfield(
+        `${groupId}.bool_value`,
+        "Boolean value (in header)",
+        `Boolean ${typeNibble === 0x01 ? "true" : "false"} is encoded directly in the header type nibble.`,
+        start,
+        headerEnd
+      )
+      pushSubfield(
+        `${groupId}.value_remainder`,
+        "Additional value bytes",
+        compactValueHint(String(field.node.ttype ?? "value")),
+        cursor,
+        end
+      )
+    } else {
+      pushSubfield(
+        `${groupId}.value`,
+        "Field value bytes",
+        compactValueHint(String(field.node.ttype ?? "value")),
+        cursor,
+        end
+      )
+    }
+  } else {
+    pushSubfield(
+      `${groupId}.bytes`,
+      "Field bytes",
+      "Field bytes for this protocol encoding.",
+      start,
+      end
+    )
+  }
+
+  fillSubfieldGaps(subfields, [start, end], `${groupId}.unknown`, "Unclassified field bytes")
+  return subfields.sort((left, right) => left.start - right.start || left.end - right.end)
+}
+
+function fillSubfieldGaps(subfields, span, idPrefix, label) {
+  const [start, end] = span
+  const covered = new Array(Math.max(0, end - start)).fill(false)
+  for (const subfield of subfields) {
+    for (let index = subfield.start; index < subfield.end; index += 1) {
+      if (index >= start && index < end) {
+        covered[index - start] = true
+      }
+    }
+  }
+
+  let gapStart = null
+  for (let offset = 0; offset < covered.length; offset += 1) {
+    const isCovered = covered[offset]
+    if (!isCovered && gapStart === null) {
+      gapStart = start + offset
+    }
+
+    if ((isCovered || offset === covered.length - 1) && gapStart !== null) {
+      const gapEnd = isCovered ? start + offset : start + offset + 1
+      subfields.push({
+        id: `${idPrefix}.${gapStart}-${gapEnd}`,
+        label,
+        description: "Field bytes not yet classified into a finer-grained subfield.",
+        start: gapStart,
+        end: gapEnd
+      })
+      gapStart = null
     }
   }
 }
@@ -2127,6 +2336,102 @@ function binaryMessageTypeLabel(value) {
     default:
       return "unknown type"
   }
+}
+
+function binaryTypeName(typeTag) {
+  const map = {
+    0: "stop",
+    1: "void",
+    2: "bool",
+    3: "byte",
+    4: "double",
+    6: "i16",
+    8: "i32",
+    10: "i64",
+    11: "string/binary",
+    12: "struct",
+    13: "map",
+    14: "set",
+    15: "list",
+    16: "uuid"
+  }
+  return map[typeTag] || "unknown"
+}
+
+function compactTypeName(typeNibble) {
+  const map = {
+    0: "stop",
+    1: "bool(true)",
+    2: "bool(false)",
+    3: "byte",
+    4: "i16",
+    5: "i32",
+    6: "i64",
+    7: "double",
+    8: "binary/string",
+    9: "list",
+    10: "set",
+    11: "map",
+    12: "struct"
+  }
+  return map[typeNibble] || "unknown"
+}
+
+function binaryValueHint(ttype) {
+  switch (ttype) {
+    case "bool":
+    case "byte":
+      return `Binary ${ttype} value (1 byte).`
+    case "i16":
+      return "Binary i16 value (2-byte big-endian signed integer)."
+    case "i32":
+      return "Binary i32 value (4-byte big-endian signed integer)."
+    case "i64":
+      return "Binary i64 value (8-byte big-endian signed integer)."
+    case "double":
+      return "Binary double value (8-byte IEEE-754 big-endian)."
+    case "string":
+      return "Binary string value (4-byte length prefix followed by UTF-8 bytes)."
+    case "struct":
+    case "map":
+    case "set":
+    case "list":
+      return `Binary ${ttype} value bytes (nested container encoding).`
+    default:
+      return `Binary ${ttype} value bytes.`
+  }
+}
+
+function compactValueHint(ttype) {
+  switch (ttype) {
+    case "i16":
+    case "i32":
+    case "i64":
+      return `Compact ${ttype} value bytes (zigzag varint).`
+    case "bool":
+      return "Compact boolean value is typically encoded in the header nibble."
+    case "string":
+      return "Compact string value bytes (length varint followed by UTF-8 bytes)."
+    case "double":
+      return "Compact double value bytes (fixed 8-byte IEEE-754 little-endian payload)."
+    case "struct":
+    case "map":
+    case "set":
+    case "list":
+      return `Compact ${ttype} value bytes (nested container encoding).`
+    default:
+      return `Compact ${ttype} value bytes.`
+  }
+}
+
+function decodeCompactZigZag(value) {
+  return (value >>> 1) ^ -(value & 1)
+}
+
+function readInt16BE(bytes, start) {
+  if (start + 1 >= bytes.length) return 0
+  const value = ((bytes[start] << 8) | bytes[start + 1]) & 0xffff
+  return value & 0x8000 ? value - 0x10000 : value
 }
 
 function readInt32BE(bytes, start) {
