@@ -11,9 +11,18 @@ GEM
   remote: https://rubygems.org/
   specs:
     base64 (0.3.0)
+    bigdecimal (4.0.1)
+    hana (1.3.7)
+    json_schemer (2.5.0)
+      bigdecimal
+      hana (~> 1.3)
+      regexp_parser (~> 2.0)
+      simpleidn (~> 0.2)
     logger (1.7.0)
     minitest (5.27.0)
     rake (13.3.1)
+    regexp_parser (2.11.3)
+    simpleidn (0.2.3)
 
 PLATFORMS
   arm64-darwin-25
@@ -21,15 +30,21 @@ PLATFORMS
 
 DEPENDENCIES
   base64 (~> 0.3)
+  json_schemer (~> 2.4)
   minitest (~> 5.25)
   rake (~> 13.2)
   thrift!
 
 CHECKSUMS
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
+  bigdecimal (4.0.1) sha256=8b07d3d065a9f921c80ceaea7c9d4ae596697295b584c296fe599dd0ad01c4a7
+  hana (1.3.7) sha256=5425db42d651fea08859811c29d20446f16af196308162894db208cac5ce9b0d
+  json_schemer (2.5.0) sha256=2f01fb4cce721a4e08dd068fc2030cffd0702a7f333f1ea2be6e8991f00ae396
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   minitest (5.27.0) sha256=2d3b17f8a36fe7801c1adcffdbc38233b938eb0b4966e97a6739055a45fa77d5
   rake (13.3.1) sha256=8c9e89d09f66a26a01264e7e3480ec0607f0c497a861ef16063604b1b08eb19c
+  regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4
+  simpleidn (0.2.3) sha256=08ce96f03fa1605286be22651ba0fc9c0b2d6272c9b27a260bc88be05b0d2c29
   thrift (0.23.0)
 
 RUBY VERSION
