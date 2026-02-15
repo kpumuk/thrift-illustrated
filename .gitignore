@@ -1,0 +1,4 @@
+tmp/
+
+# Adversarial spec
+.venv*
