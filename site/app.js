@@ -57,6 +57,7 @@ const comboPickerEl = document.querySelector("#combo-picker")
 const messageNavEl = document.querySelector("#message-nav")
 const summaryEl = document.querySelector("#message-summary")
 const rawHexEl = document.querySelector("#raw-hex")
+const byteExplainerEl = document.querySelector("#byte-explainer")
 const fieldTreeEl = document.querySelector("#field-tree")
 const parseErrorsEl = document.querySelector("#parse-errors")
 const highlightsEl = document.querySelector("#highlights")
@@ -179,6 +180,7 @@ function renderBlockingState() {
   addSummary("Hint", "Fix the source issue and refresh the page.")
 
   rawHexEl.textContent = ""
+  byteExplainerEl.textContent = "Byte-group details are unavailable while runtime checks are failing."
   fieldTreeEl.innerHTML = ""
   const blocked = document.createElement("div")
   blocked.className = "field-node"
@@ -248,6 +250,8 @@ function renderMessageDetails() {
   state.interaction = createInteractionModel(message)
   renderRawBytes(message, state.interaction)
   renderFieldTree(message.payload?.fields || [], state.interaction)
+  renderByteExplanation(state.interaction)
+  applyInteractionClasses()
   renderList(parseErrorsEl, message.parse_errors || [], (item) => `${item.code}: ${item.message}`, "warn")
   renderList(highlightsEl, message.highlights || [], (item) => `${item.kind} ${item.label} ${item.start}-${item.end}`)
 }
@@ -330,6 +334,13 @@ function renderRawBytes(message, interaction) {
     token.addEventListener("mouseleave", clearInteraction)
     token.addEventListener("focus", () => activateByteInteraction(index))
     token.addEventListener("blur", clearInteraction)
+    token.addEventListener("click", () => selectByteGroup(index))
+    token.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault()
+        selectByteGroup(index)
+      }
+    })
     interaction.byteElements.set(index, token)
     fragment.append(token)
   })
@@ -339,13 +350,21 @@ function renderRawBytes(message, interaction) {
 
 function createInteractionModel(message) {
   const fields = flattenFields(message.payload?.fields || [])
+  const payloadSpan = clampSpan(message.payload?.span, message.raw_size)
+  const envelopeSpan = clampSpan(message.envelope?.span, message.raw_size)
+  const frameHeaderSpan = clampSpan(message.transport?.frame_header_span, message.raw_size)
   const interaction = {
+    message,
     fieldToKey: new WeakMap(),
     fieldElements: new Map(),
     byteElements: new Map(),
     bytesByField: new Map(),
     fieldByByte: new Array(message.raw_size).fill(null),
-    activeFieldKey: null
+    activeFieldKey: null,
+    activeByteIndex: null,
+    selectedGroupId: null,
+    groupByByte: new Array(message.raw_size).fill(null),
+    groups: new Map()
   }
 
   for (const field of fields) {
@@ -378,6 +397,52 @@ function createInteractionModel(message) {
     }
   }
 
+  for (const field of fields) {
+    const start = clamp(field.span[0], 0, message.raw_size)
+    const end = clamp(field.span[1], 0, message.raw_size)
+    if (start >= end) continue
+
+    const groupId = `field:${field.key}`
+    interaction.groups.set(groupId, {
+      id: groupId,
+      type: "field",
+      label: `Field ${field.node.name} (${field.node.ttype}, id=${field.node.id})`,
+      description: "Encodes this field on the wire, including field header bytes and value bytes.",
+      start,
+      end
+    })
+    for (let index = start; index < end; index += 1) {
+      interaction.groupByByte[index] = groupId
+    }
+  }
+
+  assignGroupIfUnassigned(interaction, {
+    id: "envelope",
+    type: "envelope",
+    label: "Protocol envelope",
+    description: "Encodes method name, message type, and sequence id in the protocol envelope.",
+    start: envelopeSpan[0],
+    end: envelopeSpan[1]
+  })
+
+  assignGroupIfUnassigned(interaction, {
+    id: "frame-header",
+    type: "frame-header",
+    label: "Framed transport header",
+    description: "Encodes the 4-byte framed-transport length prefix.",
+    start: frameHeaderSpan[0],
+    end: frameHeaderSpan[1]
+  })
+
+  assignPayloadStructuralGroups(interaction, payloadSpan)
+  assignFallbackGroups(interaction)
+
+  if (payloadSpan[0] < payloadSpan[1]) {
+    interaction.selectedGroupId = interaction.groupByByte[payloadSpan[0]]
+  } else {
+    interaction.selectedGroupId = interaction.groupByByte[0]
+  }
+
   return interaction
 }
 
@@ -400,6 +465,7 @@ function flattenFields(fields, parentKey = "f", depth = 0) {
 function activateFieldInteraction(fieldKey) {
   if (!state.interaction) return
   state.interaction.activeFieldKey = fieldKey
+  state.interaction.activeByteIndex = null
   applyInteractionClasses()
 }
 
@@ -407,28 +473,129 @@ function activateByteInteraction(byteIndex) {
   if (!state.interaction) return
   const fieldKey = state.interaction.fieldByByte[byteIndex] || null
   state.interaction.activeFieldKey = fieldKey
-  applyInteractionClasses(byteIndex)
+  state.interaction.activeByteIndex = byteIndex
+  applyInteractionClasses()
 }
 
 function clearInteraction() {
   if (!state.interaction) return
   state.interaction.activeFieldKey = null
+  state.interaction.activeByteIndex = null
   applyInteractionClasses()
 }
 
-function applyInteractionClasses(activeByteIndex = null) {
+function selectByteGroup(byteIndex) {
+  if (!state.interaction) return
+  state.interaction.selectedGroupId = state.interaction.groupByByte[byteIndex] || null
+  state.interaction.activeByteIndex = byteIndex
+  renderByteExplanation(state.interaction)
+  applyInteractionClasses()
+}
+
+function renderByteExplanation(interaction) {
+  if (!interaction || !interaction.selectedGroupId) {
+    byteExplainerEl.textContent = "Click a byte to inspect its semantic group."
+    return
+  }
+
+  const group = interaction.groups.get(interaction.selectedGroupId)
+  if (!group) {
+    byteExplainerEl.textContent = "No semantic group found for the selected byte."
+    return
+  }
+
+  byteExplainerEl.innerHTML = ""
+  const title = document.createElement("strong")
+  title.textContent = group.label
+
+  const details = document.createElement("span")
+  details.textContent = ` (${group.start}-${group.end - 1}, ${group.end - group.start} bytes) `
+
+  const body = document.createElement("span")
+  body.textContent = group.description
+
+  byteExplainerEl.append(title, details, body)
+}
+
+function applyInteractionClasses() {
   if (!state.interaction) return
 
   const activeFieldKey = state.interaction.activeFieldKey
-  const highlightedBytes = activeFieldKey ? state.interaction.bytesByField.get(activeFieldKey) || [] : []
+  const highlightedBytes = new Set(activeFieldKey ? state.interaction.bytesByField.get(activeFieldKey) || [] : [])
+  const selectedGroup = state.interaction.selectedGroupId
+    ? state.interaction.groups.get(state.interaction.selectedGroupId)
+    : null
+  const selectedBytes = selectedGroup
+    ? new Set(rangeIndices(selectedGroup.start, selectedGroup.end))
+    : new Set()
 
   for (const [fieldKey, element] of state.interaction.fieldElements.entries()) {
     element.classList.toggle("is-hover-active", fieldKey === activeFieldKey)
   }
 
   for (const [byteIndex, element] of state.interaction.byteElements.entries()) {
-    element.classList.toggle("is-hover-active", highlightedBytes.includes(byteIndex))
-    element.classList.toggle("is-byte-focus", byteIndex === activeByteIndex)
+    element.classList.toggle("is-hover-active", highlightedBytes.has(byteIndex))
+    element.classList.toggle("is-byte-focus", byteIndex === state.interaction.activeByteIndex)
+    element.classList.toggle("is-group-selected", selectedBytes.has(byteIndex))
+  }
+}
+
+function assignGroupIfUnassigned(interaction, group) {
+  if (group.start >= group.end) return
+  interaction.groups.set(group.id, group)
+  for (let index = group.start; index < group.end; index += 1) {
+    if (interaction.groupByByte[index] === null) {
+      interaction.groupByByte[index] = group.id
+    }
+  }
+}
+
+function assignPayloadStructuralGroups(interaction, payloadSpan) {
+  let segmentStart = null
+
+  for (let index = payloadSpan[0]; index < payloadSpan[1]; index += 1) {
+    const assigned = interaction.groupByByte[index] !== null
+    if (!assigned && segmentStart === null) {
+      segmentStart = index
+    }
+
+    if ((assigned || index === payloadSpan[1] - 1) && segmentStart !== null) {
+      const segmentEnd = assigned ? index : index + 1
+      const groupId = `payload-struct:${segmentStart}-${segmentEnd}`
+      assignGroupIfUnassigned(interaction, {
+        id: groupId,
+        type: "payload-structural",
+        label: "write_struct structural bytes",
+        description: "Payload bytes outside field spans, typically struct framing, field headers, or stop markers emitted by write_struct-style encoding.",
+        start: segmentStart,
+        end: segmentEnd
+      })
+      segmentStart = null
+    }
+  }
+}
+
+function assignFallbackGroups(interaction) {
+  let segmentStart = null
+  for (let index = 0; index < interaction.groupByByte.length; index += 1) {
+    const assigned = interaction.groupByByte[index] !== null
+    if (!assigned && segmentStart === null) {
+      segmentStart = index
+    }
+
+    if ((assigned || index === interaction.groupByByte.length - 1) && segmentStart !== null) {
+      const segmentEnd = assigned ? index : index + 1
+      const groupId = `wire:${segmentStart}-${segmentEnd}`
+      assignGroupIfUnassigned(interaction, {
+        id: groupId,
+        type: "wire",
+        label: "Wire bytes",
+        description: "Wire-level bytes that are outside payload field spans.",
+        start: segmentStart,
+        end: segmentEnd
+      })
+      segmentStart = null
+    }
   }
 }
 
@@ -1464,6 +1631,22 @@ function toHex(bytes) {
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max)
+}
+
+function clampSpan(span, upperBound) {
+  if (!Array.isArray(span) || span.length !== 2) return [0, 0]
+  const start = clamp(Number(span[0]) || 0, 0, upperBound)
+  const end = clamp(Number(span[1]) || 0, 0, upperBound)
+  if (end <= start) return [0, 0]
+  return [start, end]
+}
+
+function rangeIndices(start, end) {
+  const indices = []
+  for (let value = start; value < end; value += 1) {
+    indices.push(value)
+  }
+  return indices
 }
 
 function spanToString(span) {

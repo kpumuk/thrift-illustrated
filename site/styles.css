@@ -190,6 +190,24 @@ p {
   border-color: rgba(159, 52, 24, 0.62);
 }
 
+.byte-token.is-group-selected {
+  background: rgba(159, 52, 24, 0.16);
+  border-color: rgba(159, 52, 24, 0.56);
+}
+
+.byte-explainer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  color: var(--ink-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.byte-explainer strong {
+  color: var(--ink);
+}
+
 .field-tree {
   display: grid;
   gap: 6px;
