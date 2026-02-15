@@ -28,7 +28,7 @@ jobs:
 
       - name: Setup Chrome
         id: chrome
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@v2
 
       - name: Install Ruby and Bun dependencies
         run: |
