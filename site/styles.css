@@ -48,6 +48,21 @@ body {
 
 .title-block {
   min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.title-logo {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  display: block;
+}
+
+.title-copy {
+  min-width: 0;
+  display: grid;
 }
 
 h1 {
@@ -300,6 +315,7 @@ p {
   border-radius: 50%;
   border: 2px solid rgba(31, 34, 41, 0.62);
   background: rgba(255, 255, 255, 0.96);
+  transform: translateX(1px);
 }
 
 .timeline-node.is-source {
@@ -319,8 +335,14 @@ p {
 
 .timeline-arrow {
   position: relative;
+  top: -1px;
   height: 2px;
+  margin: 0 3px;
   background: rgba(31, 34, 41, 0.72);
+}
+
+.timeline-arrow.is-right-to-left {
+  margin-left: 5px;
 }
 
 .timeline-arrow.is-return {
@@ -392,6 +414,16 @@ p {
   background: var(--panel);
   backdrop-filter: blur(2px);
   padding: 14px;
+  box-shadow:
+    0 1px 1px rgba(31, 34, 41, 0.04),
+    0 4px 10px rgba(31, 34, 41, 0.035);
+  transition: box-shadow 180ms ease;
+}
+
+.card:hover {
+  box-shadow:
+    0 1px 2px rgba(31, 34, 41, 0.05),
+    0 6px 14px rgba(31, 34, 41, 0.045);
 }
 
 .split {
@@ -422,6 +454,7 @@ p {
 .raw-hex {
   margin: 0;
   overflow-x: auto;
+  padding: 6px 6px 4px;
   font-family: "IBM Plex Mono", "Menlo", monospace;
   font-size: 0.85rem;
   color: #283244;
@@ -491,6 +524,13 @@ p {
 .byte-token:focus-visible {
   border-color: rgba(20, 108, 95, 0.44);
   outline: none;
+}
+
+.byte-token-hex:hover,
+.byte-token-hex:focus-visible,
+.byte-token-ascii:hover,
+.byte-token-ascii:focus-visible {
+  box-shadow: 0 0 0 4px rgba(20, 108, 95, 0.18);
 }
 
 .byte-token.is-hover-active {
