@@ -2,3 +2,9 @@ tmp/
 
 # Adversarial spec
 .venv*
+doc/*
+
+# Ruby / Bundler local artifacts
+.bundle/
+vendor/bundle/
+.ruby-lsp/
