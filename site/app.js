@@ -814,13 +814,48 @@ function buildEnvelopeSubfields({ protocol, rawBytes, envelopeSpan, envelopeName
   if (protocol === "binary") {
     let cursor = envelopeSpan[0]
     const end = envelopeSpan[1]
+    const headerStart = cursor
+    const headerEnd = Math.min(cursor + 4, end)
+    const headerByte0 = byteAt(rawBytes, headerStart)
+    const headerByte1 = byteAt(rawBytes, headerStart + 1)
+    const headerByte2 = byteAt(rawBytes, headerStart + 2)
+    const headerByte3 = byteAt(rawBytes, headerStart + 3)
 
     pushSubfield(
-      "envelope.binary.version_type",
-      "Version + message type",
-      "4-byte strict binary envelope header: protocol version marker plus message type.",
-      cursor,
-      Math.min(cursor + 4, end)
+      "envelope.binary.header_byte0",
+      "Header byte 0 (version marker high)",
+      headerByte0 === null
+        ? "High byte of the strict binary VERSION_1 marker (expected 0x80)."
+        : `High byte of the strict binary VERSION_1 marker: ${hexByte(headerByte0)} (expected 0x80).`,
+      headerStart,
+      Math.min(headerStart + 1, headerEnd)
+    )
+    pushSubfield(
+      "envelope.binary.header_byte1",
+      "Header byte 1 (version marker low)",
+      headerByte1 === null
+        ? "Second byte of the strict binary VERSION_1 marker (expected 0x01)."
+        : `Second byte of the strict binary VERSION_1 marker: ${hexByte(headerByte1)} (expected 0x01).`,
+      headerStart + 1,
+      Math.min(headerStart + 2, headerEnd)
+    )
+    pushSubfield(
+      "envelope.binary.header_byte2",
+      "Header byte 2 (reserved)",
+      headerByte2 === null
+        ? "Reserved byte in VERSION_1 strict header word (normally 0x00)."
+        : `Reserved byte in VERSION_1 strict header word: ${hexByte(headerByte2)} (normally 0x00).`,
+      headerStart + 2,
+      Math.min(headerStart + 3, headerEnd)
+    )
+    pushSubfield(
+      "envelope.binary.header_byte3",
+      "Header byte 3 (message type)",
+      headerByte3 === null
+        ? "Low byte of the strict header word; carries message type (call/reply/exception/oneway)."
+        : `Low byte of the strict header word: ${hexByte(headerByte3)} (${binaryMessageTypeLabel(headerByte3)}).`,
+      headerStart + 3,
+      Math.min(headerStart + 4, headerEnd)
     )
     cursor += 4
 
@@ -1998,6 +2033,30 @@ function toHex(bytes) {
     output += byte.toString(16).padStart(2, "0")
   }
   return output
+}
+
+function byteAt(bytes, index) {
+  if (index < 0 || index >= bytes.length) return null
+  return bytes[index]
+}
+
+function hexByte(value) {
+  return `0x${value.toString(16).padStart(2, "0")}`
+}
+
+function binaryMessageTypeLabel(value) {
+  switch (value) {
+    case 1:
+      return "call"
+    case 2:
+      return "reply"
+    case 3:
+      return "exception"
+    case 4:
+      return "oneway"
+    default:
+      return "unknown type"
+  }
 }
 
 function readInt32BE(bytes, start) {
