@@ -52,12 +52,14 @@ const state = {
   lastErrorKey: null,
   lastErrorCycle: -1,
   errorCycle: 0,
-  interaction: null
+  interaction: null,
+  renderCycle: 0
 }
 
 const runtimeMessageEl = document.querySelector("#runtime-message")
 const comboPickerEl = document.querySelector("#combo-picker")
 const messageNavEl = document.querySelector("#message-nav")
+const summaryCardEl = document.querySelector("#summary-card")
 const summaryEl = document.querySelector("#message-summary")
 const rawHexEl = document.querySelector("#raw-hex")
 const byteExplainerEl = document.querySelector("#byte-explainer")
@@ -146,9 +148,11 @@ async function loadCombo(comboId) {
 
 function render() {
   const renderStartedAt = performance.now()
+  markRenderPending()
 
   if (state.blockingError) {
     renderBlockingState()
+    markRenderComplete()
     recordMetric("render_ms", roundMetric(performance.now() - renderStartedAt))
     return
   }
@@ -165,7 +169,20 @@ function render() {
   renderComboPicker()
   renderMessageNav()
   renderMessageDetails()
+  markRenderComplete()
   recordMetric("render_ms", roundMetric(performance.now() - renderStartedAt))
+}
+
+function markRenderPending() {
+  if (!summaryCardEl) return
+  summaryCardEl.dataset.renderComplete = "false"
+}
+
+function markRenderComplete() {
+  if (!summaryCardEl) return
+  state.renderCycle += 1
+  summaryCardEl.dataset.renderCycle = String(state.renderCycle)
+  summaryCardEl.dataset.renderComplete = "true"
 }
 
 function renderBlockingState() {

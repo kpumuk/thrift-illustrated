@@ -1,0 +1,11 @@
+{
+  "name": "thrift-illustrated",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "benchmark:ui": "bun scripts/benchmark_ui.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "^1.56.1"
+  }
+}

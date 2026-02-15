@@ -6,7 +6,9 @@
    - `mise install`
 2. Install Ruby gems in the pinned Ruby environment:
    - `mise exec -- bundle install`
-3. List baseline tasks:
+3. Install Bun dependencies (UI benchmark harness):
+   - `bun install`
+4. List baseline tasks:
    - `mise exec -- bundle exec rake -T`
 
 ## Baseline Tasks
