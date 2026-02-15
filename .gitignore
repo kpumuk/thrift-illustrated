@@ -8,3 +8,6 @@ doc/*
 .bundle/
 vendor/bundle/
 .ruby-lsp/
+
+# Local capture orchestration placeholder output
+data/captures/*.run.json

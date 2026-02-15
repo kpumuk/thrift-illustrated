@@ -2,9 +2,9 @@
 
 require "rake"
 
-desc "Capture tutorial traffic and generate artifacts (placeholder)"
+desc "Capture tutorial traffic and generate artifacts"
 task :capture do
-  puts "capture: bootstrap placeholder (implementation pending scripts/capture_all.rb)"
+  sh "bundle exec ruby scripts/capture_all.rb"
 end
 
 desc "Run project tests (placeholder)"
