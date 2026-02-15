@@ -6,6 +6,7 @@ const MANIFEST_MAX_BYTES = 256 * 1024
 const DATASET_MAX_BYTES = 2 * 1024 * 1024
 const REQUEST_TIMEOUT_MS = 5000
 const TRANSFER_WALL_MS = 8000
+const HEXDUMP_ROW_BYTES = 16
 
 const COMBO_IDS = [
   "binary-buffered",
@@ -447,31 +448,98 @@ function renderFieldNode(field, depth, interaction) {
 
 function renderRawBytes(message, interaction) {
   rawHexEl.innerHTML = ""
-  const bytes = message.raw_hex.split(" ")
-  const fragment = document.createDocumentFragment()
+  const byteTexts = message.raw_hex.split(" ")
+  const byteValues = byteTexts.map((pair) => Number.parseInt(pair, 16))
+  const dump = document.createElement("div")
+  dump.className = "hexdump"
 
-  bytes.forEach((byteText, index) => {
-    const token = document.createElement("span")
-    token.className = "byte-token"
-    token.textContent = byteText
-    token.dataset.byteIndex = String(index)
-    token.tabIndex = 0
-    token.addEventListener("mouseenter", () => activateByteInteraction(index))
-    token.addEventListener("mouseleave", clearInteraction)
-    token.addEventListener("focus", () => activateByteInteraction(index))
-    token.addEventListener("blur", clearInteraction)
-    token.addEventListener("click", () => selectByteGroup(index))
-    token.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault()
-        selectByteGroup(index)
+  for (let rowStart = 0; rowStart < byteTexts.length; rowStart += HEXDUMP_ROW_BYTES) {
+    const row = document.createElement("div")
+    row.className = "hexdump-row"
+
+    const offset = document.createElement("span")
+    offset.className = "hexdump-offset"
+    offset.textContent = rowStart.toString(16).padStart(4, "0")
+
+    const hexColumn = document.createElement("div")
+    hexColumn.className = "hexdump-hex"
+
+    const asciiColumn = document.createElement("div")
+    asciiColumn.className = "hexdump-ascii"
+
+    for (let column = 0; column < HEXDUMP_ROW_BYTES; column += 1) {
+      const index = rowStart + column
+      if (index >= byteTexts.length) {
+        hexColumn.append(createHexdumpPlaceholder("hex"))
+        asciiColumn.append(createHexdumpPlaceholder("ascii"))
+        continue
       }
-    })
-    interaction.byteElements.set(index, token)
-    fragment.append(token)
-  })
 
-  rawHexEl.append(fragment)
+      const hexToken = createByteToken({
+        interaction,
+        index,
+        text: byteTexts[index],
+        variant: "hex"
+      })
+      const asciiToken = createByteToken({
+        interaction,
+        index,
+        text: printableAscii(byteValues[index]),
+        variant: "ascii"
+      })
+
+      hexColumn.append(hexToken)
+      asciiColumn.append(asciiToken)
+    }
+
+    row.append(offset, hexColumn, asciiColumn)
+    dump.append(row)
+  }
+
+  rawHexEl.append(dump)
+}
+
+function createByteToken({ interaction, index, text, variant }) {
+  const token = document.createElement("span")
+  token.className = `byte-token byte-token-${variant}`
+  token.textContent = text
+  token.dataset.byteIndex = String(index)
+  token.tabIndex = 0
+  token.addEventListener("mouseenter", () => activateByteInteraction(index))
+  token.addEventListener("mouseleave", clearInteraction)
+  token.addEventListener("focus", () => activateByteInteraction(index))
+  token.addEventListener("blur", clearInteraction)
+  token.addEventListener("click", () => selectByteGroup(index))
+  token.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      selectByteGroup(index)
+    }
+  })
+  registerByteElement(interaction, index, token)
+  return token
+}
+
+function createHexdumpPlaceholder(variant) {
+  const token = document.createElement("span")
+  token.className = `byte-token byte-token-${variant} byte-token-empty`
+  token.textContent = variant === "hex" ? "00" : "."
+  token.setAttribute("aria-hidden", "true")
+  return token
+}
+
+function registerByteElement(interaction, index, element) {
+  if (!interaction.byteElements.has(index)) {
+    interaction.byteElements.set(index, [])
+  }
+  interaction.byteElements.get(index).push(element)
+}
+
+function printableAscii(byteValue) {
+  if (byteValue >= 0x20 && byteValue <= 0x7e) {
+    return String.fromCharCode(byteValue)
+  }
+  return "."
 }
 
 function createInteractionModel(message, protocol) {
@@ -722,11 +790,13 @@ function applyInteractionClasses() {
     element.classList.toggle("is-hover-active", fieldKey === activeFieldKey)
   }
 
-  for (const [byteIndex, element] of state.interaction.byteElements.entries()) {
-    element.classList.toggle("is-hover-active", highlightedBytes.has(byteIndex))
-    element.classList.toggle("is-byte-focus", byteIndex === state.interaction.activeByteIndex)
-    element.classList.toggle("is-group-selected", selectedBytes.has(byteIndex))
-    element.classList.toggle("is-subfield-active", activeSubfieldBytes.has(byteIndex))
+  for (const [byteIndex, elements] of state.interaction.byteElements.entries()) {
+    for (const element of elements) {
+      element.classList.toggle("is-hover-active", highlightedBytes.has(byteIndex))
+      element.classList.toggle("is-byte-focus", byteIndex === state.interaction.activeByteIndex)
+      element.classList.toggle("is-group-selected", selectedBytes.has(byteIndex))
+      element.classList.toggle("is-subfield-active", activeSubfieldBytes.has(byteIndex))
+    }
   }
 
   const subfieldButtons = byteExplainerEl.querySelectorAll(".byte-subfield-button")

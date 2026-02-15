@@ -421,23 +421,70 @@ p {
 
 .raw-hex {
   margin: 0;
-  white-space: normal;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  overflow-x: auto;
   font-family: "IBM Plex Mono", "Menlo", monospace;
   font-size: 0.85rem;
   color: #283244;
 }
 
+.hexdump {
+  display: grid;
+  gap: 6px;
+  min-width: 700px;
+}
+
+.hexdump-row {
+  display: grid;
+  grid-template-columns: 5ch minmax(0, 2.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.hexdump-offset {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.hexdump-hex,
+.hexdump-ascii {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.hexdump-ascii {
+  border-left: 1px dashed var(--line);
+  padding-left: 8px;
+}
+
 .byte-token {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   border: 1px solid rgba(31, 34, 41, 0.18);
   border-radius: 6px;
-  padding: 3px 5px;
+  padding: 3px 4px;
   line-height: 1;
   background: rgba(255, 255, 255, 0.78);
   cursor: pointer;
   transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.byte-token-hex {
+  min-width: 2.3ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.byte-token-ascii {
+  min-width: 1.85ch;
+  padding: 3px 0;
+}
+
+.byte-token-empty {
+  visibility: hidden;
+  pointer-events: none;
+  border-color: transparent;
+  background: transparent;
 }
 
 .byte-token:hover,
@@ -582,5 +629,9 @@ p {
 
   .summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hexdump {
+    min-width: 620px;
   }
 }
