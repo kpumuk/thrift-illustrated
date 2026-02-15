@@ -45,7 +45,10 @@ const state = {
   messageIndex: 0,
   navWarning: null,
   blockingError: null,
-  datasetCache: new Map()
+  datasetCache: new Map(),
+  lastErrorKey: null,
+  lastErrorCycle: -1,
+  errorCycle: 0
 }
 
 const statusEl = document.querySelector("#status")
@@ -57,15 +60,20 @@ const fieldTreeEl = document.querySelector("#field-tree")
 const parseErrorsEl = document.querySelector("#parse-errors")
 const highlightsEl = document.querySelector("#highlights")
 
+initObservability()
 void bootstrap()
 
 async function bootstrap() {
   try {
+    beginErrorCycle()
+    const manifestStartedAt = performance.now()
     state.manifest = await loadManifest()
+    recordMetric("manifest_load_ms", roundMetric(performance.now() - manifestStartedAt))
     await applyNavigationFromHash()
     render()
 
     window.addEventListener("hashchange", () => {
+      beginErrorCycle()
       void applyNavigationFromHash().then(render).catch(handleRuntimeError)
     })
   } catch (error) {
@@ -77,11 +85,15 @@ async function applyNavigationFromHash() {
   const nav = resolveNavigation(state.manifest)
   state.combo = nav.combo
   state.messageIndex = nav.msg
-  state.navWarning = nav.warning
+  state.navWarning = null
+  if (nav.warning) {
+    setNavWarning(nav.warning)
+  }
   await loadCombo(state.combo)
 }
 
 async function loadCombo(comboId) {
+  const startedAt = performance.now()
   const entry = state.manifest.combos.find((combo) => combo.id === comboId)
   if (!entry) {
     throw runtimeFailure({
@@ -109,28 +121,30 @@ async function loadCombo(comboId) {
 
   if (state.messageIndex >= state.dataset.messages.length) {
     state.messageIndex = 0
-    if (!state.navWarning) {
-      state.navWarning = runtimeFailure({
-        code: "E_NAV_HASH_INVALID",
-        className: "non-blocking",
-        reason: "msg_invalid",
-        message: "Message index is out of range; using message 0.",
-        combo: state.combo,
-        msg: 0,
-        httpStatus: null
-      }).toObject()
-    }
+    setNavWarning(runtimeFailure({
+      code: "E_NAV_HASH_INVALID",
+      className: "non-blocking",
+      reason: "msg_invalid",
+      message: "Message index is out of range; using message 0.",
+      combo: state.combo,
+      msg: 0,
+      httpStatus: null
+    }).toObject())
   } else {
     state.messageIndex = clamp(state.messageIndex, 0, state.dataset.messages.length - 1)
   }
 
   state.blockingError = null
   writeHashIfNeeded(state.combo, state.messageIndex)
+  recordMetric("dataset_load_ms", roundMetric(performance.now() - startedAt))
 }
 
 function render() {
+  const renderStartedAt = performance.now()
+
   if (state.blockingError) {
     renderBlockingState()
+    recordMetric("render_ms", roundMetric(performance.now() - renderStartedAt))
     return
   }
 
@@ -138,10 +152,14 @@ function render() {
     ? `${state.navWarning.code}: ${state.navWarning.message}`
     : "Ready"
   statusEl.style.color = state.navWarning ? "#9f3418" : "#575f6d"
+  if (!state.navWarning) {
+    state.lastErrorKey = null
+  }
 
   renderComboPicker()
   renderMessageNav()
   renderMessageDetails()
+  recordMetric("render_ms", roundMetric(performance.now() - renderStartedAt))
 }
 
 function renderBlockingState() {
@@ -304,6 +322,7 @@ function renderList(container, items, formatter, itemClass = "") {
 }
 
 function updateSelection(combo, msg) {
+  beginErrorCycle()
   state.combo = combo
   state.messageIndex = msg
   state.navWarning = null
@@ -1103,16 +1122,20 @@ function enforceSchemaVersionGate({ value, invalidCode, combo, msg }) {
 
 function handleRuntimeError(error) {
   const runtime = normalizeRuntimeError(error)
-  state.blockingError = runtime
 
   if (runtime.class === "blocking") {
-    console.error(runtime)
+    state.blockingError = runtime
+    emitRuntimeError(runtime)
   } else {
-    state.navWarning = runtime
-    console.warn(runtime)
+    setNavWarning(runtime)
   }
 
   render()
+}
+
+function setNavWarning(runtime) {
+  state.navWarning = runtime
+  emitRuntimeError(runtime)
 }
 
 function normalizeRuntimeError(error) {
@@ -1193,6 +1216,69 @@ function runtimeFailure({ code, className, reason, message, combo, msg, httpStat
     msg,
     httpStatus
   })
+}
+
+function beginErrorCycle() {
+  state.errorCycle += 1
+}
+
+function initObservability() {
+  window.__lastError = null
+  window.__errors = []
+  window.__metrics = {
+    manifest_load_ms: 0,
+    dataset_load_ms: 0,
+    render_ms: 0,
+    ui_error_total: {}
+  }
+}
+
+function emitRuntimeError(runtime) {
+  const key = `${runtime.code}|${runtime.context.reason}|${runtime.context.combo}|${runtime.context.msg}`
+  if (state.lastErrorKey === key && state.lastErrorCycle === state.errorCycle) {
+    return
+  }
+
+  state.lastErrorKey = key
+  state.lastErrorCycle = state.errorCycle
+  window.__lastError = runtime
+
+  if (!Array.isArray(window.__errors)) {
+    window.__errors = []
+  }
+  window.__errors.push(runtime)
+  if (window.__errors.length > 100) {
+    window.__errors.splice(0, window.__errors.length - 100)
+  }
+
+  if (!window.__metrics || typeof window.__metrics !== "object") {
+    initObservability()
+  }
+  if (!window.__metrics.ui_error_total || typeof window.__metrics.ui_error_total !== "object") {
+    window.__metrics.ui_error_total = {}
+  }
+  if (!(runtime.code in window.__metrics.ui_error_total)) {
+    window.__metrics.ui_error_total[runtime.code] = 0
+  }
+  window.__metrics.ui_error_total[runtime.code] += 1
+
+  if (runtime.class === "blocking") {
+    console.error(runtime)
+  } else {
+    console.warn(runtime)
+  }
+}
+
+function recordMetric(name, value) {
+  if (!window.__metrics || typeof window.__metrics !== "object") {
+    initObservability()
+  }
+  window.__metrics[name] = value
+  console.info({ metric: name, value })
+}
+
+function roundMetric(value) {
+  return Number(value.toFixed(2))
 }
 
 function concatChunks(chunks, totalBytes) {
