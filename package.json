@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "benchmark:ui": "bun scripts/benchmark_ui.mjs"
+    "benchmark:ui": "bun scripts/benchmark_ui.mjs",
+    "test:ui-smoke": "bun scripts/ui_smoke_test.mjs"
   },
   "dependencies": {
     "playwright-core": "^1.56.1"
