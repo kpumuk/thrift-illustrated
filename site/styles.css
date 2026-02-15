@@ -430,7 +430,7 @@ p {
 .hexdump {
   display: grid;
   gap: 6px;
-  min-width: 700px;
+  min-width: 560px;
 }
 
 .hexdump-row {
@@ -448,7 +448,7 @@ p {
 .hexdump-hex,
 .hexdump-ascii {
   display: grid;
-  grid-template-columns: repeat(16, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 4px;
 }
 
@@ -632,6 +632,6 @@ p {
   }
 
   .hexdump {
-    min-width: 620px;
+    min-width: 500px;
   }
 }

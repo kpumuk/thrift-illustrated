@@ -6,7 +6,7 @@ const MANIFEST_MAX_BYTES = 256 * 1024
 const DATASET_MAX_BYTES = 2 * 1024 * 1024
 const REQUEST_TIMEOUT_MS = 5000
 const TRANSFER_WALL_MS = 8000
-const HEXDUMP_ROW_BYTES = 16
+const HEXDUMP_ROW_BYTES = 8
 
 const COMBO_IDS = [
   "binary-buffered",
