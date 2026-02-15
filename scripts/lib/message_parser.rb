@@ -300,7 +300,7 @@ module ThriftIllustrated
         thrift_protocol.read_message_end
         payload_end = reader.position
 
-        if reader.position != payload_bytes.bytesize
+        if transport == "framed" && reader.position != payload_bytes.bytesize
           parse_errors << parse_error(
             code: "E_PROTOCOL_DECODE",
             message: "Message parser did not consume full payload",
@@ -339,6 +339,7 @@ module ThriftIllustrated
       end
 
       consumed = reader.position
+      adjusted_fields = payload_offset.zero? ? fields : shift_field_spans(fields, payload_offset)
       payload_span =
         if transport == "framed"
           safe_span(start: 4, finish: payload_offset + payload_bytes.bytesize, max_end: payload_offset + payload_bytes.bytesize)
@@ -373,7 +374,7 @@ module ThriftIllustrated
             span: safe_span(start: payload_offset + payload_start, finish: payload_offset + payload_end, max_end: payload_offset + payload_bytes.bytesize)
           },
           span: safe_span(start: payload_offset + payload_start, finish: payload_offset + payload_end, max_end: payload_offset + payload_bytes.bytesize),
-          fields: fields
+          fields: adjusted_fields
         },
         highlights: [],
         parse_errors: parse_errors,
@@ -702,6 +703,21 @@ module ThriftIllustrated
 
     def bytes_to_hex(bytes)
       bytes.to_s.bytes.map { |byte| format("%02x", byte) }.join(" ")
+    end
+
+    def shift_field_spans(fields, delta)
+      Array(fields).map do |field|
+        shifted = field.dup
+        shifted[:span] = shift_span(field[:span], delta)
+        shifted[:children] = shift_field_spans(field[:children], delta)
+        shifted
+      end
+    end
+
+    def shift_span(span, delta)
+      return span unless span.is_a?(Array) && span.length == 2
+
+      [span[0].to_i + delta, span[1].to_i + delta]
     end
 
     def safe_span(start:, finish:, max_end: nil)

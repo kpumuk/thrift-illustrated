@@ -75,7 +75,7 @@ module ThriftIllustrated
     end
 
     def ensure_utf8!(string)
-      return if string.encoding == Encoding::UTF_8 && string.valid_encoding?
+      return string if string.encoding == Encoding::UTF_8 && string.valid_encoding?
 
       utf8 = string.encode("UTF-8")
       raise EncodingError, "String is not valid UTF-8" unless utf8.valid_encoding?

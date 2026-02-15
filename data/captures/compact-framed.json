@@ -1,0 +1,975 @@
+{
+  "combo": {
+    "id": "compact-framed",
+    "protocol": "compact",
+    "transport": "framed"
+  },
+  "dataset_errors": [],
+  "messages": [
+    {
+      "actor": "client",
+      "direction": "client->server",
+      "envelope": {
+        "name": "ping",
+        "seqid": 1,
+        "span": [
+          4,
+          12
+        ],
+        "type": "call"
+      },
+      "highlights": [],
+      "index": 0,
+      "message_type": "call",
+      "method": "ping",
+      "parse_errors": [],
+      "payload": {
+        "fields": [],
+        "span": [
+          12,
+          13
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            12,
+            13
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 09 82 21 01 04 70 69 6e 67 00",
+      "raw_size": 13,
+      "seqid": 1,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 9,
+        "payload_span": [
+          4,
+          13
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "server",
+      "direction": "server->client",
+      "envelope": {
+        "name": "ping",
+        "seqid": 1,
+        "span": [
+          4,
+          12
+        ],
+        "type": "reply"
+      },
+      "highlights": [],
+      "index": 1,
+      "message_type": "reply",
+      "method": "ping",
+      "parse_errors": [],
+      "payload": {
+        "fields": [],
+        "span": [
+          12,
+          13
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            12,
+            13
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 09 82 41 01 04 70 69 6e 67 00",
+      "raw_size": 13,
+      "seqid": 1,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 9,
+        "payload_span": [
+          4,
+          13
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "client",
+      "direction": "client->server",
+      "envelope": {
+        "name": "add",
+        "seqid": 2,
+        "span": [
+          4,
+          11
+        ],
+        "type": "call"
+      },
+      "highlights": [],
+      "index": 2,
+      "message_type": "call",
+      "method": "add",
+      "parse_errors": [],
+      "payload": {
+        "fields": [
+          {
+            "children": [],
+            "id": 1,
+            "name": "field_1",
+            "span": [
+              11,
+              13
+            ],
+            "ttype": "i32",
+            "value": 1
+          },
+          {
+            "children": [],
+            "id": 2,
+            "name": "field_2",
+            "span": [
+              13,
+              15
+            ],
+            "ttype": "i32",
+            "value": 1
+          }
+        ],
+        "span": [
+          11,
+          16
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            11,
+            16
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 0c 82 21 02 03 61 64 64 15 02 15 02 00",
+      "raw_size": 16,
+      "seqid": 2,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 12,
+        "payload_span": [
+          4,
+          16
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "server",
+      "direction": "server->client",
+      "envelope": {
+        "name": "add",
+        "seqid": 2,
+        "span": [
+          4,
+          11
+        ],
+        "type": "reply"
+      },
+      "highlights": [],
+      "index": 3,
+      "message_type": "reply",
+      "method": "add",
+      "parse_errors": [],
+      "payload": {
+        "fields": [
+          {
+            "children": [],
+            "id": 0,
+            "name": "field_0",
+            "span": [
+              11,
+              14
+            ],
+            "ttype": "i32",
+            "value": 2
+          }
+        ],
+        "span": [
+          11,
+          15
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            11,
+            15
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 0b 82 41 02 03 61 64 64 05 00 04 00",
+      "raw_size": 15,
+      "seqid": 2,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 11,
+        "payload_span": [
+          4,
+          15
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "client",
+      "direction": "client->server",
+      "envelope": {
+        "name": "add",
+        "seqid": 3,
+        "span": [
+          4,
+          11
+        ],
+        "type": "call"
+      },
+      "highlights": [],
+      "index": 4,
+      "message_type": "call",
+      "method": "add",
+      "parse_errors": [],
+      "payload": {
+        "fields": [
+          {
+            "children": [],
+            "id": 1,
+            "name": "field_1",
+            "span": [
+              11,
+              13
+            ],
+            "ttype": "i32",
+            "value": 1
+          },
+          {
+            "children": [],
+            "id": 2,
+            "name": "field_2",
+            "span": [
+              13,
+              15
+            ],
+            "ttype": "i32",
+            "value": 4
+          }
+        ],
+        "span": [
+          11,
+          16
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            11,
+            16
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 0c 82 21 03 03 61 64 64 15 02 15 08 00",
+      "raw_size": 16,
+      "seqid": 3,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 12,
+        "payload_span": [
+          4,
+          16
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "server",
+      "direction": "server->client",
+      "envelope": {
+        "name": "add",
+        "seqid": 3,
+        "span": [
+          4,
+          11
+        ],
+        "type": "reply"
+      },
+      "highlights": [],
+      "index": 5,
+      "message_type": "reply",
+      "method": "add",
+      "parse_errors": [],
+      "payload": {
+        "fields": [
+          {
+            "children": [],
+            "id": 0,
+            "name": "field_0",
+            "span": [
+              11,
+              14
+            ],
+            "ttype": "i32",
+            "value": 5
+          }
+        ],
+        "span": [
+          11,
+          15
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            11,
+            15
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 0b 82 41 03 03 61 64 64 05 00 0a 00",
+      "raw_size": 15,
+      "seqid": 3,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 11,
+        "payload_span": [
+          4,
+          15
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "client",
+      "direction": "client->server",
+      "envelope": {
+        "name": "calculate",
+        "seqid": 4,
+        "span": [
+          4,
+          17
+        ],
+        "type": "call"
+      },
+      "highlights": [],
+      "index": 6,
+      "message_type": "call",
+      "method": "calculate",
+      "parse_errors": [],
+      "payload": {
+        "fields": [
+          {
+            "children": [],
+            "id": 1,
+            "name": "field_1",
+            "span": [
+              17,
+              19
+            ],
+            "ttype": "i32",
+            "value": 1
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "id": 1,
+                    "name": "field_1",
+                    "span": [
+                      20,
+                      22
+                    ],
+                    "ttype": "i32",
+                    "value": 15
+                  },
+                  {
+                    "children": [],
+                    "id": 2,
+                    "name": "field_2",
+                    "span": [
+                      22,
+                      24
+                    ],
+                    "ttype": "i32",
+                    "value": 10
+                  },
+                  {
+                    "children": [],
+                    "id": 3,
+                    "name": "field_3",
+                    "span": [
+                      24,
+                      26
+                    ],
+                    "ttype": "i32",
+                    "value": 2
+                  }
+                ],
+                "id": 2,
+                "name": "struct",
+                "span": [
+                  20,
+                  27
+                ],
+                "ttype": "struct",
+                "value": null
+              }
+            ],
+            "id": 2,
+            "name": "field_2",
+            "span": [
+              19,
+              27
+            ],
+            "ttype": "struct",
+            "value": null
+          }
+        ],
+        "span": [
+          17,
+          28
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            17,
+            28
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 18 82 21 04 09 63 61 6c 63 75 6c 61 74 65 15 02 1c 15 1e 15 14 15 04 00 00",
+      "raw_size": 28,
+      "seqid": 4,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 24,
+        "payload_span": [
+          4,
+          28
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "server",
+      "direction": "server->client",
+      "envelope": {
+        "name": "calculate",
+        "seqid": 4,
+        "span": [
+          4,
+          17
+        ],
+        "type": "reply"
+      },
+      "highlights": [],
+      "index": 7,
+      "message_type": "reply",
+      "method": "calculate",
+      "parse_errors": [],
+      "payload": {
+        "fields": [
+          {
+            "children": [],
+            "id": 0,
+            "name": "field_0",
+            "span": [
+              17,
+              20
+            ],
+            "ttype": "i32",
+            "value": 5
+          }
+        ],
+        "span": [
+          17,
+          21
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            17,
+            21
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 11 82 41 04 09 63 61 6c 63 75 6c 61 74 65 05 00 0a 00",
+      "raw_size": 21,
+      "seqid": 4,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 17,
+        "payload_span": [
+          4,
+          21
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "client",
+      "direction": "client->server",
+      "envelope": {
+        "name": "getStruct",
+        "seqid": 5,
+        "span": [
+          4,
+          17
+        ],
+        "type": "call"
+      },
+      "highlights": [],
+      "index": 8,
+      "message_type": "call",
+      "method": "getStruct",
+      "parse_errors": [],
+      "payload": {
+        "fields": [
+          {
+            "children": [],
+            "id": 1,
+            "name": "field_1",
+            "span": [
+              17,
+              19
+            ],
+            "ttype": "i32",
+            "value": 1
+          }
+        ],
+        "span": [
+          17,
+          20
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            17,
+            20
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 10 82 21 05 09 67 65 74 53 74 72 75 63 74 15 02 00",
+      "raw_size": 20,
+      "seqid": 5,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 16,
+        "payload_span": [
+          4,
+          20
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "server",
+      "direction": "server->client",
+      "envelope": {
+        "name": "getStruct",
+        "seqid": 5,
+        "span": [
+          4,
+          17
+        ],
+        "type": "reply"
+      },
+      "highlights": [],
+      "index": 9,
+      "message_type": "reply",
+      "method": "getStruct",
+      "parse_errors": [],
+      "payload": {
+        "fields": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "id": 1,
+                    "name": "field_1",
+                    "span": [
+                      19,
+                      21
+                    ],
+                    "ttype": "i32",
+                    "value": 1
+                  },
+                  {
+                    "children": [],
+                    "id": 2,
+                    "name": "field_2",
+                    "span": [
+                      21,
+                      24
+                    ],
+                    "ttype": "string",
+                    "value": "5"
+                  }
+                ],
+                "id": 0,
+                "name": "struct",
+                "span": [
+                  19,
+                  25
+                ],
+                "ttype": "struct",
+                "value": null
+              }
+            ],
+            "id": 0,
+            "name": "field_0",
+            "span": [
+              17,
+              25
+            ],
+            "ttype": "struct",
+            "value": null
+          }
+        ],
+        "span": [
+          17,
+          26
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            17,
+            26
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 16 82 41 05 09 67 65 74 53 74 72 75 63 74 0c 00 15 02 18 01 35 00 00",
+      "raw_size": 26,
+      "seqid": 5,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 22,
+        "payload_span": [
+          4,
+          26
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "client",
+      "direction": "client->server",
+      "envelope": {
+        "name": "calculate",
+        "seqid": 6,
+        "span": [
+          4,
+          17
+        ],
+        "type": "call"
+      },
+      "highlights": [],
+      "index": 10,
+      "message_type": "call",
+      "method": "calculate",
+      "parse_errors": [],
+      "payload": {
+        "fields": [
+          {
+            "children": [],
+            "id": 1,
+            "name": "field_1",
+            "span": [
+              17,
+              19
+            ],
+            "ttype": "i32",
+            "value": 1
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "id": 1,
+                    "name": "field_1",
+                    "span": [
+                      20,
+                      22
+                    ],
+                    "ttype": "i32",
+                    "value": 1
+                  },
+                  {
+                    "children": [],
+                    "id": 2,
+                    "name": "field_2",
+                    "span": [
+                      22,
+                      24
+                    ],
+                    "ttype": "i32",
+                    "value": 0
+                  },
+                  {
+                    "children": [],
+                    "id": 3,
+                    "name": "field_3",
+                    "span": [
+                      24,
+                      26
+                    ],
+                    "ttype": "i32",
+                    "value": 4
+                  }
+                ],
+                "id": 2,
+                "name": "struct",
+                "span": [
+                  20,
+                  27
+                ],
+                "ttype": "struct",
+                "value": null
+              }
+            ],
+            "id": 2,
+            "name": "field_2",
+            "span": [
+              19,
+              27
+            ],
+            "ttype": "struct",
+            "value": null
+          }
+        ],
+        "span": [
+          17,
+          28
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            17,
+            28
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 18 82 21 06 09 63 61 6c 63 75 6c 61 74 65 15 02 1c 15 02 15 00 15 08 00 00",
+      "raw_size": 28,
+      "seqid": 6,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 24,
+        "payload_span": [
+          4,
+          28
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "server",
+      "direction": "server->client",
+      "envelope": {
+        "name": "calculate",
+        "seqid": 6,
+        "span": [
+          4,
+          17
+        ],
+        "type": "reply"
+      },
+      "highlights": [],
+      "index": 11,
+      "message_type": "reply",
+      "method": "calculate",
+      "parse_errors": [],
+      "payload": {
+        "fields": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "id": 1,
+                    "name": "field_1",
+                    "span": [
+                      18,
+                      20
+                    ],
+                    "ttype": "i32",
+                    "value": 4
+                  },
+                  {
+                    "children": [],
+                    "id": 2,
+                    "name": "field_2",
+                    "span": [
+                      20,
+                      40
+                    ],
+                    "ttype": "string",
+                    "value": "Cannot divide by 0"
+                  }
+                ],
+                "id": 1,
+                "name": "struct",
+                "span": [
+                  18,
+                  41
+                ],
+                "ttype": "struct",
+                "value": null
+              }
+            ],
+            "id": 1,
+            "name": "field_1",
+            "span": [
+              17,
+              41
+            ],
+            "ttype": "struct",
+            "value": null
+          }
+        ],
+        "span": [
+          17,
+          42
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            17,
+            42
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 26 82 41 06 09 63 61 6c 63 75 6c 61 74 65 1c 15 08 18 12 43 61 6e 6e 6f 74 20 64 69 76 69 64 65 20 62 79 20 30 00 00",
+      "raw_size": 42,
+      "seqid": 6,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 38,
+        "payload_span": [
+          4,
+          42
+        ],
+        "type": "framed"
+      }
+    },
+    {
+      "actor": "client",
+      "direction": "client->server",
+      "envelope": {
+        "name": "zip",
+        "seqid": 7,
+        "span": [
+          4,
+          11
+        ],
+        "type": "oneway"
+      },
+      "highlights": [],
+      "index": 12,
+      "message_type": "oneway",
+      "method": "zip",
+      "parse_errors": [],
+      "payload": {
+        "fields": [],
+        "span": [
+          11,
+          12
+        ],
+        "struct": {
+          "name": "args",
+          "span": [
+            11,
+            12
+          ],
+          "ttype": "struct"
+        }
+      },
+      "raw_hex": "00 00 00 08 82 81 07 03 7a 69 70 00",
+      "raw_size": 12,
+      "seqid": 7,
+      "transport": {
+        "frame_header_span": [
+          0,
+          4
+        ],
+        "frame_length": 8,
+        "payload_span": [
+          4,
+          12
+        ],
+        "type": "framed"
+      }
+    }
+  ],
+  "metadata": {
+    "bundler_version": "4.0.6",
+    "capture_id": "80b7e9a8-7061-4fb4-853b-a558f4be36a2",
+    "captured_at_utc": "2026-02-15T21:34:55Z",
+    "max_field_depth": 3,
+    "max_highlights_per_message": 0,
+    "max_string_value_bytes": 18,
+    "message_count": 13,
+    "platform": "arm64-darwin25",
+    "ruby_version": "4.0.1",
+    "thrift_ref": "git:fd9756c19d1ea5763ffd8be88fff1db1ccd0d6ba",
+    "total_field_nodes": 24,
+    "wire_chunk_count": 13
+  },
+  "schema_version": "1.0.0"
+}
