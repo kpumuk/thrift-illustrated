@@ -155,10 +155,39 @@ p {
 
 .raw-hex {
   margin: 0;
-  white-space: pre-wrap;
+  white-space: normal;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   font-family: "IBM Plex Mono", "Menlo", monospace;
   font-size: 0.85rem;
   color: #283244;
+}
+
+.byte-token {
+  border: 1px solid rgba(31, 34, 41, 0.18);
+  border-radius: 6px;
+  padding: 3px 5px;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.byte-token:hover,
+.byte-token:focus-visible {
+  border-color: rgba(20, 108, 95, 0.44);
+  outline: none;
+}
+
+.byte-token.is-hover-active {
+  background: rgba(20, 108, 95, 0.16);
+  border-color: rgba(20, 108, 95, 0.58);
+}
+
+.byte-token.is-byte-focus {
+  color: #111217;
+  border-color: rgba(159, 52, 24, 0.62);
 }
 
 .field-tree {
@@ -171,6 +200,11 @@ p {
 .field-node {
   border-left: 1px solid var(--line);
   padding-left: 10px;
+}
+
+.field-node.is-hover-active {
+  border-left-color: rgba(20, 108, 95, 0.75);
+  background: rgba(20, 108, 95, 0.1);
 }
 
 .field-node .meta {

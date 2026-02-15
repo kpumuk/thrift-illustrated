@@ -48,7 +48,8 @@ const state = {
   datasetCache: new Map(),
   lastErrorKey: null,
   lastErrorCycle: -1,
-  errorCycle: 0
+  errorCycle: 0,
+  interaction: null
 }
 
 const statusEl = document.querySelector("#status")
@@ -163,6 +164,7 @@ function render() {
 }
 
 function renderBlockingState() {
+  state.interaction = null
   const error = state.blockingError
   statusEl.textContent = `${error.code}: ${error.message}`
   statusEl.style.color = "#9f3418"
@@ -243,8 +245,9 @@ function renderMessageDetails() {
   addSummary("Envelope Span", spanToString(envelope.span))
   addSummary("Payload Span", spanToString(message.payload?.span))
 
-  rawHexEl.textContent = message.raw_hex
-  renderFieldTree(message.payload?.fields || [])
+  state.interaction = createInteractionModel(message)
+  renderRawBytes(message, state.interaction)
+  renderFieldTree(message.payload?.fields || [], state.interaction)
   renderList(parseErrorsEl, message.parse_errors || [], (item) => `${item.code}: ${item.message}`, "warn")
   renderList(highlightsEl, message.highlights || [], (item) => `${item.kind} ${item.label} ${item.start}-${item.end}`)
 }
@@ -257,7 +260,7 @@ function addSummary(label, value) {
   summaryEl.append(dt, dd)
 }
 
-function renderFieldTree(fields) {
+function renderFieldTree(fields, interaction) {
   fieldTreeEl.innerHTML = ""
 
   if (fields.length === 0) {
@@ -270,15 +273,24 @@ function renderFieldTree(fields) {
 
   const fragment = document.createDocumentFragment()
   for (const field of fields) {
-    fragment.append(renderFieldNode(field, 0))
+    fragment.append(renderFieldNode(field, 0, interaction))
   }
   fieldTreeEl.append(fragment)
 }
 
-function renderFieldNode(field, depth) {
+function renderFieldNode(field, depth, interaction) {
   const wrapper = document.createElement("div")
   wrapper.className = "field-node"
   wrapper.style.marginLeft = `${depth * 10}px`
+  const fieldKey = interaction.fieldToKey.get(field) || null
+  if (fieldKey) {
+    wrapper.dataset.fieldKey = fieldKey
+    interaction.fieldElements.set(fieldKey, wrapper)
+    wrapper.addEventListener("mouseenter", () => activateFieldInteraction(fieldKey))
+    wrapper.addEventListener("mouseleave", clearInteraction)
+    wrapper.addEventListener("focusin", () => activateFieldInteraction(fieldKey))
+    wrapper.addEventListener("focusout", clearInteraction)
+  }
 
   const line = document.createElement("div")
   const name = document.createElement("strong")
@@ -297,10 +309,127 @@ function renderFieldNode(field, depth) {
   }
 
   for (const child of field.children || []) {
-    wrapper.append(renderFieldNode(child, depth + 1))
+    wrapper.append(renderFieldNode(child, depth + 1, interaction))
   }
 
   return wrapper
+}
+
+function renderRawBytes(message, interaction) {
+  rawHexEl.innerHTML = ""
+  const bytes = message.raw_hex.split(" ")
+  const fragment = document.createDocumentFragment()
+
+  bytes.forEach((byteText, index) => {
+    const token = document.createElement("span")
+    token.className = "byte-token"
+    token.textContent = byteText
+    token.dataset.byteIndex = String(index)
+    token.tabIndex = 0
+    token.addEventListener("mouseenter", () => activateByteInteraction(index))
+    token.addEventListener("mouseleave", clearInteraction)
+    token.addEventListener("focus", () => activateByteInteraction(index))
+    token.addEventListener("blur", clearInteraction)
+    interaction.byteElements.set(index, token)
+    fragment.append(token)
+  })
+
+  rawHexEl.append(fragment)
+}
+
+function createInteractionModel(message) {
+  const fields = flattenFields(message.payload?.fields || [])
+  const interaction = {
+    fieldToKey: new WeakMap(),
+    fieldElements: new Map(),
+    byteElements: new Map(),
+    bytesByField: new Map(),
+    fieldByByte: new Array(message.raw_size).fill(null),
+    activeFieldKey: null
+  }
+
+  for (const field of fields) {
+    interaction.fieldToKey.set(field.node, field.key)
+    interaction.bytesByField.set(field.key, [])
+  }
+
+  const ordered = [...fields].sort((left, right) => {
+    if (left.depth !== right.depth) return right.depth - left.depth
+    const leftLen = left.span[1] - left.span[0]
+    const rightLen = right.span[1] - right.span[0]
+    if (leftLen !== rightLen) return leftLen - rightLen
+    return left.key.localeCompare(right.key)
+  })
+
+  for (const field of ordered) {
+    const start = clamp(field.span[0], 0, message.raw_size)
+    const end = clamp(field.span[1], 0, message.raw_size)
+    for (let index = start; index < end; index += 1) {
+      if (interaction.fieldByByte[index] === null) {
+        interaction.fieldByByte[index] = field.key
+      }
+    }
+  }
+
+  for (let index = 0; index < interaction.fieldByByte.length; index += 1) {
+    const fieldKey = interaction.fieldByByte[index]
+    if (fieldKey !== null) {
+      interaction.bytesByField.get(fieldKey).push(index)
+    }
+  }
+
+  return interaction
+}
+
+function flattenFields(fields, parentKey = "f", depth = 0) {
+  const flat = []
+  fields.forEach((field, idx) => {
+    const key = `${parentKey}.${idx}`
+    flat.push({
+      key,
+      node: field,
+      span: Array.isArray(field.span) ? field.span : [0, 0],
+      depth
+    })
+    const children = Array.isArray(field.children) ? field.children : []
+    flat.push(...flattenFields(children, key, depth + 1))
+  })
+  return flat
+}
+
+function activateFieldInteraction(fieldKey) {
+  if (!state.interaction) return
+  state.interaction.activeFieldKey = fieldKey
+  applyInteractionClasses()
+}
+
+function activateByteInteraction(byteIndex) {
+  if (!state.interaction) return
+  const fieldKey = state.interaction.fieldByByte[byteIndex] || null
+  state.interaction.activeFieldKey = fieldKey
+  applyInteractionClasses(byteIndex)
+}
+
+function clearInteraction() {
+  if (!state.interaction) return
+  state.interaction.activeFieldKey = null
+  applyInteractionClasses()
+}
+
+function applyInteractionClasses(activeByteIndex = null) {
+  if (!state.interaction) return
+
+  const activeFieldKey = state.interaction.activeFieldKey
+  const highlightedBytes = activeFieldKey ? state.interaction.bytesByField.get(activeFieldKey) || [] : []
+
+  for (const [fieldKey, element] of state.interaction.fieldElements.entries()) {
+    element.classList.toggle("is-hover-active", fieldKey === activeFieldKey)
+  }
+
+  for (const [byteIndex, element] of state.interaction.byteElements.entries()) {
+    element.classList.toggle("is-hover-active", highlightedBytes.includes(byteIndex))
+    element.classList.toggle("is-byte-focus", byteIndex === activeByteIndex)
+  }
 }
 
 function renderList(container, items, formatter, itemClass = "") {
