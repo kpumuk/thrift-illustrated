@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "benchmark:ui": "bun scripts/benchmark_ui.mjs",
-    "test:ui-smoke": "bun scripts/ui_smoke_test.mjs"
+    "test:ui-smoke": "bun scripts/ui_smoke_test.mjs",
+    "health:browser": "bun scripts/health_check_browser.mjs"
   },
   "dependencies": {
     "playwright-core": "^1.56.1"
