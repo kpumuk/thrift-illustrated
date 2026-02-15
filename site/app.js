@@ -12,13 +12,15 @@ const COMBO_IDS = [
   "binary-buffered",
   "binary-framed",
   "compact-buffered",
-  "compact-framed"
+  "compact-framed",
+  "json-buffered",
+  "json-framed"
 ]
 
 const MESSAGE_TYPES = new Set(["call", "reply", "exception", "oneway"])
 const ACTORS = new Set(["client", "server"])
 const DIRECTIONS = new Set(["client->server", "server->client"])
-const PROTOCOLS = new Set(["binary", "compact"])
+const PROTOCOLS = new Set(["binary", "compact", "json"])
 const TRANSPORTS = new Set(["buffered", "framed"])
 
 const DATASET_ERROR_CODES = new Set([
@@ -231,8 +233,9 @@ function renderComboPicker() {
     }),
     buildComboRow({
       label: "Protocol",
-      options: ["binary", "compact"],
+      options: ["binary", "compact", "json"],
       selected: selectedProtocol,
+      formatOptionLabel: protocolLabel,
       onPick: (protocol) => {
         const nextCombo = resolveComboId({
           protocol,
@@ -245,7 +248,7 @@ function renderComboPicker() {
   )
 }
 
-function buildComboRow({ label, options, selected, onPick }) {
+function buildComboRow({ label, options, selected, onPick, formatOptionLabel = (option) => option }) {
   const row = document.createElement("div")
   row.className = "combo-row"
 
@@ -261,7 +264,7 @@ function buildComboRow({ label, options, selected, onPick }) {
     const button = document.createElement("button")
     button.type = "button"
     button.className = "combo-option"
-    button.textContent = option
+    button.textContent = formatOptionLabel(option)
     if (option === selected) {
       button.classList.add("is-active")
     }
@@ -284,6 +287,11 @@ function resolveComboId({ protocol, transport, fallbackId }) {
   if (transportOnly) return transportOnly.id
 
   return fallbackId || state.manifest.combos[0].id
+}
+
+function protocolLabel(protocol) {
+  if (protocol === "json") return "JSON"
+  return protocol
 }
 
 function renderMessageNav() {
@@ -369,7 +377,7 @@ function renderMessageDetails() {
   addSummary("Type", message.message_type)
   addSummary("SeqID", String(message.seqid))
   addSummary("Raw Size", String(message.raw_size))
-  addSummary("Protocol", state.dataset.combo.protocol)
+  addSummary("Protocol", protocolLabel(state.dataset.combo.protocol))
   addSummary("Transport", `${transport.type}${transport.frame_length != null ? ` (${transport.frame_length})` : ""}`)
   addSummary("Envelope Span", spanToString(envelope.span))
   addSummary("Payload Span", spanToString(message.payload?.span))
@@ -1905,8 +1913,8 @@ function validateManifestFull(manifest) {
     throw invalidManifest("generated_with.thrift_ref is invalid.")
   }
 
-  if (manifest.combos.length < 1 || manifest.combos.length > 4) {
-    throw invalidManifest("combos length must be between 1 and 4.")
+  if (manifest.combos.length < 1 || manifest.combos.length > COMBO_IDS.length) {
+    throw invalidManifest(`combos length must be between 1 and ${COMBO_IDS.length}.`)
   }
 
   const seenIds = new Set()

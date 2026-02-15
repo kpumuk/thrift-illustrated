@@ -608,6 +608,8 @@ module ThriftIllustrated
         Thrift::BinaryProtocol.new(transport)
       when "compact"
         Thrift::CompactProtocol.new(transport)
+      when "json"
+        Thrift::JsonProtocol.new(transport)
       else
         raise ArgumentError, "Unsupported protocol #{@protocol.inspect}"
       end

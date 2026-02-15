@@ -6,7 +6,7 @@
       "id": "binary-buffered",
       "message_count": 13,
       "protocol": "binary",
-      "sha256": "1e0356917e5bbf915069e427c69a399bb2e3655825721217cd60b0fdd55e2f39",
+      "sha256": "b7b5595847eb19289ad585a5d997291c47736598724114f1cd320749a422f974",
       "transport": "buffered"
     },
     {
@@ -15,7 +15,7 @@
       "id": "binary-framed",
       "message_count": 13,
       "protocol": "binary",
-      "sha256": "274ebece4dc9f1cacf20d70decebc5099d99979e93ce85acf3ba4f50a5aa63ca",
+      "sha256": "f456c8a02fc021db4e5474961069c6bbb10225750bd0ae1fe9ffa74b47c48c96",
       "transport": "framed"
     },
     {
@@ -24,7 +24,7 @@
       "id": "compact-buffered",
       "message_count": 13,
       "protocol": "compact",
-      "sha256": "b0f8135904ec2fa9d3c7255544f85d858431485c10e895666b4e5e9c1e0670ad",
+      "sha256": "14a9be47cb871e4817258c2e61293471498f3ee95bf0d13157cc2d748caa2d81",
       "transport": "buffered"
     },
     {
@@ -33,17 +33,35 @@
       "id": "compact-framed",
       "message_count": 13,
       "protocol": "compact",
-      "sha256": "143d246aa2fe3a789e3f34087c206ff32aa064fa56fd1f023e071c50730ffc31",
+      "sha256": "62c7ac4ac36258b273b9dab5952153289aa9608f3a72d3ad33329a3646287130",
+      "transport": "framed"
+    },
+    {
+      "bytes": 21195,
+      "file": "json-buffered.json",
+      "id": "json-buffered",
+      "message_count": 13,
+      "protocol": "json",
+      "sha256": "99ace21ec9d495eff66fb6e12690f72feb494646287ca24429e55d0302cf93a0",
+      "transport": "buffered"
+    },
+    {
+      "bytes": 21711,
+      "file": "json-framed.json",
+      "id": "json-framed",
+      "message_count": 13,
+      "protocol": "json",
+      "sha256": "e15d8be685b51c55b0d6ee5313c5534d2b6b90d43049b92f8d34b94aa7bdecaf",
       "transport": "framed"
     }
   ],
-  "generated_at_utc": "2026-02-15T21:34:55Z",
+  "generated_at_utc": "2026-02-15T22:55:33Z",
   "generated_with": {
     "bundler_version": "4.0.6",
     "platform": "arm64-darwin25",
     "ruby_version": "4.0.1",
     "thrift_ref": "git:fd9756c19d1ea5763ffd8be88fff1db1ccd0d6ba"
   },
-  "release_id": "e7e9116431ee3c83aa54fcd5d1e2da7d0ab43834",
+  "release_id": "e251efba62cf448d65087e76d36011ce04322cf1",
   "schema_version": "1.0.0"
 }

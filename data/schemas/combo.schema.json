@@ -31,7 +31,8 @@
           "type": "string",
           "enum": [
             "binary",
-            "compact"
+            "compact",
+            "json"
           ]
         },
         "transport": {
@@ -140,7 +141,9 @@
         "binary-buffered",
         "binary-framed",
         "compact-buffered",
-        "compact-framed"
+        "compact-framed",
+        "json-buffered",
+        "json-framed"
       ]
     },
     "span": {

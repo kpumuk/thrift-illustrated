@@ -37,7 +37,9 @@ class CaptureAll
     "binary-buffered" => { protocol: "binary", transport: "buffered" },
     "binary-framed" => { protocol: "binary", transport: "framed" },
     "compact-buffered" => { protocol: "compact", transport: "buffered" },
-    "compact-framed" => { protocol: "compact", transport: "framed" }
+    "compact-framed" => { protocol: "compact", transport: "framed" },
+    "json-buffered" => { protocol: "json", transport: "buffered" },
+    "json-framed" => { protocol: "json", transport: "framed" }
   }.freeze
 
   STAGES = %w[capture record parse validate write verify].freeze

@@ -56,7 +56,9 @@
                 "binary-buffered",
                 "binary-framed",
                 "compact-buffered",
-                "compact-framed"
+                "compact-framed",
+                "json-buffered",
+                "json-framed"
               ]
             },
             {

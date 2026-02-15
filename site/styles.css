@@ -134,7 +134,6 @@ p {
   border-radius: 10px;
   cursor: pointer;
   transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
-  text-transform: capitalize;
   font: inherit;
 }
 
