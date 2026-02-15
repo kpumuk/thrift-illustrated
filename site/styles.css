@@ -17,7 +17,7 @@
 body {
   margin: 0;
   color: var(--ink);
-  font-family: "Avenir Next", "Helvetica Neue", sans-serif;
+  font-family: "Atkinson Hyperlegible", "Helvetica Neue", sans-serif;
   min-height: 100vh;
 }
 
@@ -50,13 +50,13 @@ h1 {
   margin: 0;
   font-size: clamp(1.5rem, 3.4vw, 2.2rem);
   letter-spacing: 0.01em;
-  font-family: "Georgia", "Times New Roman", serif;
+  font-family: "Atkinson Hyperlegible", "Helvetica Neue", sans-serif;
 }
 
 h2,
 h3 {
   margin: 0 0 8px;
-  font-family: "Georgia", "Times New Roman", serif;
+  font-family: "Atkinson Hyperlegible", "Helvetica Neue", sans-serif;
   letter-spacing: 0.01em;
 }
 
@@ -195,6 +195,11 @@ p {
   border-color: rgba(159, 52, 24, 0.56);
 }
 
+.byte-token.is-subfield-active {
+  background: rgba(20, 108, 95, 0.22);
+  border-color: rgba(20, 108, 95, 0.72);
+}
+
 .byte-explainer {
   margin-top: 12px;
   padding-top: 10px;
@@ -206,6 +211,42 @@ p {
 
 .byte-explainer strong {
   color: var(--ink);
+}
+
+.byte-subfields-title {
+  margin-top: 10px;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.byte-subfields {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.byte-subfield-button {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.byte-subfield-button:hover,
+.byte-subfield-button:focus-visible,
+.byte-subfield-button.is-active {
+  border-color: rgba(20, 108, 95, 0.65);
+  background: rgba(20, 108, 95, 0.16);
+  outline: none;
+}
+
+.byte-subfield-description {
+  margin-top: 3px;
+  color: var(--ink-muted);
 }
 
 .field-tree {

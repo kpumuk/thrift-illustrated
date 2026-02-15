@@ -247,7 +247,7 @@ function renderMessageDetails() {
   addSummary("Envelope Span", spanToString(envelope.span))
   addSummary("Payload Span", spanToString(message.payload?.span))
 
-  state.interaction = createInteractionModel(message)
+  state.interaction = createInteractionModel(message, state.dataset.combo.protocol)
   renderRawBytes(message, state.interaction)
   renderFieldTree(message.payload?.fields || [], state.interaction)
   renderByteExplanation(state.interaction)
@@ -348,13 +348,15 @@ function renderRawBytes(message, interaction) {
   rawHexEl.append(fragment)
 }
 
-function createInteractionModel(message) {
+function createInteractionModel(message, protocol) {
   const fields = flattenFields(message.payload?.fields || [])
+  const rawBytes = message.raw_hex.split(" ").map((pair) => Number.parseInt(pair, 16))
   const payloadSpan = clampSpan(message.payload?.span, message.raw_size)
   const envelopeSpan = clampSpan(message.envelope?.span, message.raw_size)
   const frameHeaderSpan = clampSpan(message.transport?.frame_header_span, message.raw_size)
   const interaction = {
     message,
+    protocol,
     fieldToKey: new WeakMap(),
     fieldElements: new Map(),
     byteElements: new Map(),
@@ -362,9 +364,11 @@ function createInteractionModel(message) {
     fieldByByte: new Array(message.raw_size).fill(null),
     activeFieldKey: null,
     activeByteIndex: null,
+    activeSubfieldId: null,
     selectedGroupId: null,
     groupByByte: new Array(message.raw_size).fill(null),
-    groups: new Map()
+    groups: new Map(),
+    subfields: new Map()
   }
 
   for (const field of fields) {
@@ -416,13 +420,21 @@ function createInteractionModel(message) {
     }
   }
 
+  const envelopeSubfields = buildEnvelopeSubfields({
+    protocol,
+    rawBytes,
+    envelopeSpan,
+    envelopeName: message.envelope?.name || ""
+  })
+
   assignGroupIfUnassigned(interaction, {
     id: "envelope",
     type: "envelope",
     label: "Protocol envelope",
-    description: "Encodes method name, message type, and sequence id in the protocol envelope.",
+    description: "Encodes method name, message type, and sequence id; expand subfields below for byte-level breakdown.",
     start: envelopeSpan[0],
-    end: envelopeSpan[1]
+    end: envelopeSpan[1],
+    subfields: envelopeSubfields
   })
 
   assignGroupIfUnassigned(interaction, {
@@ -488,7 +500,20 @@ function selectByteGroup(byteIndex) {
   if (!state.interaction) return
   state.interaction.selectedGroupId = state.interaction.groupByByte[byteIndex] || null
   state.interaction.activeByteIndex = byteIndex
+  state.interaction.activeSubfieldId = null
   renderByteExplanation(state.interaction)
+  applyInteractionClasses()
+}
+
+function activateSubfield(subfieldId) {
+  if (!state.interaction) return
+  state.interaction.activeSubfieldId = subfieldId
+  applyInteractionClasses()
+}
+
+function clearSubfield() {
+  if (!state.interaction) return
+  state.interaction.activeSubfieldId = null
   applyInteractionClasses()
 }
 
@@ -515,6 +540,38 @@ function renderByteExplanation(interaction) {
   body.textContent = group.description
 
   byteExplainerEl.append(title, details, body)
+
+  if (Array.isArray(group.subfields) && group.subfields.length > 0) {
+    const breakdownTitle = document.createElement("div")
+    breakdownTitle.className = "byte-subfields-title"
+    breakdownTitle.textContent = "Envelope subfields (hover to highlight bytes):"
+    byteExplainerEl.append(breakdownTitle)
+
+    const list = document.createElement("ul")
+    list.className = "byte-subfields"
+
+    for (const subfield of group.subfields) {
+      const item = document.createElement("li")
+      const button = document.createElement("button")
+      button.type = "button"
+      button.className = "byte-subfield-button"
+      button.dataset.subfieldId = subfield.id
+      button.textContent = `${subfield.label} [${subfield.start}-${subfield.end - 1}]`
+      button.addEventListener("mouseenter", () => activateSubfield(subfield.id))
+      button.addEventListener("mouseleave", clearSubfield)
+      button.addEventListener("focus", () => activateSubfield(subfield.id))
+      button.addEventListener("blur", clearSubfield)
+
+      const description = document.createElement("div")
+      description.className = "byte-subfield-description"
+      description.textContent = subfield.description
+
+      item.append(button, description)
+      list.append(item)
+    }
+
+    byteExplainerEl.append(list)
+  }
 }
 
 function applyInteractionClasses() {
@@ -528,6 +585,12 @@ function applyInteractionClasses() {
   const selectedBytes = selectedGroup
     ? new Set(rangeIndices(selectedGroup.start, selectedGroup.end))
     : new Set()
+  const activeSubfield = state.interaction.activeSubfieldId
+    ? state.interaction.subfields.get(state.interaction.activeSubfieldId)
+    : null
+  const activeSubfieldBytes = activeSubfield
+    ? new Set(rangeIndices(activeSubfield.start, activeSubfield.end))
+    : new Set()
 
   for (const [fieldKey, element] of state.interaction.fieldElements.entries()) {
     element.classList.toggle("is-hover-active", fieldKey === activeFieldKey)
@@ -537,12 +600,24 @@ function applyInteractionClasses() {
     element.classList.toggle("is-hover-active", highlightedBytes.has(byteIndex))
     element.classList.toggle("is-byte-focus", byteIndex === state.interaction.activeByteIndex)
     element.classList.toggle("is-group-selected", selectedBytes.has(byteIndex))
+    element.classList.toggle("is-subfield-active", activeSubfieldBytes.has(byteIndex))
+  }
+
+  const subfieldButtons = byteExplainerEl.querySelectorAll(".byte-subfield-button")
+  for (const button of subfieldButtons) {
+    const id = button.dataset.subfieldId || ""
+    button.classList.toggle("is-active", id === state.interaction.activeSubfieldId)
   }
 }
 
 function assignGroupIfUnassigned(interaction, group) {
   if (group.start >= group.end) return
   interaction.groups.set(group.id, group)
+  if (Array.isArray(group.subfields)) {
+    for (const subfield of group.subfields) {
+      interaction.subfields.set(subfield.id, subfield)
+    }
+  }
   for (let index = group.start; index < group.end; index += 1) {
     if (interaction.groupByByte[index] === null) {
       interaction.groupByByte[index] = group.id
@@ -597,6 +672,176 @@ function assignFallbackGroups(interaction) {
       segmentStart = null
     }
   }
+}
+
+function buildEnvelopeSubfields({ protocol, rawBytes, envelopeSpan, envelopeName }) {
+  if (envelopeSpan[0] >= envelopeSpan[1]) {
+    return []
+  }
+
+  const subfields = []
+  const pushSubfield = (id, label, description, start, end) => {
+    if (start >= end) return
+    subfields.push({ id, label, description, start, end })
+  }
+
+  if (protocol === "binary") {
+    let cursor = envelopeSpan[0]
+    const end = envelopeSpan[1]
+
+    pushSubfield(
+      "envelope.binary.version_type",
+      "Version + message type",
+      "4-byte strict binary envelope header: protocol version marker plus message type.",
+      cursor,
+      Math.min(cursor + 4, end)
+    )
+    cursor += 4
+
+    const nameLengthStart = cursor
+    const nameLengthEnd = Math.min(cursor + 4, end)
+    let methodNameLength = utf8ByteLength(envelopeName)
+    if (nameLengthEnd - nameLengthStart === 4) {
+      methodNameLength = readInt32BE(rawBytes, nameLengthStart)
+    }
+    pushSubfield(
+      "envelope.binary.name_length",
+      "Method name length",
+      "4-byte big-endian length of the method name string.",
+      nameLengthStart,
+      nameLengthEnd
+    )
+    cursor += 4
+
+    const safeNameLength = clamp(methodNameLength, 0, Math.max(0, end - cursor))
+    pushSubfield(
+      "envelope.binary.name_bytes",
+      "Method name bytes",
+      "UTF-8 bytes for the method name referenced by the envelope.",
+      cursor,
+      cursor + safeNameLength
+    )
+    cursor += safeNameLength
+
+    pushSubfield(
+      "envelope.binary.seqid",
+      "Sequence id",
+      "4-byte signed sequence id used to match requests and responses.",
+      cursor,
+      Math.min(cursor + 4, end)
+    )
+  } else if (protocol === "compact") {
+    let cursor = envelopeSpan[0]
+    const end = envelopeSpan[1]
+
+    pushSubfield(
+      "envelope.compact.protocol_id",
+      "Protocol id",
+      "Compact protocol identifier byte (0x82).",
+      cursor,
+      Math.min(cursor + 1, end)
+    )
+    cursor += 1
+
+    pushSubfield(
+      "envelope.compact.version_type",
+      "Version + message type",
+      "Compact envelope byte combining protocol version (low bits) and message type (high bits).",
+      cursor,
+      Math.min(cursor + 1, end)
+    )
+    cursor += 1
+
+    const seqidVarint = decodeCompactVarint(rawBytes, cursor, end)
+    pushSubfield(
+      "envelope.compact.seqid_varint",
+      "Sequence id varint",
+      "Varint-encoded sequence id used to correlate requests and responses.",
+      cursor,
+      cursor + seqidVarint.length
+    )
+    cursor += seqidVarint.length
+
+    const nameLenVarint = decodeCompactVarint(rawBytes, cursor, end)
+    pushSubfield(
+      "envelope.compact.name_length_varint",
+      "Method name length varint",
+      "Varint-encoded byte length of the method name.",
+      cursor,
+      cursor + nameLenVarint.length
+    )
+    cursor += nameLenVarint.length
+
+    const safeNameLength = clamp(nameLenVarint.value, 0, Math.max(0, end - cursor))
+    pushSubfield(
+      "envelope.compact.name_bytes",
+      "Method name bytes",
+      "UTF-8 bytes for the method name referenced by the envelope.",
+      cursor,
+      cursor + safeNameLength
+    )
+  } else {
+    pushSubfield(
+      "envelope.generic",
+      "Envelope bytes",
+      "Protocol envelope bytes for this message.",
+      envelopeSpan[0],
+      envelopeSpan[1]
+    )
+  }
+
+  fillEnvelopeGaps(subfields, envelopeSpan)
+  return subfields.sort((left, right) => left.start - right.start || left.end - right.end)
+}
+
+function fillEnvelopeGaps(subfields, envelopeSpan) {
+  const covered = new Array(envelopeSpan[1] - envelopeSpan[0]).fill(false)
+  for (const subfield of subfields) {
+    for (let index = subfield.start; index < subfield.end; index += 1) {
+      if (index >= envelopeSpan[0] && index < envelopeSpan[1]) {
+        covered[index - envelopeSpan[0]] = true
+      }
+    }
+  }
+
+  let gapStart = null
+  for (let offset = 0; offset < covered.length; offset += 1) {
+    const isCovered = covered[offset]
+    if (!isCovered && gapStart === null) {
+      gapStart = envelopeSpan[0] + offset
+    }
+
+    if ((isCovered || offset === covered.length - 1) && gapStart !== null) {
+      const gapEnd = isCovered ? envelopeSpan[0] + offset : envelopeSpan[0] + offset + 1
+      subfields.push({
+        id: `envelope.unknown.${gapStart}-${gapEnd}`,
+        label: "Envelope continuation bytes",
+        description: "Additional envelope bytes that keep the envelope fully covered for educational inspection.",
+        start: gapStart,
+        end: gapEnd
+      })
+      gapStart = null
+    }
+  }
+}
+
+function decodeCompactVarint(bytes, start, limit) {
+  let value = 0
+  let shift = 0
+  let cursor = start
+  const maxBytes = 5
+
+  while (cursor < limit && cursor - start < maxBytes) {
+    const byte = bytes[cursor]
+    value |= (byte & 0x7f) << shift
+    cursor += 1
+    if ((byte & 0x80) === 0) {
+      return { length: cursor - start, value }
+    }
+    shift += 7
+  }
+
+  return { length: Math.max(0, cursor - start), value: 0 }
 }
 
 function renderList(container, items, formatter, itemClass = "") {
@@ -1627,6 +1872,21 @@ function toHex(bytes) {
     output += byte.toString(16).padStart(2, "0")
   }
   return output
+}
+
+function readInt32BE(bytes, start) {
+  if (start + 3 >= bytes.length) return 0
+  const value = (
+    (bytes[start] << 24) |
+    (bytes[start + 1] << 16) |
+    (bytes[start + 2] << 8) |
+    bytes[start + 3]
+  )
+  return value | 0
+}
+
+function utf8ByteLength(value) {
+  return new TextEncoder().encode(value).length
 }
 
 function clamp(value, min, max) {
