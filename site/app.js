@@ -52,7 +52,7 @@ const state = {
   interaction: null
 }
 
-const statusEl = document.querySelector("#status")
+const runtimeMessageEl = document.querySelector("#runtime-message")
 const comboPickerEl = document.querySelector("#combo-picker")
 const messageNavEl = document.querySelector("#message-nav")
 const summaryEl = document.querySelector("#message-summary")
@@ -150,10 +150,11 @@ function render() {
     return
   }
 
-  statusEl.textContent = state.navWarning
-    ? `${state.navWarning.code}: ${state.navWarning.message}`
-    : "Ready"
-  statusEl.style.color = state.navWarning ? "#9f3418" : "#575f6d"
+  if (state.navWarning) {
+    showRuntimeMessage(`${state.navWarning.code}: ${state.navWarning.message}`, "warning")
+  } else {
+    clearRuntimeMessage()
+  }
   if (!state.navWarning) {
     state.lastErrorKey = null
   }
@@ -167,8 +168,7 @@ function render() {
 function renderBlockingState() {
   state.interaction = null
   const error = state.blockingError
-  statusEl.textContent = `${error.code}: ${error.message}`
-  statusEl.style.color = "#9f3418"
+  showRuntimeMessage(`${error.code}: ${error.message}`, "error")
 
   renderComboPicker()
   messageNavEl.innerHTML = ""
@@ -191,6 +191,18 @@ function renderBlockingState() {
   renderList(highlightsEl, [], () => "")
 }
 
+function showRuntimeMessage(message, level) {
+  runtimeMessageEl.hidden = false
+  runtimeMessageEl.textContent = message
+  runtimeMessageEl.dataset.level = level
+}
+
+function clearRuntimeMessage() {
+  runtimeMessageEl.hidden = true
+  runtimeMessageEl.textContent = ""
+  delete runtimeMessageEl.dataset.level
+}
+
 function renderComboPicker() {
   comboPickerEl.innerHTML = ""
 
@@ -198,14 +210,79 @@ function renderComboPicker() {
     return
   }
 
-  for (const combo of state.manifest.combos) {
-    const btn = document.createElement("button")
-    btn.type = "button"
-    btn.textContent = `${combo.protocol} + ${combo.transport}`
-    if (combo.id === state.combo) btn.classList.add("is-active")
-    btn.addEventListener("click", () => updateSelection(combo.id, 0))
-    comboPickerEl.append(btn)
+  const selectedCombo = state.manifest.combos.find((combo) => combo.id === state.combo) || state.manifest.combos[0]
+  const selectedProtocol = selectedCombo.protocol
+  const selectedTransport = selectedCombo.transport
+
+  comboPickerEl.append(
+    buildComboRow({
+      label: "Transport",
+      options: ["buffered", "framed"],
+      selected: selectedTransport,
+      onPick: (transport) => {
+        const nextCombo = resolveComboId({
+          protocol: selectedProtocol,
+          transport,
+          fallbackId: selectedCombo.id
+        })
+        updateSelection(nextCombo, state.messageIndex)
+      }
+    }),
+    buildComboRow({
+      label: "Protocol",
+      options: ["binary", "compact"],
+      selected: selectedProtocol,
+      onPick: (protocol) => {
+        const nextCombo = resolveComboId({
+          protocol,
+          transport: selectedTransport,
+          fallbackId: selectedCombo.id
+        })
+        updateSelection(nextCombo, state.messageIndex)
+      }
+    })
+  )
+}
+
+function buildComboRow({ label, options, selected, onPick }) {
+  const row = document.createElement("div")
+  row.className = "combo-row"
+
+  const rowLabel = document.createElement("span")
+  rowLabel.className = "combo-row-label"
+  rowLabel.textContent = `${label}:`
+  row.append(rowLabel)
+
+  const optionWrap = document.createElement("div")
+  optionWrap.className = "combo-row-options"
+
+  for (const option of options) {
+    const button = document.createElement("button")
+    button.type = "button"
+    button.className = "combo-option"
+    button.textContent = option
+    if (option === selected) {
+      button.classList.add("is-active")
+    }
+    button.addEventListener("click", () => onPick(option))
+    optionWrap.append(button)
   }
+
+  row.append(optionWrap)
+  return row
+}
+
+function resolveComboId({ protocol, transport, fallbackId }) {
+  const exact = state.manifest.combos.find((combo) => combo.protocol === protocol && combo.transport === transport)
+  if (exact) return exact.id
+
+  const protocolOnly = state.manifest.combos.find((combo) => combo.protocol === protocol)
+  if (protocolOnly) return protocolOnly.id
+
+  const transportOnly = state.manifest.combos.find((combo) => combo.transport === transport)
+  if (transportOnly) return transportOnly.id
+
+  return fallbackId || state.manifest.combos[0].id
 }
 
 function renderMessageNav() {
@@ -216,13 +293,62 @@ function renderMessageNav() {
   }
 
   state.dataset.messages.forEach((message, idx) => {
-    const btn = document.createElement("button")
-    btn.type = "button"
-    btn.className = "message-item"
-    if (idx === state.messageIndex) btn.classList.add("is-active")
-    btn.textContent = `${message.index}. ${message.method} (${message.message_type})`
-    btn.addEventListener("click", () => updateSelection(state.combo, idx))
-    messageNavEl.append(btn)
+    const leftToRight = message.direction === "client->server"
+
+    const row = document.createElement("button")
+    row.type = "button"
+    row.className = "timeline-row"
+    if (idx === state.messageIndex) row.classList.add("is-active")
+    row.dataset.direction = message.direction
+    row.dataset.messageType = message.message_type
+    row.addEventListener("click", () => updateSelection(state.combo, idx))
+    row.setAttribute(
+      "aria-label",
+      `Message ${message.index}, ${message.method}, ${message.message_type}, ${message.direction}`
+    )
+
+    const leftCell = document.createElement("span")
+    leftCell.className = "timeline-lane-cell"
+    const callIndex = document.createElement("span")
+    callIndex.className = "timeline-index"
+    callIndex.textContent = String(message.index)
+    const leftNode = document.createElement("span")
+    leftNode.className = "timeline-node"
+    leftNode.classList.add(leftToRight ? "is-source" : "is-target")
+    leftCell.append(callIndex, leftNode)
+
+    const center = document.createElement("span")
+    center.className = "timeline-mid"
+
+    const label = document.createElement("span")
+    label.className = "timeline-label"
+    const title = document.createElement("span")
+    title.className = "timeline-title"
+    title.textContent = `${message.method} (${message.message_type})`
+    label.append(title)
+
+    const arrow = document.createElement("span")
+    arrow.className = "timeline-arrow"
+    if (!leftToRight) {
+      arrow.classList.add("is-right-to-left")
+    }
+    if (message.message_type === "reply" || message.message_type === "exception") {
+      arrow.classList.add("is-return")
+    }
+    const seq = document.createElement("span")
+    seq.className = "timeline-seq"
+    seq.textContent = `seq ${message.seqid}`
+    center.append(label, arrow, seq)
+
+    const rightCell = document.createElement("span")
+    rightCell.className = "timeline-lane-cell"
+    const rightNode = document.createElement("span")
+    rightNode.className = "timeline-node"
+    rightNode.classList.add(leftToRight ? "is-target" : "is-source")
+    rightCell.append(rightNode)
+
+    row.append(leftCell, center, rightCell)
+    messageNavEl.append(row)
   })
 }
 
