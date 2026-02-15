@@ -1,0 +1,592 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://thrift-illustrated.local/schemas/combo.schema.json",
+  "title": "Thrift Illustrated Combo Dataset",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "combo",
+    "metadata",
+    "dataset_errors",
+    "messages"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "combo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "protocol",
+        "transport"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/comboId"
+        },
+        "protocol": {
+          "type": "string",
+          "enum": [
+            "binary",
+            "compact"
+          ]
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "buffered",
+            "framed"
+          ]
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capture_id",
+        "captured_at_utc",
+        "ruby_version",
+        "bundler_version",
+        "thrift_ref",
+        "platform",
+        "message_count",
+        "wire_chunk_count",
+        "max_field_depth",
+        "total_field_nodes",
+        "max_string_value_bytes",
+        "max_highlights_per_message"
+      ],
+      "properties": {
+        "capture_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "captured_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ruby_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bundler_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "thrift_ref": {
+          "type": "string",
+          "pattern": "^(git:[a-f0-9]{40}|gem:[0-9A-Za-z._+-]+)$"
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "wire_chunk_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_field_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "total_field_nodes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50000
+        },
+        "max_string_value_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65536
+        },
+        "max_highlights_per_message": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      }
+    },
+    "dataset_errors": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/datasetError"
+      }
+    },
+    "messages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/message"
+      }
+    }
+  },
+  "$defs": {
+    "comboId": {
+      "type": "string",
+      "enum": [
+        "binary-buffered",
+        "binary-framed",
+        "compact-buffered",
+        "compact-framed"
+      ]
+    },
+    "span": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "integer",
+          "minimum": 1
+        }
+      ],
+      "items": false
+    },
+    "nullableSpan": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/span"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fieldNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "ttype",
+        "span",
+        "value",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string",
+              "pattern": "^(?![0-9]+$).+"
+            }
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ttype": {
+          "type": "string",
+          "minLength": 1
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "value": {},
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/fieldNode"
+          }
+        }
+      }
+    },
+    "highlight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "kind",
+        "start",
+        "end"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "transport",
+            "envelope",
+            "field",
+            "error",
+            "custom"
+          ]
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "parseError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "offset",
+        "severity",
+        "span"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "E_FRAME_TRUNCATED",
+            "E_FRAME_LENGTH_MISMATCH",
+            "E_PROTOCOL_DECODE",
+            "E_STRUCT_UNEXPECTED_STOP",
+            "E_FIELD_TYPE_UNKNOWN",
+            "E_SEQID_MISMATCH",
+            "E_FIELD_NODE_LIMIT",
+            "E_RECURSION_LIMIT",
+            "E_STRING_TOO_LARGE",
+            "E_HIGHLIGHT_LIMIT"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "offset": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "warning",
+            "error",
+            "fatal"
+          ]
+        },
+        "span": {
+          "$ref": "#/$defs/nullableSpan"
+        }
+      }
+    },
+    "datasetError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "offset",
+        "severity",
+        "span"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "E_TUTORIAL_FLOW_MISMATCH",
+            "E_MESSAGE_COUNT_MISMATCH"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "offset": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "warning",
+            "error",
+            "fatal"
+          ]
+        },
+        "span": {
+          "$ref": "#/$defs/nullableSpan"
+        }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "frame_length",
+        "frame_header_span",
+        "payload_span"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "buffered",
+            "framed"
+          ]
+        },
+        "frame_length": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "frame_header_span": {
+          "$ref": "#/$defs/nullableSpan"
+        },
+        "payload_span": {
+          "$ref": "#/$defs/span"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "buffered"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "frame_length": {
+                "type": "null"
+              },
+              "frame_header_span": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "framed"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "frame_length": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "frame_header_span": {
+                "const": [
+                  0,
+                  4
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "message": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "actor",
+        "direction",
+        "method",
+        "message_type",
+        "seqid",
+        "raw_hex",
+        "raw_size",
+        "transport",
+        "envelope",
+        "payload",
+        "highlights",
+        "parse_errors"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "actor": {
+          "type": "string",
+          "enum": [
+            "client",
+            "server"
+          ]
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "client->server",
+            "server->client"
+          ]
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message_type": {
+          "type": "string",
+          "enum": [
+            "call",
+            "reply",
+            "exception",
+            "oneway"
+          ]
+        },
+        "seqid": {
+          "type": "integer"
+        },
+        "raw_hex": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{2}( [0-9a-f]{2})*$"
+        },
+        "raw_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "transport": {
+          "$ref": "#/$defs/transport"
+        },
+        "envelope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "type",
+            "seqid",
+            "span"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "call",
+                "reply",
+                "exception",
+                "oneway"
+              ]
+            },
+            "seqid": {
+              "type": "integer"
+            },
+            "span": {
+              "$ref": "#/$defs/span"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "struct",
+            "span",
+            "fields"
+          ],
+          "properties": {
+            "struct": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "ttype",
+                "span"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ttype": {
+                  "const": "struct"
+                },
+                "span": {
+                  "$ref": "#/$defs/span"
+                }
+              }
+            },
+            "span": {
+              "$ref": "#/$defs/span"
+            },
+            "fields": {
+              "type": "array",
+              "maxItems": 5000,
+              "items": {
+                "$ref": "#/$defs/fieldNode"
+              }
+            }
+          }
+        },
+        "highlights": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "$ref": "#/$defs/highlight"
+          }
+        },
+        "parse_errors": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/parseError"
+          }
+        }
+      }
+    }
+  }
+}

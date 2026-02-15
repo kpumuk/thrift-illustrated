@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://thrift-illustrated.local/schemas/runtime-error.schema.json",
+  "title": "Thrift Illustrated Runtime Error",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "code",
+    "class",
+    "message",
+    "context",
+    "ts"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "enum": [
+        "E_MANIFEST_FETCH_FAILED",
+        "E_MANIFEST_INVALID",
+        "E_MANIFEST_TOO_LARGE",
+        "E_DATASET_INVALID",
+        "E_DATASET_FETCH_FAILED",
+        "E_DATASET_TOO_LARGE",
+        "E_DATASET_HASH_MISMATCH",
+        "E_NAV_HASH_INVALID",
+        "E_WEBCRYPTO_UNAVAILABLE",
+        "E_SCHEMA_VERSION_UNSUPPORTED"
+      ]
+    },
+    "class": {
+      "type": "string",
+      "enum": [
+        "blocking",
+        "non-blocking"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "combo",
+        "msg",
+        "reason",
+        "http_status"
+      ],
+      "properties": {
+        "combo": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "binary-buffered",
+                "binary-framed",
+                "compact-buffered",
+                "compact-framed"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "msg": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "hash_too_long",
+            "hash_decode_failed",
+            "combo_invalid",
+            "msg_invalid",
+            "fetch_failed",
+            "schema_invalid",
+            "schema_version_unsupported",
+            "manifest_too_large",
+            "dataset_too_large",
+            "hash_mismatch",
+            "webcrypto_unavailable",
+            "bytes_mismatch",
+            "json_parse_failed"
+          ]
+        },
+        "http_status": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 599
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

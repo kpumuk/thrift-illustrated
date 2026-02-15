@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://thrift-illustrated.local/schemas/benchmark.schema.json",
+  "title": "Thrift Illustrated Benchmark Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at_utc",
+    "environment",
+    "metrics"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platform",
+        "runner",
+        "browser"
+      ],
+      "properties": {
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "browser": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "major"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "major": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capture_all_combos_ms",
+        "combo_switch_cached_ms",
+        "asset_budget_bytes",
+        "combo_artifact_bytes",
+        "heap_after_combo_load"
+      ],
+      "properties": {
+        "capture_all_combos_ms": {
+          "$ref": "#/$defs/distribution"
+        },
+        "combo_switch_cached_ms": {
+          "$ref": "#/$defs/distribution"
+        },
+        "asset_budget_bytes": {
+          "$ref": "#/$defs/budget"
+        },
+        "combo_artifact_bytes": {
+          "$ref": "#/$defs/budget"
+        },
+        "heap_after_combo_load": {
+          "$ref": "#/$defs/heapMetric"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runs",
+        "warmup_runs",
+        "median_ms",
+        "p95_ms",
+        "max_ms"
+      ],
+      "properties": {
+        "runs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "warmup_runs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "median_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "p95_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max_ms": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observed",
+        "limit",
+        "unit"
+      ],
+      "properties": {
+        "observed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "bytes"
+          ]
+        }
+      }
+    },
+    "heapMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "used_js_heap_size",
+        "limit"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "available",
+            "unavailable"
+          ]
+        },
+        "used_js_heap_size": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
