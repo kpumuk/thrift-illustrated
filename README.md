@@ -1,24 +1,177 @@
 # Thrift Illustrated
 
-## Bootstrap
+Thrift Illustrated is a static learning site.
+It shows Apache Thrift bytes from real local traffic.
 
-1. Install toolchain defined in `mise.toml`:
-   - `mise install`
-2. Install Ruby gems in the pinned Ruby environment:
-   - `mise exec -- bundle install`
-3. Install Bun dependencies (UI benchmark harness):
-   - `bun install`
-4. List baseline tasks:
-   - `mise exec -- bundle exec rake -T`
+The goal is simple: make Thrift wire data easy to see and easy to learn.
+This project takes design ideas from [illustrated-tls12](https://tls12.xargs.org/).
 
-## Baseline Tasks
+## Why We Made This
 
-- `bundle exec rake capture`
-- `bundle exec rake test`
-- `bundle exec rake build`
-- `bundle exec rake check`
-- `mise run web` (then open `http://127.0.0.1:8000/`)
+Thrift tutorials often show only method calls and return values.
+That is useful, but it hides the wire format.
 
-## Deployment Ops
+This project helps you:
 
-- Browser health probe script: `scripts/health_check_browser.mjs`.
+- See real bytes from real Ruby tutorial calls.
+- Compare protocol and transport choices.
+- Learn what each byte means.
+- Review changes with stable, committed data files.
+
+> [!IMPORTANT]
+> Capture data must come from real localhost Ruby traffic. No fake wire fixtures.
+
+## How It Works
+
+The project has two parts.
+
+1. A Ruby pipeline captures and parses traffic.
+2. A static web app renders that data.
+
+Pipeline flow:
+
+1. Run tutorial client and server on localhost.
+2. Record write chunks from client and server.
+3. Parse bytes into messages, fields, and spans.
+4. Validate schema and call-flow rules.
+5. Write JSON artifacts into `site/data/captures/`.
+
+UI flow:
+
+1. Load `manifest.json`.
+2. Load one combo dataset.
+3. Check byte size and SHA-256.
+4. Render timeline, summary, hexdump, and field tree.
+
+Byte learning behavior:
+
+- Hover a field to highlight its bytes.
+- Hover a byte to highlight its field.
+- Click a byte to show its byte group.
+- Hover subfields to highlight exact sub-ranges.
+- Hex and ASCII views stay linked.
+
+> [!NOTE]
+> The site is plain HTML, CSS, and JavaScript. There is no bundling step.
+
+## Supported Combinations
+
+```text
+binary + buffered
+binary + framed
+compact + buffered
+compact + framed
+json + buffered
+json + framed
+```
+
+## Quick Start
+
+Prerequisites:
+
+- `mise`
+- Ruby `4.0.1`
+- Bun `1.3.5`
+
+Setup:
+
+```bash
+mise install
+mise exec -- bundle install
+mise exec -- bun install
+```
+
+Capture data:
+
+```bash
+mise exec -- bundle exec rake capture
+```
+
+Run tests and checks:
+
+```bash
+mise exec -- bundle exec rake test
+mise exec -- bundle exec rake check
+```
+
+Run local web server:
+
+```bash
+mise run web
+```
+
+Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
+
+## Common Options
+
+Capture command:
+
+```bash
+bundle exec ruby scripts/capture_all.rb [--combo <id>] [--output <dir>] [--strict]
+```
+
+Flags:
+
+- `--combo`: run only one combo.
+- `--output`: write artifacts to another repo-local path.
+- `--strict`: stop on first non-warning parse error.
+
+Env var:
+
+- `THRIFT_TIMEOUT_MS` (default `5000`)
+
+UI hash state:
+
+```text
+#combo=<combo-id>&msg=<index>
+```
+
+Example:
+
+```text
+#combo=compact-framed&msg=4
+```
+
+## CI and Dependency Updates
+
+CI runs on push to `main` and on pull requests.
+
+CI commands:
+
+```bash
+mise exec -- bundle exec rake test
+mise exec -- bundle exec rake check
+```
+
+Dependabot updates:
+
+- Bundler gems
+- GitHub Actions
+- npm/Bun packages
+
+## Contributing
+
+1. Read `CONSTITUTION.md` first.
+2. Keep the site static.
+3. Keep captures real and local.
+4. If parser or capture code changes, regenerate artifacts.
+5. Run tests before opening a PR.
+
+Useful commands:
+
+```bash
+mise exec -- bundle exec rake test
+mise exec -- bundle exec rake check
+mise exec -- bun run scripts/ui_smoke_test.mjs
+```
+
+If browser checks fail, set `CHROME_BIN` to your Chrome or Chromium path.
+
+## Project Layout
+
+```text
+site/        static UI, capture data, and schemas
+scripts/     capture, parser, validation, benchmark, and health scripts
+test/        Ruby unit and integration tests
+mise.toml    pinned tools and local web task
+```
