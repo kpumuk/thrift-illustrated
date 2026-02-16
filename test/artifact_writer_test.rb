@@ -16,8 +16,8 @@ class ArtifactWriterTest < Minitest::Test
       writer = ThriftIllustrated::ArtifactWriter.new(base_dir: dir)
       payload = {
         "z" => 1,
-        :a => { "d" => 4, "b" => 2 },
-        "list" => [{ "k" => 3, "a" => 1 }]
+        :a => {"d" => 4, "b" => 2},
+        "list" => [{"k" => 3, "a" => 1}]
       }
 
       out_path = writer.write_json(relative_path: "nested/out.json", payload: payload)
@@ -34,7 +34,7 @@ class ArtifactWriterTest < Minitest::Test
   def test_repeated_writes_are_byte_stable
     with_tmpdir do |dir|
       writer = ThriftIllustrated::ArtifactWriter.new(base_dir: dir)
-      payload = { "b" => 2, "a" => 1 }
+      payload = {"b" => 2, "a" => 1}
 
       out_path = writer.write_manifest(payload)
       first = File.binread(out_path)
@@ -51,7 +51,7 @@ class ArtifactWriterTest < Minitest::Test
       writer = ThriftIllustrated::ArtifactWriter.new(base_dir: dir)
 
       assert_raises(ArgumentError) do
-        writer.write_json(relative_path: "../escape.json", payload: { "x" => 1 })
+        writer.write_json(relative_path: "../escape.json", payload: {"x" => 1})
       end
     end
   end
@@ -62,7 +62,7 @@ class ArtifactWriterTest < Minitest::Test
       invalid = "\xC3\x28".b.force_encoding("UTF-8")
 
       assert_raises(EncodingError) do
-        writer.write_json(relative_path: "bad.json", payload: { "bad" => invalid })
+        writer.write_json(relative_path: "bad.json", payload: {"bad" => invalid})
       end
     end
   end

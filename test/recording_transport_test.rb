@@ -127,7 +127,7 @@ class RecordingTransportTest < Minitest::Test
 
     assert_raises(FrozenError) { external.first[:actor] = "server" }
 
-    external << { chunk_index: 99 }
+    external << {chunk_index: 99}
     assert_equal 1, transport.records.length
   end
 end

@@ -19,8 +19,8 @@ class MessageParserTest < Minitest::Test
 
   def test_parses_binary_buffered_message
     payload = build_message(protocol: "binary", method: "ping", seqid: 7, fields: [
-      { id: 1, type: Thrift::Types::I32, value: 42 },
-      { id: 2, type: Thrift::Types::STRING, value: "hello" }
+      {id: 1, type: Thrift::Types::I32, value: 42},
+      {id: 2, type: Thrift::Types::STRING, value: "hello"}
     ])
 
     parser = ThriftIllustrated::MessageParser.new
@@ -44,7 +44,7 @@ class MessageParserTest < Minitest::Test
   end
 
   def test_parses_compact_framed_messages
-    payload_one = build_message(protocol: "compact", method: "add", seqid: 1, fields: [{ id: 1, type: Thrift::Types::I32, value: 2 }])
+    payload_one = build_message(protocol: "compact", method: "add", seqid: 1, fields: [{id: 1, type: Thrift::Types::I32, value: 2}])
     payload_two = build_message(protocol: "compact", method: "zip", seqid: 2, message_type: Thrift::MessageTypes::ONEWAY, fields: [])
 
     framed = frame(payload_one) + frame(payload_two)
@@ -83,8 +83,8 @@ class MessageParserTest < Minitest::Test
 
   def test_enforces_field_node_limit
     payload = build_message(protocol: "binary", method: "ping", seqid: 1, fields: [
-      { id: 1, type: Thrift::Types::I32, value: 1 },
-      { id: 2, type: Thrift::Types::I32, value: 2 }
+      {id: 1, type: Thrift::Types::I32, value: 1},
+      {id: 2, type: Thrift::Types::I32, value: 2}
     ])
 
     parser = ThriftIllustrated::MessageParser.new(max_field_nodes: 1)
@@ -98,7 +98,7 @@ class MessageParserTest < Minitest::Test
 
   def build_message(protocol:, method:, seqid:, fields:, message_type: Thrift::MessageTypes::CALL)
     transport = BufferWriter.new
-    proto = protocol == "binary" ? Thrift::BinaryProtocol.new(transport) : Thrift::CompactProtocol.new(transport)
+    proto = (protocol == "binary") ? Thrift::BinaryProtocol.new(transport) : Thrift::CompactProtocol.new(transport)
 
     proto.write_message_begin(method, message_type, seqid)
     proto.write_struct_begin("args")

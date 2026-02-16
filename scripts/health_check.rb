@@ -55,7 +55,7 @@ class HealthCheck
       assert_required_headers!(manifest_response, resource_name: "manifest") if @options.fetch(:enforce_headers)
       manifest_json = parse_json(manifest_body, resource_name: "manifest")
       @release_id = manifest_json["release_id"]
-      { bytes: manifest_body.bytesize, release_id: @release_id }
+      {bytes: manifest_body.bytesize, release_id: @release_id}
     end
 
     success &&= run_check("combo_fetch") do
@@ -67,7 +67,7 @@ class HealthCheck
       assert_json_response!(combo_response, resource_name: combo_entry.fetch("id"))
       assert_required_headers!(combo_response, resource_name: combo_entry.fetch("id")) if @options.fetch(:enforce_headers)
       parse_json(combo_body, resource_name: combo_entry.fetch("id"))
-      { bytes: combo_body.bytesize, combo: combo_entry.fetch("id") }
+      {bytes: combo_body.bytesize, combo: combo_entry.fetch("id")}
     end
 
     success &&= run_check("dataset_bytes") do
@@ -75,7 +75,7 @@ class HealthCheck
       observed_bytes = combo_body.bytesize
       raise "Dataset byte length mismatch: expected #{expected_bytes}, got #{observed_bytes}" unless observed_bytes == expected_bytes
 
-      { expected: expected_bytes, observed: observed_bytes, combo: combo_entry.fetch("id") }
+      {expected: expected_bytes, observed: observed_bytes, combo: combo_entry.fetch("id")}
     end
 
     success &&= run_check("dataset_sha256") do
@@ -83,7 +83,7 @@ class HealthCheck
       observed_sha = Digest::SHA256.hexdigest(combo_body)
       raise "Dataset SHA mismatch: expected #{expected_sha}, got #{observed_sha}" unless observed_sha == expected_sha
 
-      { expected: expected_sha, observed: observed_sha, combo: combo_entry.fetch("id") }
+      {expected: expected_sha, observed: observed_sha, combo: combo_entry.fetch("id")}
     end
 
     success &&= run_check("browser_render") do
@@ -105,7 +105,7 @@ class HealthCheck
   rescue OptionParser::ParseError => error
     @stderr.puts(error.message)
     2
-  rescue StandardError => error
+  rescue => error
     emit_alert(check: "health_check_setup", message: error.message, threshold: nil, observed: nil)
     @stderr.puts(error.message)
     1
@@ -157,8 +157,8 @@ class HealthCheck
       details = yield
       log(check: check_name, status: "pass", details: details)
       true
-    rescue StandardError => error
-      details = { message: error.message, attempt: attempt }
+    rescue => error
+      details = {message: error.message, attempt: attempt}
       if attempt <= retries
         log(check: check_name, status: "fail", details: details.merge(retrying: true))
         retry
@@ -240,7 +240,7 @@ class HealthCheck
   def append_alert_file(payload)
     path = File.expand_path(@options.fetch(:alert_file), Dir.pwd)
     File.open(path, "a") { |file| file.puts(JSON.generate(payload)) }
-  rescue StandardError => error
+  rescue => error
     @stderr.puts("Failed to write alert file: #{error.message}")
   end
 
@@ -250,7 +250,7 @@ class HealthCheck
     request["content-type"] = "application/json"
     request.body = JSON.generate(payload)
     Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https") { |http| http.request(request) }
-  rescue StandardError => error
+  rescue => error
     @stderr.puts("Failed to post alert webhook: #{error.message}")
   end
 end

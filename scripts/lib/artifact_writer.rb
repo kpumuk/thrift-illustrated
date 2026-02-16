@@ -2,7 +2,6 @@
 
 require "fileutils"
 require "json"
-require "pathname"
 require "securerandom"
 
 module ThriftIllustrated

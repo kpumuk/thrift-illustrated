@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "base64"
-require "thread"
 
 module ThriftIllustrated
   class RecordingTransport

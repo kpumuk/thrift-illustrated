@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "socket"
-require "set"
-require "thread"
 require "timeout"
 require "thrift"
 
@@ -35,7 +33,8 @@ module ThriftIllustrated
         @log = {}
       end
 
-      def ping; end
+      def ping
+      end
 
       def add(n1, n2)
         n1 + n2
@@ -43,19 +42,19 @@ module ThriftIllustrated
 
       def calculate(logid, work)
         value = case work.op
-                when Operation::ADD
-                  work.num1 + work.num2
-                when Operation::SUBTRACT
-                  work.num1 - work.num2
-                when Operation::MULTIPLY
-                  work.num1 * work.num2
-                when Operation::DIVIDE
-                  raise InvalidOperation.new(whatOp: work.op, why: "Cannot divide by 0") if work.num2.zero?
+        when Operation::ADD
+          work.num1 + work.num2
+        when Operation::SUBTRACT
+          work.num1 - work.num2
+        when Operation::MULTIPLY
+          work.num1 * work.num2
+        when Operation::DIVIDE
+          raise InvalidOperation.new(whatOp: work.op, why: "Cannot divide by 0") if work.num2.zero?
 
-                  work.num1 / work.num2
-                else
-                  raise InvalidOperation.new(whatOp: work.op, why: "Invalid operation")
-                end
+          work.num1 / work.num2
+        else
+          raise InvalidOperation.new(whatOp: work.op, why: "Invalid operation")
+        end
 
         @log[logid] = SharedStruct.new(key: logid, value: value.to_s)
         value
@@ -65,7 +64,8 @@ module ThriftIllustrated
         @log.fetch(key) { SharedStruct.new(key: key, value: "") }
       end
 
-      def zip(_payload); end
+      def zip(_payload)
+      end
     end
 
     def initialize(protocol:, transport:, host:, port:, timeout_ms:)

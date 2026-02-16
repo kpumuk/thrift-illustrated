@@ -118,7 +118,7 @@ module ThriftIllustrated
     private
 
     def parse_buffered_stream(bytes, protocol:, actor:, starting_index:)
-      direction = actor.to_s == "client" ? "client->server" : "server->client"
+      direction = (actor.to_s == "client") ? "client->server" : "server->client"
       messages = []
       offset = 0
       index = starting_index
@@ -169,7 +169,7 @@ module ThriftIllustrated
     end
 
     def parse_framed_stream(bytes, protocol:, actor:, starting_index:)
-      direction = actor.to_s == "client" ? "client->server" : "server->client"
+      direction = (actor.to_s == "client") ? "client->server" : "server->client"
       messages = []
       offset = 0
       index = starting_index
@@ -273,7 +273,7 @@ module ThriftIllustrated
       reader = CursorTransport.new(payload_bytes)
       thrift_protocol = build_protocol(protocol, reader)
       parse_errors = []
-      stats = { field_nodes: 0, max_depth: 0, max_string_bytes: 0 }
+      stats = {field_nodes: 0, max_depth: 0, max_string_bytes: 0}
 
       envelope_start = reader.position
       name = "__parse_error__"
@@ -331,7 +331,7 @@ module ThriftIllustrated
           span: nil
         )
         payload_end = reader.position
-      rescue StandardError => e
+      rescue => e
         parse_errors << parse_error(
           code: "E_PROTOCOL_DECODE",
           message: e.message,
@@ -382,7 +382,7 @@ module ThriftIllustrated
         },
         highlights: [],
         parse_errors: parse_errors,
-        consumed: transport == "framed" ? payload_bytes.bytesize : consumed,
+        consumed: (transport == "framed") ? payload_bytes.bytesize : consumed,
         _field_node_count: stats[:field_nodes],
         _max_field_depth: stats[:max_depth],
         _max_string_value_bytes: stats[:max_string_bytes]
@@ -481,17 +481,17 @@ module ThriftIllustrated
 
       case type
       when Thrift::Types::BOOL
-        { value: protocol.read_bool, children: [] }
+        {value: protocol.read_bool, children: []}
       when Thrift::Types::BYTE
-        { value: protocol.read_byte, children: [] }
+        {value: protocol.read_byte, children: []}
       when Thrift::Types::I16
-        { value: protocol.read_i16, children: [] }
+        {value: protocol.read_i16, children: []}
       when Thrift::Types::I32
-        { value: protocol.read_i32, children: [] }
+        {value: protocol.read_i32, children: []}
       when Thrift::Types::I64
-        { value: protocol.read_i64, children: [] }
+        {value: protocol.read_i64, children: []}
       when Thrift::Types::DOUBLE
-        { value: protocol.read_double, children: [] }
+        {value: protocol.read_double, children: []}
       when Thrift::Types::STRING
         str = protocol.read_string
         string_size = str.to_s.bytesize
@@ -504,9 +504,9 @@ module ThriftIllustrated
             severity: "fatal"
           )
         end
-        { value: str, children: [] }
+        {value: str, children: []}
       when Thrift::Types::UUID
-        { value: protocol.read_uuid, children: [] }
+        {value: protocol.read_uuid, children: []}
       when Thrift::Types::STRUCT
         struct_start = reader.position
         protocol.read_struct_begin
@@ -522,7 +522,7 @@ module ThriftIllustrated
         protocol.read_struct_end
         struct_end = reader.position
 
-        { value: nil, children: [build_field_node(id: element_id, name: "struct", ttype: "struct", span: [struct_start, struct_end], value: nil, children: children)] }
+        {value: nil, children: [build_field_node(id: element_id, name: "struct", ttype: "struct", span: [struct_start, struct_end], value: nil, children: children)]}
       when Thrift::Types::LIST
         etype, size = protocol.read_list_begin
         element_schema = schema.is_a?(Hash) ? schema[:element] : nil
@@ -538,7 +538,7 @@ module ThriftIllustrated
           item_schema: element_schema
         )
         protocol.read_list_end
-        { value: nil, children: children }
+        {value: nil, children: children}
       when Thrift::Types::SET
         etype, size = protocol.read_set_begin
         element_schema = schema.is_a?(Hash) ? schema[:element] : nil
@@ -554,7 +554,7 @@ module ThriftIllustrated
           item_schema: element_schema
         )
         protocol.read_set_end
-        { value: nil, children: children }
+        {value: nil, children: children}
       when Thrift::Types::MAP
         key_type, value_type, size = protocol.read_map_begin
         key_schema = schema.is_a?(Hash) ? schema[:key] : nil
@@ -614,7 +614,7 @@ module ThriftIllustrated
         end
 
         protocol.read_map_end
-        { value: nil, children: children }
+        {value: nil, children: children}
       else
         start = reader.position
         parse_errors << parse_error(
@@ -626,7 +626,7 @@ module ThriftIllustrated
         )
         protocol.skip(type)
         finish = reader.position
-        { value: nil, children: [build_field_node(id: element_id, name: "unknown", ttype: type_name(type), span: [start, finish], value: nil, children: [])] }
+        {value: nil, children: [build_field_node(id: element_id, name: "unknown", ttype: type_name(type), span: [start, finish], value: nil, children: [])]}
       end
     end
 
@@ -669,7 +669,7 @@ module ThriftIllustrated
 
       fields = struct_class.const_get(:FIELDS)
       fields[field_id]
-    rescue StandardError
+    rescue
       nil
     end
 
@@ -798,7 +798,7 @@ module ThriftIllustrated
       end
 
       if f <= s
-        if max_end && max_end.positive?
+        if max_end&.positive?
           s = [s, max_end - 1].min
           f = [s + 1, max_end].min
         else

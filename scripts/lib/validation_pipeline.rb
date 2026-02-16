@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "json_schemer"
-require "pathname"
 
 module ThriftIllustrated
   class ValidationPipeline
@@ -108,7 +107,7 @@ module ThriftIllustrated
 
     def schema_errors(schemer, document, default_code:)
       schemer.validate(document).map do |entry|
-        message = "#{entry['type']} at #{entry['data_pointer']}"
+        message = "#{entry["type"]} at #{entry["data_pointer"]}"
         error(code: default_code, message: message, path: entry["data_pointer"])
       end
     end
@@ -275,7 +274,7 @@ module ThriftIllustrated
         errors << error(
           code: "E_TUTORIAL_FLOW_MISMATCH",
           message: "zip must be sent as oneway",
-          path: "/messages/#{fetch(zip_call, 'index', 0)}"
+          path: "/messages/#{fetch(zip_call, "index", 0)}"
         )
       end
 

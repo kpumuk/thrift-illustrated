@@ -50,6 +50,6 @@ def validate_schema!(schema_path:, data_path:)
   errors = JSONSchemer.schema(schema).validate(data).to_a
   return if errors.empty?
 
-  details = errors.map { |error| "#{error['data_pointer']}: #{error['type']}" }
+  details = errors.map { |error| "#{error["data_pointer"]}: #{error["type"]}" }
   raise "Schema validation failed for #{data_path}:\n#{details.join("\n")}"
 end

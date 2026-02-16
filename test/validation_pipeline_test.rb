@@ -10,7 +10,7 @@ class ValidationPipelineTest < Minitest::Test
     manifest = valid_manifest(message_count: 7)
     dataset = valid_dataset(methods: %w[ping add add calculate getStruct calculate zip])
 
-    result = pipeline.validate_all(manifest: manifest, datasets_by_id: { "binary-buffered" => dataset })
+    result = pipeline.validate_all(manifest: manifest, datasets_by_id: {"binary-buffered" => dataset})
 
     assert result.ok?, result.errors.inspect
   end
@@ -22,7 +22,7 @@ class ValidationPipelineTest < Minitest::Test
     dataset = valid_dataset(methods: %w[ping add add calculate getStruct calculate zip])
     dataset["metadata"]["message_count"] = 6
 
-    result = pipeline.validate_all(manifest: manifest, datasets_by_id: { "binary-buffered" => dataset })
+    result = pipeline.validate_all(manifest: manifest, datasets_by_id: {"binary-buffered" => dataset})
 
     codes = result.errors.map { |e| e[:code] }
     assert_includes codes, "E_MESSAGE_COUNT_MISMATCH"
@@ -34,7 +34,7 @@ class ValidationPipelineTest < Minitest::Test
     manifest = valid_manifest(message_count: 7)
     dataset = valid_dataset(methods: %w[ping add add calculate getStruct add zip])
 
-    result = pipeline.validate_all(manifest: manifest, datasets_by_id: { "binary-buffered" => dataset })
+    result = pipeline.validate_all(manifest: manifest, datasets_by_id: {"binary-buffered" => dataset})
 
     codes = result.errors.map { |e| e[:code] }
     assert_includes codes, "E_TUTORIAL_FLOW_MISMATCH"
@@ -54,7 +54,7 @@ class ValidationPipelineTest < Minitest::Test
     dataset["messages"][0]["raw_size"] = 4
     dataset["messages"][0]["raw_hex"] = "00 01 02 03"
 
-    result = pipeline.validate_all(manifest: manifest, datasets_by_id: { "binary-buffered" => dataset })
+    result = pipeline.validate_all(manifest: manifest, datasets_by_id: {"binary-buffered" => dataset})
 
     messages = result.errors.map { |e| e[:message] }
     assert(messages.any? { |msg| msg.include?("Field ordering is not canonical") }, result.errors.inspect)
@@ -116,7 +116,7 @@ class ValidationPipelineTest < Minitest::Test
           "actor" => "client",
           "direction" => "client->server",
           "method" => method,
-          "message_type" => (method == "zip" ? "oneway" : "call"),
+          "message_type" => ((method == "zip") ? "oneway" : "call"),
           "seqid" => idx,
           "raw_hex" => "00 01",
           "raw_size" => 2,
@@ -128,7 +128,7 @@ class ValidationPipelineTest < Minitest::Test
           },
           "envelope" => {
             "name" => method,
-            "type" => (method == "zip" ? "oneway" : "call"),
+            "type" => ((method == "zip") ? "oneway" : "call"),
             "seqid" => idx,
             "span" => [0, 1]
           },

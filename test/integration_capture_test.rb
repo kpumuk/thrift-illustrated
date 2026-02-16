@@ -66,7 +66,7 @@ class IntegrationCaptureTest < Minitest::Test
 
         client_method_flow = messages
           .select { |message| message.fetch("direction") == "client->server" }
-          .map { |message| "#{message.fetch('method')}:#{message.fetch('message_type')}" }
+          .map { |message| "#{message.fetch("method")}:#{message.fetch("message_type")}" }
         assert_equal EXPECTED_CLIENT_METHOD_FLOW, client_method_flow
         client_seqids = messages
           .select { |message| message.fetch("direction") == "client->server" }

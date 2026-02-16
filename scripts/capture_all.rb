@@ -7,7 +7,6 @@ require "fileutils"
 require "json"
 require "open3"
 require "optparse"
-require "pathname"
 require "securerandom"
 require "socket"
 require "time"
@@ -34,12 +33,12 @@ end
 
 class CaptureAll
   COMBOS = {
-    "binary-buffered" => { protocol: "binary", transport: "buffered" },
-    "binary-framed" => { protocol: "binary", transport: "framed" },
-    "compact-buffered" => { protocol: "compact", transport: "buffered" },
-    "compact-framed" => { protocol: "compact", transport: "framed" },
-    "json-buffered" => { protocol: "json", transport: "buffered" },
-    "json-framed" => { protocol: "json", transport: "framed" }
+    "binary-buffered" => {protocol: "binary", transport: "buffered"},
+    "binary-framed" => {protocol: "binary", transport: "framed"},
+    "compact-buffered" => {protocol: "compact", transport: "buffered"},
+    "compact-framed" => {protocol: "compact", transport: "framed"},
+    "json-buffered" => {protocol: "json", transport: "buffered"},
+    "json-framed" => {protocol: "json", transport: "framed"}
   }.freeze
 
   STAGES = %w[capture record parse validate write verify].freeze
@@ -82,7 +81,7 @@ class CaptureAll
       duration_ms: 0,
       code: "E_SETUP_INVALID",
       severity: "error",
-      details: { message: e.message }
+      details: {message: e.message}
     )
     @stderr.puts(e.message)
     2
@@ -94,11 +93,11 @@ class CaptureAll
       duration_ms: 0,
       code: e.code,
       severity: e.severity || "error",
-      details: e.details || { message: e.message }
+      details: e.details || {message: e.message}
     )
     @stderr.puts(e.message)
-    e.stage == "write" ? 4 : 3
-  rescue StandardError => e
+    (e.stage == "write") ? 4 : 3
+  rescue => e
     log(
       stage: "internal",
       combo: "all",
@@ -106,7 +105,7 @@ class CaptureAll
       duration_ms: 0,
       code: "E_INTERNAL",
       severity: "fatal",
-      details: { message: e.message, class: e.class.name }
+      details: {message: e.message, class: e.class.name}
     )
     @stderr.puts("Unexpected internal failure: #{e.class}: #{e.message}")
     1
@@ -169,7 +168,7 @@ class CaptureAll
     send("stage_#{stage}", state)
   rescue PipelineError
     raise
-  rescue StandardError => e
+  rescue => e
     raise PipelineError.new(
       "Stage #{stage} failed for #{state.fetch("combo")}: #{e.message}",
       stage: stage,
@@ -205,7 +204,7 @@ class CaptureAll
       "client_records" => captured.fetch(:client_records),
       "server_records" => captured.fetch(:server_records)
     )
-  rescue StandardError => e
+  rescue => e
     raise PipelineError.new(
       "Capture failed for #{state.fetch("combo")}: #{e.message}",
       stage: "capture",
@@ -343,7 +342,7 @@ class CaptureAll
     }
 
     state.merge("combo_path" => output_path.to_s)
-  rescue StandardError => e
+  rescue => e
     raise PipelineError.new(
       "Write failed for #{state.fetch("combo")}: #{e.message}",
       stage: "write",
@@ -359,7 +358,7 @@ class CaptureAll
 
   def stage_verify(state)
     combo_path = Pathname.new(state.fetch("combo_path"))
-    raise PipelineError.new("Missing combo artifact for #{state.fetch("combo")}", stage: "verify", code: "E_VERIFY_MISSING", severity: "error", details: { "combo" => state.fetch("combo") }) unless combo_path.file?
+    raise PipelineError.new("Missing combo artifact for #{state.fetch("combo")}", stage: "verify", code: "E_VERIFY_MISSING", severity: "error", details: {"combo" => state.fetch("combo")}) unless combo_path.file?
 
     JSON.parse(File.read(combo_path))
     state
@@ -494,7 +493,7 @@ class CaptureAll
 
   def ensure_environment!(repo_root)
     expected_ruby = expected_ruby_version(repo_root)
-    if expected_ruby && RUBY_VERSION != expected_ruby
+    if expected_ruby && expected_ruby != RUBY_VERSION
       raise SetupError, "Ruby version mismatch: expected #{expected_ruby}, got #{RUBY_VERSION}. Run with `mise exec --` or switch toolchain."
     end
 
@@ -514,7 +513,7 @@ class CaptureAll
     raise
   rescue LoadError => e
     raise SetupError, "Missing runtime dependency: #{e.message}. Run `mise exec -- bundle install`."
-  rescue StandardError => e
+  rescue => e
     raise SetupError, "Environment check failed: #{e.message}"
   end
 
@@ -532,14 +531,14 @@ class CaptureAll
     probe = dir.join(".write_test_#{Process.pid}_#{Time.now.to_i}")
     File.write(probe, "ok\n")
     File.delete(probe)
-  rescue StandardError => e
+  rescue => e
     raise SetupError, "Output directory not writable: #{dir} (#{e.message})"
   end
 
   def ensure_localhost_tcp_available!
     server = TCPServer.new("127.0.0.1", 0)
     server.close
-  rescue StandardError => e
+  rescue => e
     raise SetupError, "Localhost TCP unavailable: #{e.message}"
   end
 
