@@ -1015,37 +1015,198 @@ function renderByteExplanation(interaction) {
       breakdownTitle.textContent = "Envelope subfields (hover to preview bytes, click to lock):"
     } else if (group.type === "field") {
       breakdownTitle.textContent = "Field subfields (hover to preview bytes, click to lock):"
+    } else if (group.type === "header-transport") {
+      breakdownTitle.textContent = "Header subfields tree (hover to preview bytes, click to lock):"
     } else {
       breakdownTitle.textContent = "Subfields (hover to preview bytes, click to lock):"
     }
     byteExplainerEl.append(breakdownTitle)
 
-    const list = document.createElement("ul")
-    list.className = "byte-subfields"
+    if (group.type === "header-transport") {
+      byteExplainerEl.append(renderHeaderSubfieldTree(group.subfields))
+    } else {
+      const list = document.createElement("ul")
+      list.className = "byte-subfields"
 
-    for (const subfield of group.subfields) {
-      const item = document.createElement("li")
-      const button = document.createElement("button")
-      button.type = "button"
-      button.className = "byte-subfield-button"
-      button.dataset.subfieldId = subfield.id
-      button.textContent = `${subfield.label} [${subfield.start}-${subfield.end - 1}]`
-      button.addEventListener("mouseenter", () => activateSubfield(subfield.id))
-      button.addEventListener("mouseleave", clearSubfield)
-      button.addEventListener("focus", () => activateSubfield(subfield.id))
-      button.addEventListener("blur", clearSubfield)
-      button.addEventListener("click", () => toggleSubfieldSelection(subfield.id))
+      for (const subfield of group.subfields) {
+        const item = document.createElement("li")
+        item.append(buildSubfieldEntry(subfield))
+        list.append(item)
+      }
 
-      const description = document.createElement("div")
-      description.className = "byte-subfield-description"
-      description.textContent = subfield.description
-
-      item.append(button, description)
-      list.append(item)
+      byteExplainerEl.append(list)
     }
-
-    byteExplainerEl.append(list)
   }
+}
+
+function buildSubfieldEntry(subfield) {
+  const wrapper = document.createElement("div")
+  const button = document.createElement("button")
+  button.type = "button"
+  button.className = "byte-subfield-button"
+  button.dataset.subfieldId = subfield.id
+  button.textContent = `${subfield.label} [${subfield.start}-${subfield.end - 1}]`
+  button.addEventListener("mouseenter", () => activateSubfield(subfield.id))
+  button.addEventListener("mouseleave", clearSubfield)
+  button.addEventListener("focus", () => activateSubfield(subfield.id))
+  button.addEventListener("blur", clearSubfield)
+  button.addEventListener("click", () => toggleSubfieldSelection(subfield.id))
+
+  const description = document.createElement("div")
+  description.className = "byte-subfield-description"
+  description.textContent = subfield.description
+
+  wrapper.append(button, description)
+  return wrapper
+}
+
+function renderHeaderSubfieldTree(subfields) {
+  const tree = buildHeaderSubfieldTree(subfields)
+  const root = document.createElement("div")
+  root.className = "byte-subfields-tree"
+  for (const node of tree) {
+    root.append(renderHeaderSubfieldTreeNode(node, 0))
+  }
+  return root
+}
+
+function renderHeaderSubfieldTreeNode(node, depth) {
+  const wrapper = document.createElement("div")
+  wrapper.className = "byte-subfield-tree-node"
+  wrapper.style.marginLeft = `${depth * 10}px`
+
+  const heading = document.createElement("div")
+  heading.className = "byte-subfield-tree-heading"
+  heading.textContent = node.label
+  wrapper.append(heading)
+
+  const ownSubfields = [...node.subfields].sort((left, right) => left.start - right.start || left.end - right.end)
+  for (const subfield of ownSubfields) {
+    const entry = buildSubfieldEntry(subfield)
+    entry.classList.add("byte-subfield-tree-entry")
+    wrapper.append(entry)
+  }
+
+  const children = [...node.children].sort((left, right) => {
+    if (left.orderStart !== right.orderStart) return left.orderStart - right.orderStart
+    return left.label.localeCompare(right.label)
+  })
+  for (const child of children) {
+    wrapper.append(renderHeaderSubfieldTreeNode(child, depth + 1))
+  }
+
+  return wrapper
+}
+
+function buildHeaderSubfieldTree(subfields) {
+  const root = []
+  const rootByLabel = new Map()
+
+  for (const subfield of subfields) {
+    const path = headerTreePathForSubfield(subfield)
+    let level = root
+    let levelByLabel = rootByLabel
+    let current = null
+    for (const segment of path) {
+      let node = levelByLabel.get(segment)
+      if (!node) {
+        node = {
+          label: segment,
+          orderStart: subfield.start,
+          subfields: [],
+          children: [],
+          childrenByLabel: new Map()
+        }
+        levelByLabel.set(segment, node)
+        level.push(node)
+      } else {
+        node.orderStart = Math.min(node.orderStart, subfield.start)
+      }
+      current = node
+      level = node.children
+      levelByLabel = node.childrenByLabel
+    }
+    if (current) current.subfields.push(subfield)
+  }
+
+  stripTreeIndexMaps(root)
+  return root
+}
+
+function stripTreeIndexMaps(nodes) {
+  for (const node of nodes) {
+    delete node.childrenByLabel
+    if (node.children.length > 0) stripTreeIndexMaps(node.children)
+  }
+}
+
+function headerTreePathForSubfield(subfield) {
+  if (!subfield || typeof subfield.id !== "string") return ["Metadata", "Other"]
+  const id = subfield.id
+
+  if (id === "header.transport.magic") return ["Fixed header", "Magic"]
+  if (id === "header.transport.flags") return ["Fixed header", "Flags"]
+  if (id === "header.transport.seqid") return ["Fixed header", "Sequence id"]
+  if (id === "header.transport.header_words") return ["Fixed header", "Header words"]
+  if (id === "header.transport.protocol_id") return ["Metadata", "Protocol id"]
+  if (id === "header.transport.transform_count") return ["Metadata", "Transforms", "Count"]
+
+  const transformMatch = id.match(/^header\.transport\.transform\.(\d+)$/)
+  if (transformMatch) {
+    const index = Number.parseInt(transformMatch[1], 10)
+    return ["Metadata", "Transforms", `Transform ${index}`]
+  }
+
+  const infoTypeMatch = id.match(/^header\.transport\.info_type\.(\d+)$/)
+  if (infoTypeMatch) {
+    const section = Number.parseInt(infoTypeMatch[1], 10)
+    return ["Metadata", `Info section ${section}`, "Type"]
+  }
+
+  const kvCountMatch = id.match(/^header\.transport\.kv_count\.(\d+)$/)
+  if (kvCountMatch) {
+    const section = Number.parseInt(kvCountMatch[1], 10)
+    return ["Metadata", `Info section ${section}`, "KV pairs"]
+  }
+
+  const keyLengthMatch = id.match(/^header\.transport\.kv_key_len\.(\d+)\.(\d+)$/)
+  if (keyLengthMatch) {
+    const section = Number.parseInt(keyLengthMatch[1], 10)
+    const kvIndex = Number.parseInt(keyLengthMatch[2], 10)
+    return ["Metadata", `Info section ${section}`, `Header ${kvIndex}`, "Key length"]
+  }
+
+  const keyMatch = id.match(/^header\.transport\.kv_key\.(\d+)\.(\d+)$/)
+  if (keyMatch) {
+    const section = Number.parseInt(keyMatch[1], 10)
+    const kvIndex = Number.parseInt(keyMatch[2], 10)
+    return ["Metadata", `Info section ${section}`, `Header ${kvIndex}`, "Key bytes"]
+  }
+
+  const valueLengthMatch = id.match(/^header\.transport\.kv_value_len\.(\d+)\.(\d+)$/)
+  if (valueLengthMatch) {
+    const section = Number.parseInt(valueLengthMatch[1], 10)
+    const kvIndex = Number.parseInt(valueLengthMatch[2], 10)
+    return ["Metadata", `Info section ${section}`, `Header ${kvIndex}`, "Value length"]
+  }
+
+  const valueMatch = id.match(/^header\.transport\.kv_value\.(\d+)\.(\d+)$/)
+  if (valueMatch) {
+    const section = Number.parseInt(valueMatch[1], 10)
+    const kvIndex = Number.parseInt(valueMatch[2], 10)
+    return ["Metadata", `Info section ${section}`, `Header ${kvIndex}`, "Value bytes"]
+  }
+
+  const infoPayloadMatch = id.match(/^header\.transport\.info_payload_unknown\.(\d+)$/)
+  if (infoPayloadMatch) {
+    const section = Number.parseInt(infoPayloadMatch[1], 10)
+    return ["Metadata", `Info section ${section}`, "Unknown payload"]
+  }
+
+  if (id.startsWith("header.transport.padding.")) return ["Metadata", "Padding"]
+  if (id.startsWith("header.transport.unknown.")) return ["Metadata", "Unclassified"]
+
+  return ["Metadata", "Other"]
 }
 
 function applyInteractionClasses() {
