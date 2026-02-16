@@ -459,11 +459,25 @@ function renderFieldNode(field, depth, interaction) {
   const fieldKey = interaction.fieldToKey.get(field) || null
   if (fieldKey) {
     wrapper.dataset.fieldKey = fieldKey
+    wrapper.tabIndex = 0
+    wrapper.setAttribute("role", "button")
+    wrapper.setAttribute("aria-label", `Select field ${String(field.name ?? "")}`)
     interaction.fieldElements.set(fieldKey, wrapper)
     wrapper.addEventListener("mouseenter", () => activateFieldInteraction(fieldKey))
     wrapper.addEventListener("mouseleave", clearInteraction)
     wrapper.addEventListener("focusin", () => activateFieldInteraction(fieldKey))
     wrapper.addEventListener("focusout", clearInteraction)
+    wrapper.addEventListener("click", (event) => {
+      event.stopPropagation()
+      selectFieldGroup(fieldKey)
+    })
+    wrapper.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault()
+        event.stopPropagation()
+        selectFieldGroup(fieldKey)
+      }
+    })
   }
 
   const line = document.createElement("div")
@@ -763,6 +777,15 @@ function flattenFields(fields, parentKey = "f", depth = 0) {
   return flat
 }
 
+function groupIdForFieldKey(fieldKey) {
+  return `field:${fieldKey}`
+}
+
+function fieldKeyFromGroupId(groupId) {
+  if (typeof groupId !== "string") return null
+  return groupId.startsWith("field:") ? groupId.slice("field:".length) : null
+}
+
 function activateFieldInteraction(fieldKey) {
   if (!state.interaction) return
   state.interaction.activeFieldKey = fieldKey
@@ -787,8 +810,23 @@ function clearInteraction() {
 
 function selectByteGroup(byteIndex) {
   if (!state.interaction) return
-  state.interaction.selectedGroupId = state.interaction.groupByByte[byteIndex] || null
+  const selectedGroupId = state.interaction.groupByByte[byteIndex] || null
+  state.interaction.selectedGroupId = selectedGroupId
+  state.interaction.activeFieldKey = fieldKeyFromGroupId(selectedGroupId) || null
   state.interaction.activeByteIndex = byteIndex
+  state.interaction.activeSubfieldId = null
+  renderByteExplanation(state.interaction)
+  applyInteractionClasses()
+}
+
+function selectFieldGroup(fieldKey) {
+  if (!state.interaction) return
+  const selectedGroupId = groupIdForFieldKey(fieldKey)
+  if (!state.interaction.groups.has(selectedGroupId)) return
+  const fieldBytes = state.interaction.bytesByField.get(fieldKey) || []
+  state.interaction.selectedGroupId = selectedGroupId
+  state.interaction.activeFieldKey = fieldKey
+  state.interaction.activeByteIndex = fieldBytes.length > 0 ? fieldBytes[0] : null
   state.interaction.activeSubfieldId = null
   renderByteExplanation(state.interaction)
   applyInteractionClasses()
@@ -874,6 +912,7 @@ function applyInteractionClasses() {
   const selectedGroup = state.interaction.selectedGroupId
     ? state.interaction.groups.get(state.interaction.selectedGroupId)
     : null
+  const selectedFieldKey = selectedGroup ? fieldKeyFromGroupId(selectedGroup.id) : null
   const selectedBytes = selectedGroup
     ? new Set(rangeIndices(selectedGroup.start, selectedGroup.end))
     : new Set()
@@ -886,6 +925,7 @@ function applyInteractionClasses() {
 
   for (const [fieldKey, element] of state.interaction.fieldElements.entries()) {
     element.classList.toggle("is-hover-active", fieldKey === activeFieldKey)
+    element.classList.toggle("is-group-selected", fieldKey === selectedFieldKey)
   }
 
   for (const [byteIndex, elements] of state.interaction.byteElements.entries()) {

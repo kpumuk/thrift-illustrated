@@ -614,9 +614,23 @@ p {
   padding-left: 10px;
 }
 
+.field-node[data-field-key] {
+  cursor: pointer;
+}
+
+.field-node[data-field-key]:focus-visible {
+  outline: 2px solid rgba(20, 108, 95, 0.55);
+  outline-offset: 2px;
+}
+
 .field-node.is-hover-active {
   border-left-color: rgba(20, 108, 95, 0.75);
   background: rgba(20, 108, 95, 0.1);
+}
+
+.field-node.is-group-selected {
+  border-left-color: rgba(159, 52, 24, 0.7);
+  background: rgba(159, 52, 24, 0.12);
 }
 
 .field-node .meta {
