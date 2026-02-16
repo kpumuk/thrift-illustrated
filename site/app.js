@@ -6,7 +6,10 @@ const MANIFEST_MAX_BYTES = 256 * 1024
 const DATASET_MAX_BYTES = 2 * 1024 * 1024
 const REQUEST_TIMEOUT_MS = 5000
 const TRANSFER_WALL_MS = 8000
-const HEXDUMP_ROW_BYTES = 8
+const DEFAULT_HEXDUMP_ROW_BYTES = 8
+const HEXDUMP_ROW_BYTES_CSS_VAR = "--hexdump-row-bytes"
+const MIN_HEXDUMP_ROW_BYTES = 1
+const MAX_HEXDUMP_ROW_BYTES = 32
 
 const COMBO_IDS = [
   "binary-buffered",
@@ -66,6 +69,7 @@ const byteExplainerEl = document.querySelector("#byte-explainer")
 const fieldTreeEl = document.querySelector("#field-tree")
 const parseErrorsEl = document.querySelector("#parse-errors")
 const highlightsEl = document.querySelector("#highlights")
+let responsiveRenderFrame = 0
 
 initObservability()
 void bootstrap()
@@ -83,9 +87,23 @@ async function bootstrap() {
       beginErrorCycle()
       void applyNavigationFromHash().then(render).catch(handleRuntimeError)
     })
+    window.addEventListener("resize", scheduleResponsiveRerender)
   } catch (error) {
     handleRuntimeError(error)
   }
+}
+
+function scheduleResponsiveRerender() {
+  if (!state.dataset || state.blockingError) return
+  if (responsiveRenderFrame !== 0) return
+  responsiveRenderFrame = window.requestAnimationFrame(() => {
+    responsiveRenderFrame = 0
+    if (!state.dataset || state.blockingError || !state.interaction) return
+    const nextRowBytes = resolveHexdumpRowBytes()
+    if (nextRowBytes !== state.interaction.hexdumpRowBytes) {
+      renderMessageDetails()
+    }
+  })
 }
 
 async function applyNavigationFromHash() {
@@ -473,12 +491,15 @@ function renderFieldNode(field, depth, interaction) {
 
 function renderRawBytes(message, interaction) {
   rawHexEl.innerHTML = ""
+  interaction.byteElements.clear()
   const byteTexts = message.raw_hex.split(" ")
   const byteValues = byteTexts.map((pair) => Number.parseInt(pair, 16))
+  const rowBytes = resolveHexdumpRowBytes()
+  interaction.hexdumpRowBytes = rowBytes
   const dump = document.createElement("div")
   dump.className = "hexdump"
 
-  for (let rowStart = 0; rowStart < byteTexts.length; rowStart += HEXDUMP_ROW_BYTES) {
+  for (let rowStart = 0; rowStart < byteTexts.length; rowStart += rowBytes) {
     const row = document.createElement("div")
     row.className = "hexdump-row"
 
@@ -492,7 +513,7 @@ function renderRawBytes(message, interaction) {
     const asciiColumn = document.createElement("div")
     asciiColumn.className = "hexdump-ascii"
 
-    for (let column = 0; column < HEXDUMP_ROW_BYTES; column += 1) {
+    for (let column = 0; column < rowBytes; column += 1) {
       const index = rowStart + column
       if (index >= byteTexts.length) {
         hexColumn.append(createHexdumpPlaceholder("hex"))
@@ -522,6 +543,18 @@ function renderRawBytes(message, interaction) {
   }
 
   rawHexEl.append(dump)
+}
+
+function resolveHexdumpRowBytes() {
+  if (!rawHexEl || typeof window.getComputedStyle !== "function") {
+    return DEFAULT_HEXDUMP_ROW_BYTES
+  }
+  const cssValue = window.getComputedStyle(rawHexEl).getPropertyValue(HEXDUMP_ROW_BYTES_CSS_VAR).trim()
+  const parsed = Number.parseInt(cssValue, 10)
+  if (!Number.isInteger(parsed) || parsed < MIN_HEXDUMP_ROW_BYTES || parsed > MAX_HEXDUMP_ROW_BYTES) {
+    return DEFAULT_HEXDUMP_ROW_BYTES
+  }
+  return parsed
 }
 
 function createByteToken({ interaction, index, text, variant }) {
@@ -585,6 +618,7 @@ function createInteractionModel(message, protocol) {
     activeByteIndex: null,
     activeSubfieldId: null,
     selectedGroupId: null,
+    hexdumpRowBytes: null,
     groupByByte: new Array(message.raw_size).fill(null),
     groups: new Map(),
     subfields: new Map()

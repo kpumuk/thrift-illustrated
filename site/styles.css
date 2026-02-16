@@ -451,6 +451,7 @@ p {
 }
 
 .raw-hex {
+  --hexdump-row-bytes: 8;
   margin: 0;
   overflow-x: auto;
   padding: 6px 6px 4px;
@@ -480,7 +481,7 @@ p {
 .hexdump-hex,
 .hexdump-ascii {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--hexdump-row-bytes), minmax(0, 1fr));
   gap: 4px;
 }
 
@@ -672,5 +673,38 @@ p {
 
   .hexdump {
     min-width: 500px;
+  }
+}
+
+@media (max-width: 640px) {
+  .raw-hex {
+    --hexdump-row-bytes: 4;
+  }
+
+  .hexdump {
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .hexdump-row {
+    grid-template-columns: 4ch minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .hexdump-hex,
+  .hexdump-ascii {
+    gap: 3px;
+  }
+
+  .hexdump-ascii {
+    padding-left: 6px;
+  }
+
+  .byte-token {
+    padding: 2px 3px;
+  }
+
+  .byte-token-ascii {
+    padding: 2px 0;
   }
 }
