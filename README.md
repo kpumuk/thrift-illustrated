@@ -19,8 +19,6 @@
 - `bundle exec rake check`
 - `mise run web` (then open `http://127.0.0.1:8000/`)
 
-These are skeleton tasks during bootstrap and are expected to be replaced with full implementations.
-
 ## Deployment Ops
 
 - Browser health probe script: `scripts/health_check_browser.mjs`.
