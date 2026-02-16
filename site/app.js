@@ -977,9 +977,11 @@ function toggleSubfieldSelection(subfieldId) {
   const groupId = state.interaction.subfieldToGroup.get(subfieldId) || state.interaction.selectedGroupId
   state.interaction.selectedGroupId = groupId || state.interaction.selectedGroupId
   state.interaction.selectedSubfieldId = subfieldId
-  state.interaction.activeSubfieldId = subfieldId
-  state.interaction.activeGroupId = groupId || state.interaction.activeGroupId
-  state.interaction.activeFieldKey = fieldKeyFromGroupId(state.interaction.selectedGroupId) || null
+  // Selection is sticky; hover state is transient and must not stay latched after rerender.
+  state.interaction.activeSubfieldId = null
+  state.interaction.activeGroupId = null
+  state.interaction.activeFieldKey = null
+  state.interaction.activeByteIndex = null
   renderByteExplanation(state.interaction)
   applyInteractionClasses()
 }
@@ -1012,7 +1014,7 @@ function renderByteExplanation(interaction) {
     const breakdownTitle = document.createElement("div")
     breakdownTitle.className = "byte-subfields-title"
     if (group.type === "envelope") {
-      breakdownTitle.textContent = "Envelope subfields (hover to preview bytes, click to lock):"
+      breakdownTitle.textContent = "Envelope header tree (hover to preview bytes, click to lock):"
     } else if (group.type === "field") {
       breakdownTitle.textContent = "Field subfields (hover to preview bytes, click to lock):"
     } else if (group.type === "header-transport") {
@@ -1022,8 +1024,8 @@ function renderByteExplanation(interaction) {
     }
     byteExplainerEl.append(breakdownTitle)
 
-    if (group.type === "header-transport") {
-      byteExplainerEl.append(renderHeaderSubfieldTree(group.subfields))
+    if (group.type === "header-transport" || group.type === "envelope") {
+      byteExplainerEl.append(renderSubfieldTree(group.subfields, group.type))
     } else {
       const list = document.createElement("ul")
       list.className = "byte-subfields"
@@ -1060,17 +1062,17 @@ function buildSubfieldEntry(subfield) {
   return wrapper
 }
 
-function renderHeaderSubfieldTree(subfields) {
-  const tree = buildHeaderSubfieldTree(subfields)
+function renderSubfieldTree(subfields, groupType) {
+  const tree = buildSubfieldTree(subfields, (subfield) => subfieldTreePathFor(groupType, subfield))
   const root = document.createElement("div")
   root.className = "byte-subfields-tree"
   for (const node of tree) {
-    root.append(renderHeaderSubfieldTreeNode(node, 0))
+    root.append(renderSubfieldTreeNode(node, 0))
   }
   return root
 }
 
-function renderHeaderSubfieldTreeNode(node, depth) {
+function renderSubfieldTreeNode(node, depth) {
   const wrapper = document.createElement("div")
   wrapper.className = "byte-subfield-tree-node"
   wrapper.style.marginLeft = `${depth * 10}px`
@@ -1092,18 +1094,18 @@ function renderHeaderSubfieldTreeNode(node, depth) {
     return left.label.localeCompare(right.label)
   })
   for (const child of children) {
-    wrapper.append(renderHeaderSubfieldTreeNode(child, depth + 1))
+    wrapper.append(renderSubfieldTreeNode(child, depth + 1))
   }
 
   return wrapper
 }
 
-function buildHeaderSubfieldTree(subfields) {
+function buildSubfieldTree(subfields, pathForSubfield) {
   const root = []
   const rootByLabel = new Map()
 
   for (const subfield of subfields) {
-    const path = headerTreePathForSubfield(subfield)
+    const path = pathForSubfield(subfield)
     let level = root
     let levelByLabel = rootByLabel
     let current = null
@@ -1138,6 +1140,12 @@ function stripTreeIndexMaps(nodes) {
     delete node.childrenByLabel
     if (node.children.length > 0) stripTreeIndexMaps(node.children)
   }
+}
+
+function subfieldTreePathFor(groupType, subfield) {
+  if (groupType === "header-transport") return headerTreePathForSubfield(subfield)
+  if (groupType === "envelope") return envelopeTreePathForSubfield(subfield)
+  return ["Subfields"]
 }
 
 function headerTreePathForSubfield(subfield) {
@@ -1207,6 +1215,30 @@ function headerTreePathForSubfield(subfield) {
   if (id.startsWith("header.transport.unknown.")) return ["Metadata", "Unclassified"]
 
   return ["Metadata", "Other"]
+}
+
+function envelopeTreePathForSubfield(subfield) {
+  if (!subfield || typeof subfield.id !== "string") return ["Envelope", "Other"]
+  const id = subfield.id
+
+  if (id === "envelope.binary.header_byte0") return ["Binary envelope", "Version marker", "Byte 0"]
+  if (id === "envelope.binary.header_byte1") return ["Binary envelope", "Version marker", "Byte 1"]
+  if (id === "envelope.binary.header_byte2") return ["Binary envelope", "Version + type", "Byte 2"]
+  if (id === "envelope.binary.header_byte3") return ["Binary envelope", "Version + type", "Message type"]
+  if (id === "envelope.binary.name_length") return ["Binary envelope", "Method", "Name length"]
+  if (id === "envelope.binary.name_bytes") return ["Binary envelope", "Method", "Name bytes"]
+  if (id === "envelope.binary.seqid") return ["Binary envelope", "Sequence id"]
+
+  if (id === "envelope.compact.protocol_id") return ["Compact envelope", "Protocol id"]
+  if (id === "envelope.compact.version_type") return ["Compact envelope", "Version + type"]
+  if (id === "envelope.compact.seqid_varint") return ["Compact envelope", "Sequence id"]
+  if (id === "envelope.compact.name_length_varint") return ["Compact envelope", "Method", "Name length"]
+  if (id === "envelope.compact.name_bytes") return ["Compact envelope", "Method", "Name bytes"]
+
+  if (id === "envelope.generic") return ["Envelope", "Bytes"]
+  if (id.startsWith("envelope.unknown.")) return ["Envelope", "Unclassified"]
+
+  return ["Envelope", "Other"]
 }
 
 function applyInteractionClasses() {
