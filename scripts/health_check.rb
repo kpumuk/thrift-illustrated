@@ -10,7 +10,7 @@ require "time"
 require "uri"
 
 class HealthCheck
-  DEFAULT_TIMEOUT_MS = 5000
+  DEFAULT_TIMEOUT_MS = 15000
   DEFAULT_RETRIES = 2
   DEFAULT_COMBO = "binary-buffered"
   DEFAULT_MSG = 0
