@@ -6,7 +6,7 @@
       "id": "binary-buffered",
       "message_count": 13,
       "protocol": "binary",
-      "sha256": "4c1f8cca2214d57e40ba6a757d7329e2cbc2fccb0a8a76fb04dfaedd140eb78d",
+      "sha256": "0357b5030d7d7dc59c094d18e11673171e3cef8765b05d465bc0ae22e1a739ed",
       "transport": "buffered"
     },
     {
@@ -15,7 +15,7 @@
       "id": "binary-framed",
       "message_count": 13,
       "protocol": "binary",
-      "sha256": "38bed371142958c1c32f41832f9a07772d8aaa77a634e1e991810c7a37c76225",
+      "sha256": "01221a346fa504665f54012ed630de4a5a22029159910a0d3958cf6755c4f756",
       "transport": "framed"
     },
     {
@@ -24,7 +24,7 @@
       "id": "compact-buffered",
       "message_count": 13,
       "protocol": "compact",
-      "sha256": "f2c09d8fc58413b4587328bdecbf2eb5824eb5c7fe206f90b52cd65cb32131d4",
+      "sha256": "806415a030e56ff1050a4769a49b423f20441ed41356e2b69aaf07697450e0d0",
       "transport": "buffered"
     },
     {
@@ -33,7 +33,7 @@
       "id": "compact-framed",
       "message_count": 13,
       "protocol": "compact",
-      "sha256": "62941bdba26eeff1a9592d4ec93b05a1cc820bcad47015e7205dec70b47ff052",
+      "sha256": "7561d2d27b47769724e0cf34b71d862d3d1501665aecbbead23b3720b156c7b8",
       "transport": "framed"
     },
     {
@@ -42,7 +42,7 @@
       "id": "json-buffered",
       "message_count": 13,
       "protocol": "json",
-      "sha256": "3554e134ab13d5b91351760223a4d18a574d1d7827796e865c15d3a58e88e82e",
+      "sha256": "4deedc88174580aa7928b282f05e686829c016316339e6cfba1f6590a82e89ef",
       "transport": "buffered"
     },
     {
@@ -51,17 +51,17 @@
       "id": "json-framed",
       "message_count": 13,
       "protocol": "json",
-      "sha256": "bcf8ba1251150a907ab3aeb9b8c66cb4a9e1259b20f362fc4980f72f20c285e3",
+      "sha256": "3da7e77380d521446b3b487fccefdd9957f5e12de5212ca1bc3e25a8d7b7cba6",
       "transport": "framed"
     }
   ],
-  "generated_at_utc": "2026-02-15T23:30:48Z",
+  "generated_at_utc": "2026-02-16T03:11:06Z",
   "generated_with": {
     "bundler_version": "4.0.6",
     "platform": "arm64-darwin25",
     "ruby_version": "4.0.1",
     "thrift_ref": "git:fd9756c19d1ea5763ffd8be88fff1db1ccd0d6ba"
   },
-  "release_id": "d1d872f93f9c3f1402bfca213b6a0e0eead1ec4b",
+  "release_id": "5414be242496985e02fb184601869f3df7d861d3",
   "schema_version": "1.0.0"
 }

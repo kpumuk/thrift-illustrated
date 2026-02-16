@@ -84,6 +84,7 @@ mise exec -- bun install
 Capture data:
 
 ```bash
+mise run gen
 mise exec -- bundle exec rake capture
 ```
 
@@ -172,6 +173,7 @@ If browser checks fail, set `CHROME_BIN` to your Chrome or Chromium path.
 ```text
 site/        static UI, capture data, and schemas
 scripts/     capture, parser, validation, benchmark, and health scripts
+thrift/      tutorial IDL and generated Ruby stubs (`gen-rb`)
 test/        Ruby unit and integration tests
-mise.toml    pinned tools and local web task
+mise.toml    pinned tools and local tasks (`web`, `gen`)
 ```

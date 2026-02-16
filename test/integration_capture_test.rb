@@ -24,6 +24,8 @@ class IntegrationCaptureTest < Minitest::Test
     "calculate:call",
     "zip:oneway"
   ].freeze
+  EXPECTED_CLIENT_SEQIDS = [1, 2, 3, 4, 5, 6, 7].freeze
+  EXPECTED_SERVER_SEQIDS = [1, 2, 3, 4, 5, 6].freeze
 
   def test_capture_all_generates_expected_combo_artifacts_and_tutorial_flow
     Dir.mktmpdir("capture-integration", File.join(repo_root, "tmp")) do |output_dir|
@@ -47,6 +49,15 @@ class IntegrationCaptureTest < Minitest::Test
           .select { |message| message.fetch("direction") == "client->server" }
           .map { |message| "#{message.fetch('method')}:#{message.fetch('message_type')}" }
         assert_equal EXPECTED_CLIENT_METHOD_FLOW, client_method_flow
+        client_seqids = messages
+          .select { |message| message.fetch("direction") == "client->server" }
+          .map { |message| message.fetch("seqid") }
+        assert_equal EXPECTED_CLIENT_SEQIDS, client_seqids
+
+        server_seqids = messages
+          .select { |message| message.fetch("direction") == "server->client" }
+          .map { |message| message.fetch("seqid") }
+        assert_equal EXPECTED_SERVER_SEQIDS, server_seqids
 
         zip_messages = messages.select { |message| message.fetch("method") == "zip" }
         assert_equal 1, zip_messages.length
