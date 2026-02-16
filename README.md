@@ -77,8 +77,7 @@ Setup:
 
 ```bash
 mise install
-mise exec -- bundle install
-mise exec -- bun install
+mise run deps
 ```
 
 Capture data:
@@ -88,11 +87,16 @@ mise run gen
 mise exec -- bundle exec rake capture
 ```
 
-Run tests and checks:
+Run Ruby checks:
 
 ```bash
-mise exec -- bundle exec rake test
 mise exec -- bundle exec rake check
+```
+
+Run cross-language checks (Ruby + JavaScript + benchmark schema):
+
+```bash
+mise run ci
 ```
 
 Run local web server:
@@ -140,8 +144,7 @@ CI runs on push to `main` and on pull requests.
 CI commands:
 
 ```bash
-mise exec -- bundle exec rake test
-mise exec -- bundle exec rake check
+mise run ci
 ```
 
 Dependabot updates:
@@ -161,8 +164,8 @@ Dependabot updates:
 Useful commands:
 
 ```bash
-mise exec -- bundle exec rake test
 mise exec -- bundle exec rake check
+mise run ci
 mise exec -- bun run scripts/ui_smoke_test.mjs
 ```
 
@@ -175,5 +178,5 @@ site/        static UI, capture data, and schemas
 scripts/     capture, parser, validation, benchmark, and health scripts
 thrift/      tutorial IDL and generated Ruby stubs (`gen-rb`)
 test/        Ruby unit and integration tests
-mise.toml    pinned tools and local tasks (`web`, `gen`)
+mise.toml    pinned tools and local tasks (`web`, `gen`, `ci`)
 ```

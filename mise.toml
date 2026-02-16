@@ -9,3 +9,36 @@ run = "ruby -run -e httpd site -b 127.0.0.1 -p 8000"
 [tasks.gen]
 description = "Generate Ruby tutorial stubs from thrift/idl/tutorial.thrift"
 run = "mkdir -p thrift/gen-rb && find thrift/gen-rb -maxdepth 1 -type f -name '*.rb' -delete && thrift --gen rb -r -out thrift/gen-rb -I thrift/idl thrift/idl/tutorial.thrift"
+
+[tasks.deps-ruby]
+description = "Install Ruby dependencies"
+run = "bundle install"
+
+[tasks.deps-js]
+description = "Install JavaScript dependencies"
+run = "bun install"
+
+[tasks.deps]
+description = "Update development dependencies"
+depends = ["deps-ruby", "deps-js"]
+
+[tasks.check-ruby]
+description = "Run Ruby checks (lint, tests, schema)"
+run = "bundle exec rake check"
+
+[tasks.lint-js]
+description = "Run JavaScript linter"
+run = "bun run lint:js"
+
+[tasks.benchmark]
+description = "Generate benchmark report"
+run = "bun run scripts/benchmark_ui.mjs --output tmp/benchmarks/latest.json"
+
+[tasks.schema-benchmark]
+description = "Validate benchmark report schema"
+depends = ["benchmark"]
+run = "bundle exec rake schema:benchmark"
+
+[tasks.ci]
+description = "Cross-language checks (Ruby lint/tests/schema + JS lint + benchmark schema)"
+depends = ["check-ruby", "lint-js", "schema-benchmark"]

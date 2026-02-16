@@ -18,11 +18,15 @@
 ## Commands
 
 - `mise install`
+- `mise run deps`
 - `bundle install`
+- `bun install`
 - `bundle exec rake capture`
+- `bundle exec rake lint`
 - `bundle exec rake test`
-- `bundle exec rake build`
+- `bundle exec rake schema`
 - `bundle exec rake check`
+- `mise run ci`
 
 ## Rules
 

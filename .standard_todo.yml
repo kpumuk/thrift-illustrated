@@ -1,0 +1,44 @@
+# Auto generated files with errors to ignore.
+# Remove from this list as you refactor files.
+---
+ignore:
+- Rakefile:
+  - Style/StringLiteralsInInterpolation
+- scripts/capture_all.rb:
+  - Lint/RedundantRequireStatement
+  - Layout/SpaceInsideHashLiteralBraces
+  - Style/TernaryParentheses
+  - Style/RescueStandardError
+  - Style/YodaCondition
+- scripts/health_check.rb:
+  - Layout/SpaceInsideHashLiteralBraces
+  - Style/RescueStandardError
+- scripts/lib/artifact_writer.rb:
+  - Lint/RedundantRequireStatement
+- scripts/lib/message_parser.rb:
+  - Style/TernaryParentheses
+  - Layout/SpaceInsideHashLiteralBraces
+  - Style/RescueStandardError
+  - Style/SafeNavigation
+- scripts/lib/recording_transport.rb:
+  - Lint/RedundantRequireStatement
+- scripts/lib/tutorial_capture.rb:
+  - Lint/RedundantRequireStatement
+  - Style/EmptyMethod
+  - Style/SingleLineMethods
+  - Layout/EndAlignment
+- scripts/lib/validation_pipeline.rb:
+  - Lint/RedundantRequireStatement
+  - Style/StringLiteralsInInterpolation
+- test/artifact_writer_test.rb:
+  - Layout/SpaceInsideHashLiteralBraces
+- test/integration_capture_test.rb:
+  - Style/StringLiteralsInInterpolation
+- test/message_parser_test.rb:
+  - Layout/SpaceInsideHashLiteralBraces
+  - Style/TernaryParentheses
+- test/recording_transport_test.rb:
+  - Layout/SpaceInsideHashLiteralBraces
+- test/validation_pipeline_test.rb:
+  - Layout/SpaceInsideHashLiteralBraces
+  - Style/TernaryParentheses

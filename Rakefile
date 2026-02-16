@@ -12,21 +12,37 @@ task :capture do
   sh "bundle exec ruby scripts/capture_all.rb"
 end
 
+desc "Run Ruby linter"
+task :lint do
+  sh "bundle exec standardrb"
+end
+
 desc "Run project tests"
 task :test do
   sh "bundle exec ruby -Itest -e 'Dir[\"test/*_test.rb\"].sort.each { |f| require_relative f }'"
 end
 
-desc "Build static output (source-served; placeholder)"
-task :build do
-  puts "build: bootstrap placeholder (no build pipeline yet)"
+namespace :schema do
+  desc "Validate committed captures against schemas and invariants"
+  task :captures do
+    sh "bundle exec ruby -Itest test/artifact_schema_invariant_test.rb"
+  end
+
+  desc "Validate benchmark report JSON against benchmark schema"
+  task :benchmark do
+    unless File.exist?(BENCHMARK_REPORT_PATH)
+      raise "Benchmark report missing at #{BENCHMARK_REPORT_PATH}. Run `mise run schema-benchmark` first."
+    end
+
+    validate_schema!(schema_path: BENCHMARK_SCHEMA_PATH, data_path: BENCHMARK_REPORT_PATH)
+  end
 end
 
-desc "Run full quality checks"
-task check: %i[test] do
-  sh "bun run scripts/benchmark_ui.mjs --output #{BENCHMARK_REPORT_PATH}"
-  validate_schema!(schema_path: BENCHMARK_SCHEMA_PATH, data_path: BENCHMARK_REPORT_PATH)
-end
+desc "Run Ruby schema validation checks"
+task schema: ["schema:captures"]
+
+desc "Run full Ruby quality checks"
+task check: %i[lint test schema]
 
 def validate_schema!(schema_path:, data_path:)
   schema = JSON.parse(File.read(schema_path))

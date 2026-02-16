@@ -35,9 +35,7 @@ jobs:
           mise exec -- bundle install --jobs 4 --retry 3
           mise exec -- bun install --frozen-lockfile
 
-      - name: Run tests
+      - name: Run checks
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
-        run: |
-          mise exec -- bundle exec rake test
-          mise exec -- bundle exec rake check
+        run: mise run ci
