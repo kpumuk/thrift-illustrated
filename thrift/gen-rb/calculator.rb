@@ -72,12 +72,12 @@ module Calculator
       raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'calculate failed: unknown result')
     end
 
-    def zip()
-      send_zip()
+    def zip(payload)
+      send_zip(payload)
     end
 
-    def send_zip()
-      send_oneway_message('zip', Zip_args)
+    def send_zip(payload)
+      send_oneway_message('zip', Zip_args, :payload => payload)
     end
   end
 
@@ -111,7 +111,7 @@ module Calculator
 
     def process_zip(seqid, iprot, oprot)
       args = read_args(iprot, Zip_args)
-      @handler.zip()
+      @handler.zip(args.payload)
       return
     end
 
@@ -221,9 +221,10 @@ module Calculator
 
   class Zip_args
     include ::Thrift::Struct, ::Thrift::Struct_Union
+    PAYLOAD = 1
 
     FIELDS = {
-
+      PAYLOAD => {:type => ::Thrift::Types::STRUCT, :name => 'payload', :class => ::AllTypeValues}
     }
 
     def struct_fields; FIELDS; end

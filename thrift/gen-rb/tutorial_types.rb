@@ -19,6 +19,8 @@ end
 
 class Work; end
 
+class AllTypeValues; end
+
 class InvalidOperation < ::Thrift::Exception; end
 
 # Structs are the basic complex data structures. They are comprised of fields
@@ -47,6 +49,59 @@ class Work
   def validate
     unless @op.nil? || ::Operation::VALID_VALUES.include?(@op)
       raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Invalid value of field op!')
+    end
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+# Exercises all commonly used Thrift wire types in one payload.
+# (UUID intentionally omitted for now; requires a newer compiler/runtime path.)
+class AllTypeValues
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  BOOL_VALUE = 1
+  BYTE_VALUE = 2
+  I16_VALUE = 3
+  I32_VALUE = 4
+  I64_VALUE = 5
+  DOUBLE_VALUE = 6
+  STRING_VALUE = 7
+  BINARY_VALUE = 8
+  LIST_VALUE = 9
+  SET_VALUE = 10
+  MAP_VALUE = 11
+  STRUCT_VALUE = 12
+  STRUCT_LIST_VALUE = 13
+  STRUCT_MAP_VALUE = 14
+  TYPEDEF_VALUE = 15
+  ENUM_VALUE = 16
+  OPTIONAL_TEXT = 17
+
+  FIELDS = {
+    BOOL_VALUE => {:type => ::Thrift::Types::BOOL, :name => 'bool_value'},
+    BYTE_VALUE => {:type => ::Thrift::Types::BYTE, :name => 'byte_value'},
+    I16_VALUE => {:type => ::Thrift::Types::I16, :name => 'i16_value'},
+    I32_VALUE => {:type => ::Thrift::Types::I32, :name => 'i32_value'},
+    I64_VALUE => {:type => ::Thrift::Types::I64, :name => 'i64_value'},
+    DOUBLE_VALUE => {:type => ::Thrift::Types::DOUBLE, :name => 'double_value'},
+    STRING_VALUE => {:type => ::Thrift::Types::STRING, :name => 'string_value'},
+    BINARY_VALUE => {:type => ::Thrift::Types::STRING, :name => 'binary_value', :binary => true},
+    LIST_VALUE => {:type => ::Thrift::Types::LIST, :name => 'list_value', :element => {:type => ::Thrift::Types::I32}},
+    SET_VALUE => {:type => ::Thrift::Types::SET, :name => 'set_value', :element => {:type => ::Thrift::Types::STRING}},
+    MAP_VALUE => {:type => ::Thrift::Types::MAP, :name => 'map_value', :key => {:type => ::Thrift::Types::STRING}, :value => {:type => ::Thrift::Types::I64}},
+    STRUCT_VALUE => {:type => ::Thrift::Types::STRUCT, :name => 'struct_value', :class => ::SharedStruct},
+    STRUCT_LIST_VALUE => {:type => ::Thrift::Types::LIST, :name => 'struct_list_value', :element => {:type => ::Thrift::Types::STRUCT, :class => ::SharedStruct}},
+    STRUCT_MAP_VALUE => {:type => ::Thrift::Types::MAP, :name => 'struct_map_value', :key => {:type => ::Thrift::Types::I32}, :value => {:type => ::Thrift::Types::STRUCT, :class => ::SharedStruct}},
+    TYPEDEF_VALUE => {:type => ::Thrift::Types::I32, :name => 'typedef_value'},
+    ENUM_VALUE => {:type => ::Thrift::Types::I32, :name => 'enum_value', :enum_class => ::Operation},
+    OPTIONAL_TEXT => {:type => ::Thrift::Types::STRING, :name => 'optional_text', :optional => true}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
+    unless @enum_value.nil? || ::Operation::VALID_VALUES.include?(@enum_value)
+      raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Invalid value of field enum_value!')
     end
   end
 

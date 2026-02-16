@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "socket"
+require "set"
 require "thread"
 require "timeout"
 require "thrift"
@@ -64,7 +65,7 @@ module ThriftIllustrated
         @log.fetch(key) { SharedStruct.new(key: key, value: "") }
       end
 
-      def zip; end
+      def zip(_payload); end
     end
 
     def initialize(protocol:, transport:, host:, port:, timeout_ms:)
@@ -158,7 +159,7 @@ module ThriftIllustrated
         end
       end
 
-      client.zip
+      client.zip(build_zip_payload)
 
       {
         records: recording.records
@@ -190,6 +191,37 @@ module ThriftIllustrated
       else
         raise ArgumentError, "Unsupported protocol #{@protocol.inspect}"
       end
+    end
+
+    def build_zip_payload
+      AllTypeValues.new(
+        bool_value: true,
+        byte_value: 0x2a,
+        i16_value: 12_345,
+        i32_value: 1_234_567_890,
+        i64_value: 1_234_567_890_123,
+        double_value: 3.141592653589793,
+        string_value: "thrift-illustrated",
+        binary_value: "bytes:\x00\x01\x7f".b,
+        list_value: [3, 1, 4, 1, 5],
+        set_value: Set.new(%w[alpha beta gamma]),
+        map_value: {
+          "small" => 7,
+          "large" => 7_000_000_000
+        },
+        struct_value: SharedStruct.new(key: 7, value: "nested"),
+        struct_list_value: [
+          SharedStruct.new(key: 11, value: "first"),
+          SharedStruct.new(key: 12, value: "second")
+        ],
+        struct_map_value: {
+          21 => SharedStruct.new(key: 21, value: "map-first"),
+          22 => SharedStruct.new(key: 22, value: "map-second")
+        },
+        typedef_value: 98_765,
+        enum_value: Operation::MULTIPLY,
+        optional_text: "optional-note"
+      )
     end
   end
 end

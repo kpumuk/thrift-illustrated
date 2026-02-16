@@ -926,32 +926,670 @@
       "method": "zip",
       "parse_errors": [],
       "payload": {
-        "fields": [],
+        "fields": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "id": 1,
+                    "name": "field_1",
+                    "span": [
+                      22,
+                      26
+                    ],
+                    "ttype": "bool",
+                    "value": true
+                  },
+                  {
+                    "children": [],
+                    "id": 2,
+                    "name": "field_2",
+                    "span": [
+                      26,
+                      30
+                    ],
+                    "ttype": "byte",
+                    "value": 42
+                  },
+                  {
+                    "children": [],
+                    "id": 3,
+                    "name": "field_3",
+                    "span": [
+                      30,
+                      35
+                    ],
+                    "ttype": "i16",
+                    "value": 12345
+                  },
+                  {
+                    "children": [],
+                    "id": 4,
+                    "name": "field_4",
+                    "span": [
+                      35,
+                      42
+                    ],
+                    "ttype": "i32",
+                    "value": 1234567890
+                  },
+                  {
+                    "children": [],
+                    "id": 5,
+                    "name": "field_5",
+                    "span": [
+                      42,
+                      53
+                    ],
+                    "ttype": "i64",
+                    "value": 1234567890123
+                  },
+                  {
+                    "children": [],
+                    "id": 6,
+                    "name": "field_6",
+                    "span": [
+                      53,
+                      64
+                    ],
+                    "ttype": "double",
+                    "value": 3.141592653589793
+                  },
+                  {
+                    "children": [],
+                    "id": 7,
+                    "name": "field_7",
+                    "span": [
+                      64,
+                      89
+                    ],
+                    "ttype": "string",
+                    "value": "thrift-illustrated"
+                  },
+                  {
+                    "children": [],
+                    "id": 8,
+                    "name": "field_8",
+                    "span": [
+                      89,
+                      105
+                    ],
+                    "ttype": "string",
+                    "value": "bytes:\u0000\u0001"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "id": 0,
+                        "name": "list_0",
+                        "span": [
+                          113,
+                          117
+                        ],
+                        "ttype": "i32",
+                        "value": 3
+                      },
+                      {
+                        "children": [],
+                        "id": 1,
+                        "name": "list_1",
+                        "span": [
+                          117,
+                          121
+                        ],
+                        "ttype": "i32",
+                        "value": 1
+                      },
+                      {
+                        "children": [],
+                        "id": 2,
+                        "name": "list_2",
+                        "span": [
+                          121,
+                          125
+                        ],
+                        "ttype": "i32",
+                        "value": 4
+                      },
+                      {
+                        "children": [],
+                        "id": 3,
+                        "name": "list_3",
+                        "span": [
+                          125,
+                          129
+                        ],
+                        "ttype": "i32",
+                        "value": 1
+                      },
+                      {
+                        "children": [],
+                        "id": 4,
+                        "name": "list_4",
+                        "span": [
+                          129,
+                          133
+                        ],
+                        "ttype": "i32",
+                        "value": 5
+                      }
+                    ],
+                    "id": 9,
+                    "name": "field_9",
+                    "span": [
+                      105,
+                      133
+                    ],
+                    "ttype": "list",
+                    "value": null
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "id": 0,
+                        "name": "set_0",
+                        "span": [
+                          141,
+                          150
+                        ],
+                        "ttype": "string",
+                        "value": "alpha"
+                      },
+                      {
+                        "children": [],
+                        "id": 1,
+                        "name": "set_1",
+                        "span": [
+                          150,
+                          158
+                        ],
+                        "ttype": "string",
+                        "value": "beta"
+                      },
+                      {
+                        "children": [],
+                        "id": 2,
+                        "name": "set_2",
+                        "span": [
+                          158,
+                          167
+                        ],
+                        "ttype": "string",
+                        "value": "gamma"
+                      }
+                    ],
+                    "id": 10,
+                    "name": "field_10",
+                    "span": [
+                      133,
+                      167
+                    ],
+                    "ttype": "set",
+                    "value": null
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "id": "key",
+                            "name": "key",
+                            "span": [
+                              176,
+                              193
+                            ],
+                            "ttype": "string",
+                            "value": "small"
+                          },
+                          {
+                            "children": [],
+                            "id": "value",
+                            "name": "value",
+                            "span": [
+                              176,
+                              193
+                            ],
+                            "ttype": "i64",
+                            "value": 7
+                          }
+                        ],
+                        "id": 0,
+                        "name": "entry_0",
+                        "span": [
+                          176,
+                          193
+                        ],
+                        "ttype": "map_entry",
+                        "value": null
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "id": "key",
+                            "name": "key",
+                            "span": [
+                              193,
+                              210
+                            ],
+                            "ttype": "string",
+                            "value": "large"
+                          },
+                          {
+                            "children": [],
+                            "id": "value",
+                            "name": "value",
+                            "span": [
+                              193,
+                              210
+                            ],
+                            "ttype": "i64",
+                            "value": 7000000000
+                          }
+                        ],
+                        "id": 1,
+                        "name": "entry_1",
+                        "span": [
+                          193,
+                          210
+                        ],
+                        "ttype": "map_entry",
+                        "value": null
+                      }
+                    ],
+                    "id": 11,
+                    "name": "field_11",
+                    "span": [
+                      167,
+                      210
+                    ],
+                    "ttype": "map",
+                    "value": null
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "id": 1,
+                            "name": "field_1",
+                            "span": [
+                              213,
+                              220
+                            ],
+                            "ttype": "i32",
+                            "value": 7
+                          },
+                          {
+                            "children": [],
+                            "id": 2,
+                            "name": "field_2",
+                            "span": [
+                              220,
+                              233
+                            ],
+                            "ttype": "string",
+                            "value": "nested"
+                          }
+                        ],
+                        "id": 12,
+                        "name": "struct",
+                        "span": [
+                          213,
+                          234
+                        ],
+                        "ttype": "struct",
+                        "value": null
+                      }
+                    ],
+                    "id": 12,
+                    "name": "field_12",
+                    "span": [
+                      210,
+                      234
+                    ],
+                    "ttype": "struct",
+                    "value": null
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "id": 1,
+                                "name": "field_1",
+                                "span": [
+                                  242,
+                                  249
+                                ],
+                                "ttype": "i32",
+                                "value": 11
+                              },
+                              {
+                                "children": [],
+                                "id": 2,
+                                "name": "field_2",
+                                "span": [
+                                  249,
+                                  261
+                                ],
+                                "ttype": "string",
+                                "value": "first"
+                              }
+                            ],
+                            "id": 0,
+                            "name": "struct",
+                            "span": [
+                              242,
+                              262
+                            ],
+                            "ttype": "struct",
+                            "value": null
+                          }
+                        ],
+                        "id": 0,
+                        "name": "list_0",
+                        "span": [
+                          242,
+                          262
+                        ],
+                        "ttype": "struct",
+                        "value": null
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "id": 1,
+                                "name": "field_1",
+                                "span": [
+                                  262,
+                                  269
+                                ],
+                                "ttype": "i32",
+                                "value": 12
+                              },
+                              {
+                                "children": [],
+                                "id": 2,
+                                "name": "field_2",
+                                "span": [
+                                  269,
+                                  282
+                                ],
+                                "ttype": "string",
+                                "value": "second"
+                              }
+                            ],
+                            "id": 1,
+                            "name": "struct",
+                            "span": [
+                              262,
+                              283
+                            ],
+                            "ttype": "struct",
+                            "value": null
+                          }
+                        ],
+                        "id": 1,
+                        "name": "list_1",
+                        "span": [
+                          262,
+                          283
+                        ],
+                        "ttype": "struct",
+                        "value": null
+                      }
+                    ],
+                    "id": 13,
+                    "name": "field_13",
+                    "span": [
+                      234,
+                      283
+                    ],
+                    "ttype": "list",
+                    "value": null
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "id": "key",
+                            "name": "key",
+                            "span": [
+                              292,
+                              320
+                            ],
+                            "ttype": "i32",
+                            "value": 21
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "id": 1,
+                                    "name": "field_1",
+                                    "span": [
+                                      296,
+                                      303
+                                    ],
+                                    "ttype": "i32",
+                                    "value": 21
+                                  },
+                                  {
+                                    "children": [],
+                                    "id": 2,
+                                    "name": "field_2",
+                                    "span": [
+                                      303,
+                                      319
+                                    ],
+                                    "ttype": "string",
+                                    "value": "map-first"
+                                  }
+                                ],
+                                "id": "value",
+                                "name": "struct",
+                                "span": [
+                                  296,
+                                  320
+                                ],
+                                "ttype": "struct",
+                                "value": null
+                              }
+                            ],
+                            "id": "value",
+                            "name": "value",
+                            "span": [
+                              292,
+                              320
+                            ],
+                            "ttype": "struct",
+                            "value": null
+                          }
+                        ],
+                        "id": 0,
+                        "name": "entry_0",
+                        "span": [
+                          292,
+                          320
+                        ],
+                        "ttype": "map_entry",
+                        "value": null
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "id": "key",
+                            "name": "key",
+                            "span": [
+                              320,
+                              349
+                            ],
+                            "ttype": "i32",
+                            "value": 22
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "id": 1,
+                                    "name": "field_1",
+                                    "span": [
+                                      324,
+                                      331
+                                    ],
+                                    "ttype": "i32",
+                                    "value": 22
+                                  },
+                                  {
+                                    "children": [],
+                                    "id": 2,
+                                    "name": "field_2",
+                                    "span": [
+                                      331,
+                                      348
+                                    ],
+                                    "ttype": "string",
+                                    "value": "map-second"
+                                  }
+                                ],
+                                "id": "value",
+                                "name": "struct",
+                                "span": [
+                                  324,
+                                  349
+                                ],
+                                "ttype": "struct",
+                                "value": null
+                              }
+                            ],
+                            "id": "value",
+                            "name": "value",
+                            "span": [
+                              320,
+                              349
+                            ],
+                            "ttype": "struct",
+                            "value": null
+                          }
+                        ],
+                        "id": 1,
+                        "name": "entry_1",
+                        "span": [
+                          320,
+                          349
+                        ],
+                        "ttype": "map_entry",
+                        "value": null
+                      }
+                    ],
+                    "id": 14,
+                    "name": "field_14",
+                    "span": [
+                      283,
+                      349
+                    ],
+                    "ttype": "map",
+                    "value": null
+                  },
+                  {
+                    "children": [],
+                    "id": 15,
+                    "name": "field_15",
+                    "span": [
+                      349,
+                      356
+                    ],
+                    "ttype": "i32",
+                    "value": 98765
+                  },
+                  {
+                    "children": [],
+                    "id": 16,
+                    "name": "field_16",
+                    "span": [
+                      356,
+                      363
+                    ],
+                    "ttype": "i32",
+                    "value": 3
+                  },
+                  {
+                    "children": [],
+                    "id": 17,
+                    "name": "field_17",
+                    "span": [
+                      363,
+                      383
+                    ],
+                    "ttype": "string",
+                    "value": "optional-note"
+                  }
+                ],
+                "id": 1,
+                "name": "struct",
+                "span": [
+                  22,
+                  384
+                ],
+                "ttype": "struct",
+                "value": null
+              }
+            ],
+            "id": 1,
+            "name": "field_1",
+            "span": [
+              19,
+              384
+            ],
+            "ttype": "struct",
+            "value": null
+          }
+        ],
         "span": [
           19,
-          20
+          385
         ],
         "struct": {
           "name": "args",
           "span": [
             19,
-            20
+            385
           ],
           "ttype": "struct"
         }
       },
-      "raw_hex": "00 00 00 10 80 01 00 04 00 00 00 03 7a 69 70 00 00 00 07 00",
-      "raw_size": 20,
+      "raw_hex": "00 00 01 7d 80 01 00 04 00 00 00 03 7a 69 70 00 00 00 07 0c 00 01 02 00 01 01 03 00 02 2a 06 00 03 30 39 08 00 04 49 96 02 d2 0a 00 05 00 00 01 1f 71 fb 04 cb 04 00 06 40 09 21 fb 54 44 2d 18 0b 00 07 00 00 00 12 74 68 72 69 66 74 2d 69 6c 6c 75 73 74 72 61 74 65 64 0b 00 08 00 00 00 09 62 79 74 65 73 3a 00 01 7f 0f 00 09 08 00 00 00 05 00 00 00 03 00 00 00 01 00 00 00 04 00 00 00 01 00 00 00 05 0e 00 0a 0b 00 00 00 03 00 00 00 05 61 6c 70 68 61 00 00 00 04 62 65 74 61 00 00 00 05 67 61 6d 6d 61 0d 00 0b 0b 0a 00 00 00 02 00 00 00 05 73 6d 61 6c 6c 00 00 00 00 00 00 00 07 00 00 00 05 6c 61 72 67 65 00 00 00 01 a1 3b 86 00 0c 00 0c 08 00 01 00 00 00 07 0b 00 02 00 00 00 06 6e 65 73 74 65 64 00 0f 00 0d 0c 00 00 00 02 08 00 01 00 00 00 0b 0b 00 02 00 00 00 05 66 69 72 73 74 00 08 00 01 00 00 00 0c 0b 00 02 00 00 00 06 73 65 63 6f 6e 64 00 0d 00 0e 08 0c 00 00 00 02 00 00 00 15 08 00 01 00 00 00 15 0b 00 02 00 00 00 09 6d 61 70 2d 66 69 72 73 74 00 00 00 00 16 08 00 01 00 00 00 16 0b 00 02 00 00 00 0a 6d 61 70 2d 73 65 63 6f 6e 64 00 08 00 0f 00 01 81 cd 08 00 10 00 00 00 03 0b 00 11 00 00 00 0d 6f 70 74 69 6f 6e 61 6c 2d 6e 6f 74 65 00 00",
+      "raw_size": 385,
       "seqid": 7,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 16,
+        "frame_length": 381,
         "payload_span": [
           4,
-          20
+          385
         ],
         "type": "framed"
       }
@@ -959,16 +1597,16 @@
   ],
   "metadata": {
     "bundler_version": "4.0.6",
-    "capture_id": "0dc44507-526b-42a2-8cd4-d37c8966eb9b",
-    "captured_at_utc": "2026-02-16T03:11:06Z",
-    "max_field_depth": 3,
+    "capture_id": "07cc2d8d-49aa-4658-ac55-c26cce58c859",
+    "captured_at_utc": "2026-02-16T03:33:08Z",
+    "max_field_depth": 6,
     "max_highlights_per_message": 0,
     "max_string_value_bytes": 18,
     "message_count": 13,
     "platform": "arm64-darwin25",
     "ruby_version": "4.0.1",
     "thrift_ref": "git:fd9756c19d1ea5763ffd8be88fff1db1ccd0d6ba",
-    "total_field_nodes": 24,
+    "total_field_nodes": 66,
     "wire_chunk_count": 13
   },
   "schema_version": "1.0.0"

@@ -63,6 +63,17 @@ class IntegrationCaptureTest < Minitest::Test
         assert_equal 1, zip_messages.length
         assert_equal "oneway", zip_messages.first.fetch("message_type")
         assert_equal "client->server", zip_messages.first.fetch("direction")
+        zip_payload_struct = zip_messages.first
+          .fetch("payload")
+          .fetch("fields")
+          .fetch(0)
+          .fetch("children")
+          .fetch(0)
+        assert_equal((1..17).to_a, zip_payload_struct.fetch("children").map { |field| field.fetch("id") })
+        zip_types = zip_payload_struct.fetch("children").map { |field| field.fetch("ttype") }
+        %w[bool byte i16 i32 i64 double string list set map struct].each do |ttype|
+          assert_includes zip_types, ttype
+        end
       end
     end
   end

@@ -114,6 +114,30 @@ struct Work {
 }
 
 /**
+ * Exercises all commonly used Thrift wire types in one payload.
+ * (UUID intentionally omitted for now; requires a newer compiler/runtime path.)
+ */
+struct AllTypeValues {
+  1: bool bool_value,
+  2: i8 byte_value,
+  3: i16 i16_value,
+  4: i32 i32_value,
+  5: i64 i64_value,
+  6: double double_value,
+  7: string string_value,
+  8: binary binary_value,
+  9: list<i32> list_value,
+  10: set<string> set_value,
+  11: map<string, i64> map_value,
+  12: shared.SharedStruct struct_value,
+  13: list<shared.SharedStruct> struct_list_value,
+  14: map<i32, shared.SharedStruct> struct_map_value,
+  15: MyInteger typedef_value,
+  16: Operation enum_value,
+  17: optional string optional_text,
+}
+
+/**
  * Structs can also be exceptions, if they are nasty.
  */
 exception InvalidOperation {
@@ -145,7 +169,7 @@ service Calculator extends shared.SharedService {
     * a request and does not listen for any response at all. Oneway methods
     * must be void.
     */
-   oneway void zip()
+   oneway void zip(1:AllTypeValues payload)
 
 }
 
