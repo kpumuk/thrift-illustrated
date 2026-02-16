@@ -115,6 +115,7 @@ class ValidationPipelineTest < Minitest::Test
           "index" => idx,
           "actor" => "client",
           "direction" => "client->server",
+          "protocol" => "binary",
           "method" => method,
           "message_type" => ((method == "zip") ? "oneway" : "call"),
           "seqid" => idx,
@@ -124,6 +125,8 @@ class ValidationPipelineTest < Minitest::Test
             "type" => "buffered",
             "frame_length" => nil,
             "frame_header_span" => nil,
+            "header_span" => nil,
+            "header_protocol" => nil,
             "payload_span" => [0, 2]
           },
           "envelope" => {

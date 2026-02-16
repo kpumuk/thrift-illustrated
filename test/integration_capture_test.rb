@@ -13,6 +13,7 @@ class IntegrationCaptureTest < Minitest::Test
     compact-framed
     json-buffered
     json-framed
+    header-header
   ].freeze
 
   EXPECTED_CLIENT_METHOD_FLOW = [
@@ -55,6 +56,7 @@ class IntegrationCaptureTest < Minitest::Test
       assert_equal EXPECTED_COMBOS, combo_ids
 
       manifest.fetch("combos").each do |entry|
+        combo_id = entry.fetch("id")
         dataset_path = File.join(output_dir, entry.fetch("file"))
         assert(File.file?(dataset_path), "Missing dataset file #{dataset_path}")
 
@@ -93,6 +95,20 @@ class IntegrationCaptureTest < Minitest::Test
         zip_types = zip_payload_struct.fetch("children").map { |field| field.fetch("ttype") }
         %w[bool byte i16 i32 i64 double string list set map struct].each do |ttype|
           assert_includes zip_types, ttype
+        end
+
+        next unless combo_id == "header-header"
+
+        header_client_messages = messages.select { |message| message.fetch("direction") == "client->server" }
+        refute_empty header_client_messages
+        header_client_messages.each do |message|
+          transport = message.fetch("transport")
+          assert_equal "header", transport.fetch("type")
+          assert_equal [0, 4], transport.fetch("frame_header_span")
+          assert_equal "compact", transport.fetch("header_protocol")
+          assert_kind_of Array, transport.fetch("header_span")
+          assert_operator transport.fetch("header_span").fetch(1), :>, transport.fetch("header_span").fetch(0)
+          assert_operator transport.fetch("payload_span").fetch(0), :>=, transport.fetch("header_span").fetch(1)
         end
       end
     end

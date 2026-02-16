@@ -81,6 +81,26 @@ class MessageParserTest < Minitest::Test
     assert_equal "E_FRAME_TRUNCATED", parse_errors.first.fetch(:code)
   end
 
+  def test_parses_header_transport_message
+    payload = build_message(protocol: "compact", method: "ping", seqid: 11, fields: [])
+    raw = wrap_header(payload, protocol_id: Thrift::HeaderSubprotocolID::COMPACT)
+
+    parser = ThriftIllustrated::MessageParser.new
+    result = parser.parse_bytes(raw_bytes: raw, protocol: "header", transport: "header", actor: "client")
+
+    assert_equal 1, result.fetch(:messages).length
+    message = result.fetch(:messages).first
+
+    assert_equal "header", message.fetch(:transport).fetch(:type)
+    assert_equal raw.bytesize - 4, message.fetch(:transport).fetch(:frame_length)
+    assert_equal [0, 4], message.fetch(:transport).fetch(:frame_header_span)
+    assert_equal "compact", message.fetch(:transport).fetch(:header_protocol)
+    assert_equal "compact", message.fetch(:protocol)
+    assert_equal "ping", message.fetch(:method)
+    assert_equal "call", message.fetch(:message_type)
+    assert_empty message.fetch(:parse_errors)
+  end
+
   def test_enforces_field_node_limit
     payload = build_message(protocol: "binary", method: "ping", seqid: 1, fields: [
       {id: 1, type: Thrift::Types::I32, value: 1},
@@ -139,5 +159,13 @@ class MessageParserTest < Minitest::Test
 
   def frame(payload)
     [payload.bytesize].pack("N") + payload
+  end
+
+  def wrap_header(payload, protocol_id:)
+    transport = BufferWriter.new
+    header_transport = Thrift::HeaderTransport.new(transport, nil, protocol_id)
+    header_transport.write(payload)
+    header_transport.flush
+    transport.buffer
   end
 end

@@ -54,7 +54,7 @@
     "combos": {
       "type": "array",
       "minItems": 1,
-      "maxItems": 6,
+      "maxItems": 7,
       "items": {
         "$ref": "#/$defs/comboEntry"
       }
@@ -69,7 +69,8 @@
         "compact-buffered",
         "compact-framed",
         "json-buffered",
-        "json-framed"
+        "json-framed",
+        "header-header"
       ]
     },
     "comboEntry": {
@@ -93,19 +94,21 @@
           "enum": [
             "binary",
             "compact",
-            "json"
+            "json",
+            "header"
           ]
         },
         "transport": {
           "type": "string",
           "enum": [
             "buffered",
-            "framed"
+            "framed",
+            "header"
           ]
         },
         "file": {
           "type": "string",
-          "pattern": "^(binary-buffered|binary-framed|compact-buffered|compact-framed|json-buffered|json-framed)\\.json$"
+          "pattern": "^(binary-buffered|binary-framed|compact-buffered|compact-framed|json-buffered|json-framed|header-header)\\.json$"
         },
         "sha256": {
           "type": "string",

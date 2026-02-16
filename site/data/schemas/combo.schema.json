@@ -32,14 +32,16 @@
           "enum": [
             "binary",
             "compact",
-            "json"
+            "json",
+            "header"
           ]
         },
         "transport": {
           "type": "string",
           "enum": [
             "buffered",
-            "framed"
+            "framed",
+            "header"
           ]
         }
       }
@@ -143,7 +145,8 @@
         "compact-buffered",
         "compact-framed",
         "json-buffered",
-        "json-framed"
+        "json-framed",
+        "header-header"
       ]
     },
     "span": {
@@ -359,6 +362,8 @@
         "type",
         "frame_length",
         "frame_header_span",
+        "header_span",
+        "header_protocol",
         "payload_span"
       ],
       "properties": {
@@ -366,7 +371,8 @@
           "type": "string",
           "enum": [
             "buffered",
-            "framed"
+            "framed",
+            "header"
           ]
         },
         "frame_length": {
@@ -382,6 +388,23 @@
         },
         "frame_header_span": {
           "$ref": "#/$defs/nullableSpan"
+        },
+        "header_span": {
+          "$ref": "#/$defs/nullableSpan"
+        },
+        "header_protocol": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "binary",
+                "compact"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "payload_span": {
           "$ref": "#/$defs/span"
@@ -405,6 +428,12 @@
                 "type": "null"
               },
               "frame_header_span": {
+                "type": "null"
+              },
+              "header_span": {
+                "type": "null"
+              },
+              "header_protocol": {
                 "type": "null"
               }
             }
@@ -432,6 +461,48 @@
                   0,
                   4
                 ]
+              },
+              "header_span": {
+                "type": "null"
+              },
+              "header_protocol": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "header"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "frame_length": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "frame_header_span": {
+                "const": [
+                  0,
+                  4
+                ]
+              },
+              "header_span": {
+                "$ref": "#/$defs/span"
+              },
+              "header_protocol": {
+                "type": "string",
+                "enum": [
+                  "binary",
+                  "compact"
+                ]
               }
             }
           }
@@ -445,6 +516,7 @@
         "index",
         "actor",
         "direction",
+        "protocol",
         "method",
         "message_type",
         "seqid",
@@ -473,6 +545,22 @@
           "enum": [
             "client->server",
             "server->client"
+          ]
+        },
+        "protocol": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "binary",
+                "compact",
+                "json",
+                "header"
+              ]
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "method": {

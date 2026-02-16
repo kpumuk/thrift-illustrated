@@ -5,6 +5,12 @@ require "thrift"
 
 module ThriftIllustrated
   class MessageParser
+    HEADER_MAGIC = 0x0FFF
+    HEADER_SUBPROTOCOLS = {
+      Thrift::HeaderSubprotocolID::BINARY => "binary",
+      Thrift::HeaderSubprotocolID::COMPACT => "compact"
+    }.freeze
+
     TYPE_NAMES = {
       Thrift::Types::STOP => "stop",
       Thrift::Types::BOOL => "bool",
@@ -100,6 +106,8 @@ module ThriftIllustrated
       messages =
         if transport.to_s == "framed"
           parse_framed_stream(bytes, protocol: protocol, actor: actor, starting_index: starting_index)
+        elsif transport.to_s == "header"
+          parse_header_stream(bytes, protocol: protocol, actor: actor, starting_index: starting_index)
         else
           parse_buffered_stream(bytes, protocol: protocol, actor: actor, starting_index: starting_index)
         end
@@ -133,7 +141,9 @@ module ThriftIllustrated
           index: index,
           payload_offset: 0,
           frame_length: nil,
-          frame_header_span: nil
+          frame_header_span: nil,
+          header_span: nil,
+          header_protocol: nil
         )
 
         consumed = parsed.fetch(:consumed)
@@ -257,7 +267,9 @@ module ThriftIllustrated
           index: index,
           payload_offset: 4,
           frame_length: frame_length,
-          frame_header_span: [0, 4]
+          frame_header_span: [0, 4],
+          header_span: nil,
+          header_protocol: nil
         )
 
         messages << build_message(raw: raw, parsed: parsed)
@@ -269,7 +281,178 @@ module ThriftIllustrated
       messages
     end
 
-    def parse_message_payload(payload_bytes:, protocol:, actor:, direction:, transport:, index:, payload_offset:, frame_length:, frame_header_span:)
+    def parse_header_stream(bytes, protocol:, actor:, starting_index:)
+      direction = (actor.to_s == "client") ? "client->server" : "server->client"
+      messages = []
+      offset = 0
+      index = starting_index
+
+      while offset < bytes.bytesize
+        if bytes.bytesize - offset < 4
+          raw = bytes.byteslice(offset, bytes.bytesize - offset)
+          messages << synthetic_error_message(
+            raw: raw,
+            index: index,
+            actor: actor,
+            direction: direction,
+            transport: "header",
+            payload_span: safe_span(start: 0, finish: raw.bytesize, max_end: raw.bytesize),
+            frame_length: nil,
+            frame_header_span: safe_span(start: 0, finish: [raw.bytesize, 4].min, max_end: raw.bytesize),
+            header_span: nil,
+            header_protocol: nil,
+            error: parse_error(
+              code: "E_FRAME_TRUNCATED",
+              message: "Header transport length prefix is truncated",
+              offset: 0,
+              severity: "fatal",
+              span: [0, raw.bytesize]
+            )
+          )
+          break
+        end
+
+        frame_length = bytes.byteslice(offset, 4).unpack1("N")
+        total_size = frame_length + 4
+        if offset + total_size > bytes.bytesize
+          raw = bytes.byteslice(offset, bytes.bytesize - offset)
+          messages << synthetic_error_message(
+            raw: raw,
+            index: index,
+            actor: actor,
+            direction: direction,
+            transport: "header",
+            payload_span: safe_span(start: 4, finish: raw.bytesize, max_end: raw.bytesize),
+            frame_length: frame_length,
+            frame_header_span: safe_span(start: 0, finish: 4, max_end: raw.bytesize),
+            header_span: safe_span(start: 4, finish: raw.bytesize, max_end: raw.bytesize),
+            header_protocol: nil,
+            error: parse_error(
+              code: "E_FRAME_TRUNCATED",
+              message: "Header transport frame truncated: expected #{frame_length} bytes",
+              offset: 4,
+              severity: "fatal",
+              span: [4, raw.bytesize]
+            )
+          )
+          break
+        end
+
+        raw = bytes.byteslice(offset, total_size)
+        header_details, header_error = parse_header_transport_details(raw)
+
+        if header_error
+          messages << synthetic_error_message(
+            raw: raw,
+            index: index,
+            actor: actor,
+            direction: direction,
+            transport: "header",
+            payload_span: header_details.fetch(:payload_span),
+            frame_length: frame_length,
+            frame_header_span: [0, 4],
+            header_span: header_details.fetch(:header_span),
+            header_protocol: header_details.fetch(:header_protocol),
+            error: header_error
+          )
+          offset += total_size
+          index += 1
+          next
+        end
+
+        effective_protocol =
+          if protocol.to_s == "header"
+            header_details.fetch(:header_protocol)
+          else
+            protocol.to_s
+          end
+
+        parsed = parse_message_payload(
+          payload_bytes: header_details.fetch(:payload_bytes),
+          protocol: effective_protocol,
+          actor: actor,
+          direction: direction,
+          transport: "header",
+          index: index,
+          payload_offset: header_details.fetch(:payload_offset),
+          frame_length: frame_length,
+          frame_header_span: [0, 4],
+          header_span: header_details.fetch(:header_span),
+          header_protocol: header_details.fetch(:header_protocol)
+        )
+        parsed[:protocol] = effective_protocol
+        messages << build_message(raw: raw, parsed: parsed)
+
+        offset += total_size
+        index += 1
+      end
+
+      messages
+    end
+
+    def parse_header_transport_details(raw)
+      raw_size = raw.bytesize
+      frame_header_span = safe_span(start: 0, finish: [4, raw_size].min, max_end: raw_size)
+      default_payload_span = safe_span(start: frame_header_span[1], finish: raw_size, max_end: raw_size)
+      default_header_span = safe_span(start: frame_header_span[1], finish: raw_size, max_end: raw_size)
+
+      base_details = {
+        frame_header_span: frame_header_span,
+        payload_span: default_payload_span,
+        header_span: default_header_span,
+        header_protocol: nil,
+        payload_offset: frame_header_span[1],
+        payload_bytes: raw.byteslice(frame_header_span[1], raw_size - frame_header_span[1]) || "".b
+      }
+
+      return [base_details, parse_error(code: "E_PROTOCOL_DECODE", message: "Header transport frame is too small", offset: 4, severity: "error", span: default_header_span)] if raw_size < 14
+
+      magic = raw.byteslice(4, 2).unpack1("n")
+      return [base_details, parse_error(code: "E_PROTOCOL_DECODE", message: format("Invalid header transport magic: 0x%04x", magic), offset: 4, severity: "error", span: [4, 6])] unless magic == HEADER_MAGIC
+
+      header_words = raw.byteslice(12, 2).unpack1("n")
+      header_data_length = header_words * 4
+      header_data_start = 14
+      payload_offset = header_data_start + header_data_length
+      if payload_offset > raw_size
+        details = base_details.merge(
+          payload_offset: raw_size,
+          payload_bytes: "".b,
+          payload_span: safe_span(start: raw_size, finish: raw_size, max_end: raw_size),
+          header_span: safe_span(start: 4, finish: raw_size, max_end: raw_size)
+        )
+        error = parse_error(
+          code: "E_PROTOCOL_DECODE",
+          message: "Header transport header size exceeds frame size",
+          offset: 12,
+          severity: "error",
+          span: [12, 14]
+        )
+        return [details, error]
+      end
+
+      header_span = safe_span(start: 4, finish: payload_offset, max_end: raw_size)
+      payload_span = safe_span(start: payload_offset, finish: raw_size, max_end: raw_size)
+      payload_bytes = raw.byteslice(payload_offset, raw_size - payload_offset) || "".b
+
+      details = base_details.merge(
+        payload_offset: payload_offset,
+        payload_bytes: payload_bytes,
+        payload_span: payload_span,
+        header_span: header_span
+      )
+
+      protocol_id, protocol_len = decode_varint32(raw, header_data_start, payload_offset)
+      return [details, parse_error(code: "E_PROTOCOL_DECODE", message: "Header transport protocol id varint is invalid", offset: header_data_start, severity: "error", span: [header_data_start, payload_offset])] if protocol_len <= 0
+
+      protocol_name = HEADER_SUBPROTOCOLS[protocol_id]
+      return [details, parse_error(code: "E_PROTOCOL_DECODE", message: "Header transport subprotocol #{protocol_id} is unsupported", offset: header_data_start, severity: "error", span: [header_data_start, header_data_start + protocol_len])] unless protocol_name
+
+      details[:header_protocol] = protocol_name
+      [details, nil]
+    end
+
+    def parse_message_payload(payload_bytes:, protocol:, actor:, direction:, transport:, index:, payload_offset:, frame_length:, frame_header_span:, header_span:, header_protocol:)
       reader = CursorTransport.new(payload_bytes)
       thrift_protocol = build_protocol(protocol, reader)
       parse_errors = []
@@ -304,7 +487,7 @@ module ThriftIllustrated
         thrift_protocol.read_message_end
         payload_end = reader.position
 
-        if transport == "framed" && reader.position != payload_bytes.bytesize
+        if %w[framed header].include?(transport) && reader.position != payload_bytes.bytesize
           parse_errors << parse_error(
             code: "E_PROTOCOL_DECODE",
             message: "Message parser did not consume full payload",
@@ -347,6 +530,8 @@ module ThriftIllustrated
       payload_span =
         if transport == "framed"
           safe_span(start: 4, finish: payload_offset + payload_bytes.bytesize, max_end: payload_offset + payload_bytes.bytesize)
+        elsif transport == "header"
+          safe_span(start: payload_offset, finish: payload_offset + payload_bytes.bytesize, max_end: payload_offset + payload_bytes.bytesize)
         else
           safe_span(start: 0, finish: consumed, max_end: consumed)
         end
@@ -355,6 +540,7 @@ module ThriftIllustrated
         index: index,
         actor: actor.to_s,
         direction: direction,
+        protocol: protocol.to_s,
         method: name.to_s.empty? ? "__parse_error__" : name,
         message_type: message_type,
         seqid: seqid,
@@ -363,6 +549,8 @@ module ThriftIllustrated
           type: transport,
           frame_length: frame_length,
           frame_header_span: frame_header_span,
+          header_span: header_span,
+          header_protocol: header_protocol,
           payload_span: payload_span
         },
         envelope: {
@@ -382,7 +570,7 @@ module ThriftIllustrated
         },
         highlights: [],
         parse_errors: parse_errors,
-        consumed: (transport == "framed") ? payload_bytes.bytesize : consumed,
+        consumed: %w[framed header].include?(transport) ? payload_bytes.bytesize : consumed,
         _field_node_count: stats[:field_nodes],
         _max_field_depth: stats[:max_depth],
         _max_string_value_bytes: stats[:max_string_bytes]
@@ -397,11 +585,12 @@ module ThriftIllustrated
       message
     end
 
-    def synthetic_error_message(raw:, index:, actor:, direction:, transport:, payload_span:, error:, frame_length: nil, frame_header_span: nil)
+    def synthetic_error_message(raw:, index:, actor:, direction:, transport:, payload_span:, error:, frame_length: nil, frame_header_span: nil, header_span: nil, header_protocol: nil)
       {
         index: index,
         actor: actor.to_s,
         direction: direction,
+        protocol: nil,
         method: "__parse_error__",
         message_type: "call",
         seqid: 0,
@@ -411,6 +600,8 @@ module ThriftIllustrated
           type: transport,
           frame_length: frame_length,
           frame_header_span: frame_header_span,
+          header_span: header_span,
+          header_protocol: header_protocol,
           payload_span: payload_span
         },
         envelope: {
@@ -785,6 +976,29 @@ module ThriftIllustrated
       return span unless span.is_a?(Array) && span.length == 2
 
       [span[0].to_i + delta, span[1].to_i + delta]
+    end
+
+    def decode_varint32(bytes, start_offset, end_offset)
+      value = 0
+      shift = 0
+      cursor = start_offset
+      max_cursor = [end_offset, bytes.bytesize].min
+      max_bytes = 5
+      consumed = 0
+
+      while cursor < max_cursor && consumed < max_bytes
+        byte = bytes.getbyte(cursor)
+        return [0, 0] if byte.nil?
+
+        value |= (byte & 0x7f) << shift
+        cursor += 1
+        consumed += 1
+        return [value, consumed] if (byte & 0x80).zero?
+
+        shift += 7
+      end
+
+      [0, 0]
     end
 
     def safe_span(start:, finish:, max_end: nil)

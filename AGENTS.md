@@ -14,6 +14,9 @@
   - `binary + framed`
   - `compact + buffered`
   - `compact + framed`
+  - `json + buffered`
+  - `json + framed`
+  - `header + header`
 
 ## Commands
 

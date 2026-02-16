@@ -38,6 +38,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 09 82 21 01 04 70 69 6e 67 00",
       "raw_size": 13,
       "seqid": 1,
@@ -47,6 +48,8 @@
           4
         ],
         "frame_length": 9,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           13
@@ -86,6 +89,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 09 82 41 01 04 70 69 6e 67 00",
       "raw_size": 13,
       "seqid": 1,
@@ -95,6 +99,8 @@
           4
         ],
         "frame_length": 9,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           13
@@ -157,6 +163,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 0c 82 21 02 03 61 64 64 15 02 15 02 00",
       "raw_size": 16,
       "seqid": 2,
@@ -166,6 +173,8 @@
           4
         ],
         "frame_length": 12,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           16
@@ -217,6 +226,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 0b 82 41 02 03 61 64 64 05 00 04 00",
       "raw_size": 15,
       "seqid": 2,
@@ -226,6 +236,8 @@
           4
         ],
         "frame_length": 11,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           15
@@ -288,6 +300,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 0c 82 21 03 03 61 64 64 15 02 15 08 00",
       "raw_size": 16,
       "seqid": 3,
@@ -297,6 +310,8 @@
           4
         ],
         "frame_length": 12,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           16
@@ -348,6 +363,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 0b 82 41 03 03 61 64 64 05 00 0a 00",
       "raw_size": 15,
       "seqid": 3,
@@ -357,6 +373,8 @@
           4
         ],
         "frame_length": 11,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           15
@@ -465,6 +483,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 18 82 21 04 09 63 61 6c 63 75 6c 61 74 65 15 02 1c 15 1e 15 14 15 04 00 00",
       "raw_size": 28,
       "seqid": 4,
@@ -474,6 +493,8 @@
           4
         ],
         "frame_length": 24,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           28
@@ -525,6 +546,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 11 82 41 04 09 63 61 6c 63 75 6c 61 74 65 05 00 0a 00",
       "raw_size": 21,
       "seqid": 4,
@@ -534,6 +556,8 @@
           4
         ],
         "frame_length": 17,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           21
@@ -585,6 +609,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 10 82 21 05 09 67 65 74 53 74 72 75 63 74 15 02 00",
       "raw_size": 20,
       "seqid": 5,
@@ -594,6 +619,8 @@
           4
         ],
         "frame_length": 16,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           20
@@ -680,6 +707,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 16 82 41 05 09 67 65 74 53 74 72 75 63 74 0c 00 15 02 18 01 35 00 00",
       "raw_size": 26,
       "seqid": 5,
@@ -689,6 +717,8 @@
           4
         ],
         "frame_length": 22,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           26
@@ -797,6 +827,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 18 82 21 06 09 63 61 6c 63 75 6c 61 74 65 15 02 1c 15 02 15 00 15 08 00 00",
       "raw_size": 28,
       "seqid": 6,
@@ -806,6 +837,8 @@
           4
         ],
         "frame_length": 24,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           28
@@ -892,6 +925,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 26 82 41 06 09 63 61 6c 63 75 6c 61 74 65 1c 15 08 18 12 43 61 6e 6e 6f 74 20 64 69 76 69 64 65 20 62 79 20 30 00 00",
       "raw_size": 42,
       "seqid": 6,
@@ -901,6 +935,8 @@
           4
         ],
         "frame_length": 38,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           42
@@ -1578,6 +1614,7 @@
           "ttype": "struct"
         }
       },
+      "protocol": "compact",
       "raw_hex": "00 00 00 cf 82 81 07 03 7a 69 70 1c 11 13 2a 14 f2 c0 01 15 a4 8b b0 99 09 16 96 93 d8 9f ee 47 17 18 2d 44 54 fb 21 09 40 18 12 74 68 72 69 66 74 2d 69 6c 6c 75 73 74 72 61 74 65 64 18 09 62 79 74 65 73 3a 00 01 7f 19 55 06 02 08 02 0a 1a 38 05 61 6c 70 68 61 04 62 65 74 61 05 67 61 6d 6d 61 1b 02 86 05 73 6d 61 6c 6c 0e 05 6c 61 72 67 65 80 98 dc 93 34 1c 15 0e 18 06 6e 65 73 74 65 64 00 19 2c 15 16 18 05 66 69 72 73 74 00 15 18 18 06 73 65 63 6f 6e 64 00 1b 02 5c 2a 15 2a 18 09 6d 61 70 2d 66 69 72 73 74 00 2c 15 2c 18 0a 6d 61 70 2d 73 65 63 6f 6e 64 00 15 9a 87 0c 15 06 18 0d 6f 70 74 69 6f 6e 61 6c 2d 6e 6f 74 65 00 00",
       "raw_size": 211,
       "seqid": 7,
@@ -1587,6 +1624,8 @@
           4
         ],
         "frame_length": 207,
+        "header_protocol": null,
+        "header_span": null,
         "payload_span": [
           4,
           211
@@ -1597,8 +1636,8 @@
   ],
   "metadata": {
     "bundler_version": "4.0.6",
-    "capture_id": "f621129d-3562-4e84-ac79-a1e40305472f",
-    "captured_at_utc": "2026-02-16T04:43:48Z",
+    "capture_id": "f977e09a-db71-49ac-960c-685969643073",
+    "captured_at_utc": "2026-02-16T21:19:29Z",
     "max_field_depth": 6,
     "max_highlights_per_message": 0,
     "max_string_value_bytes": 18,

@@ -58,7 +58,8 @@
                 "compact-buffered",
                 "compact-framed",
                 "json-buffered",
-                "json-framed"
+                "json-framed",
+                "header-header"
               ]
             },
             {

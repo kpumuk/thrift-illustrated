@@ -1,8 +1,8 @@
 {
   "combo": {
-    "id": "json-framed",
-    "protocol": "json",
-    "transport": "framed"
+    "id": "header-header",
+    "protocol": "header",
+    "transport": "header"
   },
   "dataset_errors": [],
   "messages": [
@@ -13,8 +13,8 @@
         "name": "ping",
         "seqid": 1,
         "span": [
-          4,
-          18
+          70,
+          78
         ],
         "type": "call"
       },
@@ -26,35 +26,38 @@
       "payload": {
         "fields": [],
         "span": [
-          18,
-          21
+          78,
+          79
         ],
         "struct": {
           "name": "args",
           "span": [
-            18,
-            21
+            78,
+            79
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 11 5b 31 2c 22 70 69 6e 67 22 2c 31 2c 31 2c 7b 7d 5d",
-      "raw_size": 21,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 4b 0f ff 00 00 00 00 00 00 00 0e 02 00 01 03 09 78 2d 74 69 2d 66 6c 6f 77 08 74 75 74 6f 72 69 61 6c 0b 78 2d 74 69 2d 6d 65 74 68 6f 64 04 70 69 6e 67 0a 78 2d 74 69 2d 73 65 71 69 64 01 31 00 00 00 82 21 01 04 70 69 6e 67 00",
+      "raw_size": 79,
       "seqid": 1,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 17,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 75,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          21
+          70
         ],
-        "type": "framed"
+        "payload_span": [
+          70,
+          79
+        ],
+        "type": "header"
       }
     },
     {
@@ -64,8 +67,8 @@
         "name": "ping",
         "seqid": 1,
         "span": [
-          4,
-          18
+          18,
+          26
         ],
         "type": "reply"
       },
@@ -77,35 +80,38 @@
       "payload": {
         "fields": [],
         "span": [
-          18,
-          21
+          26,
+          27
         ],
         "struct": {
           "name": "args",
           "span": [
-            18,
-            21
+            26,
+            27
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 11 5b 31 2c 22 70 69 6e 67 22 2c 32 2c 31 2c 7b 7d 5d",
-      "raw_size": 21,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 17 0f ff 00 00 00 00 00 00 00 01 02 00 00 00 82 41 01 04 70 69 6e 67 00",
+      "raw_size": 27,
       "seqid": 1,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 17,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 23,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          21
+          18
         ],
-        "type": "framed"
+        "payload_span": [
+          18,
+          27
+        ],
+        "type": "header"
       }
     },
     {
@@ -115,8 +121,8 @@
         "name": "add",
         "seqid": 2,
         "span": [
-          4,
-          17
+          66,
+          73
         ],
         "type": "call"
       },
@@ -132,8 +138,8 @@
             "id": 1,
             "name": "num1",
             "span": [
-              18,
-              31
+              73,
+              75
             ],
             "ttype": "i32",
             "value": 1
@@ -143,43 +149,46 @@
             "id": 2,
             "name": "num2",
             "span": [
-              31,
-              45
+              75,
+              77
             ],
             "ttype": "i32",
             "value": 1
           }
         ],
         "span": [
-          17,
-          47
+          73,
+          78
         ],
         "struct": {
           "name": "args",
           "span": [
-            17,
-            47
+            73,
+            78
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 2b 5b 31 2c 22 61 64 64 22 2c 31 2c 32 2c 7b 22 31 22 3a 7b 22 69 33 32 22 3a 31 7d 2c 22 32 22 3a 7b 22 69 33 32 22 3a 31 7d 7d 5d",
-      "raw_size": 47,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 4a 0f ff 00 00 00 00 00 00 00 0d 02 00 01 03 09 78 2d 74 69 2d 66 6c 6f 77 08 74 75 74 6f 72 69 61 6c 0b 78 2d 74 69 2d 6d 65 74 68 6f 64 03 61 64 64 0a 78 2d 74 69 2d 73 65 71 69 64 01 32 82 21 02 03 61 64 64 15 02 15 02 00",
+      "raw_size": 78,
       "seqid": 2,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 43,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 74,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          47
+          66
         ],
-        "type": "framed"
+        "payload_span": [
+          66,
+          78
+        ],
+        "type": "header"
       }
     },
     {
@@ -189,8 +198,8 @@
         "name": "add",
         "seqid": 2,
         "span": [
-          4,
-          17
+          18,
+          25
         ],
         "type": "reply"
       },
@@ -206,43 +215,46 @@
             "id": 0,
             "name": "success",
             "span": [
-              18,
-              31
+              25,
+              28
             ],
             "ttype": "i32",
             "value": 2
           }
         ],
         "span": [
-          17,
-          33
+          25,
+          29
         ],
         "struct": {
           "name": "args",
           "span": [
-            17,
-            33
+            25,
+            29
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 1d 5b 31 2c 22 61 64 64 22 2c 32 2c 32 2c 7b 22 30 22 3a 7b 22 69 33 32 22 3a 32 7d 7d 5d",
-      "raw_size": 33,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 19 0f ff 00 00 00 00 00 00 00 01 02 00 00 00 82 41 02 03 61 64 64 05 00 04 00",
+      "raw_size": 29,
       "seqid": 2,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 29,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 25,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          33
+          18
         ],
-        "type": "framed"
+        "payload_span": [
+          18,
+          29
+        ],
+        "type": "header"
       }
     },
     {
@@ -252,8 +264,8 @@
         "name": "add",
         "seqid": 3,
         "span": [
-          4,
-          17
+          66,
+          73
         ],
         "type": "call"
       },
@@ -269,8 +281,8 @@
             "id": 1,
             "name": "num1",
             "span": [
-              18,
-              31
+              73,
+              75
             ],
             "ttype": "i32",
             "value": 1
@@ -280,43 +292,46 @@
             "id": 2,
             "name": "num2",
             "span": [
-              31,
-              45
+              75,
+              77
             ],
             "ttype": "i32",
             "value": 4
           }
         ],
         "span": [
-          17,
-          47
+          73,
+          78
         ],
         "struct": {
           "name": "args",
           "span": [
-            17,
-            47
+            73,
+            78
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 2b 5b 31 2c 22 61 64 64 22 2c 31 2c 33 2c 7b 22 31 22 3a 7b 22 69 33 32 22 3a 31 7d 2c 22 32 22 3a 7b 22 69 33 32 22 3a 34 7d 7d 5d",
-      "raw_size": 47,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 4a 0f ff 00 00 00 00 00 00 00 0d 02 00 01 03 09 78 2d 74 69 2d 66 6c 6f 77 08 74 75 74 6f 72 69 61 6c 0b 78 2d 74 69 2d 6d 65 74 68 6f 64 03 61 64 64 0a 78 2d 74 69 2d 73 65 71 69 64 01 33 82 21 03 03 61 64 64 15 02 15 08 00",
+      "raw_size": 78,
       "seqid": 3,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 43,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 74,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          47
+          66
         ],
-        "type": "framed"
+        "payload_span": [
+          66,
+          78
+        ],
+        "type": "header"
       }
     },
     {
@@ -326,8 +341,8 @@
         "name": "add",
         "seqid": 3,
         "span": [
-          4,
-          17
+          18,
+          25
         ],
         "type": "reply"
       },
@@ -343,43 +358,46 @@
             "id": 0,
             "name": "success",
             "span": [
-              18,
-              31
+              25,
+              28
             ],
             "ttype": "i32",
             "value": 5
           }
         ],
         "span": [
-          17,
-          33
+          25,
+          29
         ],
         "struct": {
           "name": "args",
           "span": [
-            17,
-            33
+            25,
+            29
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 1d 5b 31 2c 22 61 64 64 22 2c 32 2c 33 2c 7b 22 30 22 3a 7b 22 69 33 32 22 3a 35 7d 7d 5d",
-      "raw_size": 33,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 19 0f ff 00 00 00 00 00 00 00 01 02 00 00 00 82 41 03 03 61 64 64 05 00 0a 00",
+      "raw_size": 29,
       "seqid": 3,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 29,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 25,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          33
+          18
         ],
-        "type": "framed"
+        "payload_span": [
+          18,
+          29
+        ],
+        "type": "header"
       }
     },
     {
@@ -389,8 +407,8 @@
         "name": "calculate",
         "seqid": 4,
         "span": [
-          4,
-          23
+          74,
+          87
         ],
         "type": "call"
       },
@@ -406,8 +424,8 @@
             "id": 1,
             "name": "logid",
             "span": [
-              24,
-              37
+              87,
+              89
             ],
             "ttype": "i32",
             "value": 1
@@ -421,8 +439,8 @@
                     "id": 1,
                     "name": "num1",
                     "span": [
-                      50,
-                      64
+                      90,
+                      92
                     ],
                     "ttype": "i32",
                     "value": 15
@@ -432,8 +450,8 @@
                     "id": 2,
                     "name": "num2",
                     "span": [
-                      64,
-                      79
+                      92,
+                      94
                     ],
                     "ttype": "i32",
                     "value": 10
@@ -443,8 +461,8 @@
                     "id": 3,
                     "name": "op",
                     "span": [
-                      79,
-                      93
+                      94,
+                      96
                     ],
                     "ttype": "i32",
                     "value": 2
@@ -453,8 +471,8 @@
                 "id": 2,
                 "name": "struct",
                 "span": [
-                  48,
-                  94
+                  90,
+                  97
                 ],
                 "ttype": "struct",
                 "value": null
@@ -463,43 +481,46 @@
             "id": 2,
             "name": "w",
             "span": [
-              37,
-              94
+              89,
+              97
             ],
             "ttype": "struct",
             "value": null
           }
         ],
         "span": [
-          23,
-          97
+          87,
+          98
         ],
         "struct": {
           "name": "args",
           "span": [
-            23,
-            97
+            87,
+            98
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 5d 5b 31 2c 22 63 61 6c 63 75 6c 61 74 65 22 2c 31 2c 34 2c 7b 22 31 22 3a 7b 22 69 33 32 22 3a 31 7d 2c 22 32 22 3a 7b 22 72 65 63 22 3a 7b 22 31 22 3a 7b 22 69 33 32 22 3a 31 35 7d 2c 22 32 22 3a 7b 22 69 33 32 22 3a 31 30 7d 2c 22 33 22 3a 7b 22 69 33 32 22 3a 32 7d 7d 7d 7d 5d",
-      "raw_size": 97,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 5e 0f ff 00 00 00 00 00 00 00 0f 02 00 01 03 09 78 2d 74 69 2d 66 6c 6f 77 08 74 75 74 6f 72 69 61 6c 0b 78 2d 74 69 2d 6d 65 74 68 6f 64 09 63 61 6c 63 75 6c 61 74 65 0a 78 2d 74 69 2d 73 65 71 69 64 01 34 00 00 82 21 04 09 63 61 6c 63 75 6c 61 74 65 15 02 1c 15 1e 15 14 15 04 00 00",
+      "raw_size": 98,
       "seqid": 4,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 93,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 94,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          97
+          74
         ],
-        "type": "framed"
+        "payload_span": [
+          74,
+          98
+        ],
+        "type": "header"
       }
     },
     {
@@ -509,8 +530,8 @@
         "name": "calculate",
         "seqid": 4,
         "span": [
-          4,
-          23
+          18,
+          31
         ],
         "type": "reply"
       },
@@ -526,43 +547,46 @@
             "id": 0,
             "name": "success",
             "span": [
-              24,
-              37
+              31,
+              34
             ],
             "ttype": "i32",
             "value": 5
           }
         ],
         "span": [
-          23,
-          39
+          31,
+          35
         ],
         "struct": {
           "name": "args",
           "span": [
-            23,
-            39
+            31,
+            35
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 23 5b 31 2c 22 63 61 6c 63 75 6c 61 74 65 22 2c 32 2c 34 2c 7b 22 30 22 3a 7b 22 69 33 32 22 3a 35 7d 7d 5d",
-      "raw_size": 39,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 1f 0f ff 00 00 00 00 00 00 00 01 02 00 00 00 82 41 04 09 63 61 6c 63 75 6c 61 74 65 05 00 0a 00",
+      "raw_size": 35,
       "seqid": 4,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 35,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 31,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          39
+          18
         ],
-        "type": "framed"
+        "payload_span": [
+          18,
+          35
+        ],
+        "type": "header"
       }
     },
     {
@@ -572,8 +596,8 @@
         "name": "getStruct",
         "seqid": 5,
         "span": [
-          4,
-          23
+          74,
+          87
         ],
         "type": "call"
       },
@@ -589,43 +613,46 @@
             "id": 1,
             "name": "key",
             "span": [
-              24,
-              37
+              87,
+              89
             ],
             "ttype": "i32",
             "value": 1
           }
         ],
         "span": [
-          23,
-          39
+          87,
+          90
         ],
         "struct": {
           "name": "args",
           "span": [
-            23,
-            39
+            87,
+            90
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 23 5b 31 2c 22 67 65 74 53 74 72 75 63 74 22 2c 31 2c 35 2c 7b 22 31 22 3a 7b 22 69 33 32 22 3a 31 7d 7d 5d",
-      "raw_size": 39,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 56 0f ff 00 00 00 00 00 00 00 0f 02 00 01 03 09 78 2d 74 69 2d 66 6c 6f 77 08 74 75 74 6f 72 69 61 6c 0b 78 2d 74 69 2d 6d 65 74 68 6f 64 09 67 65 74 53 74 72 75 63 74 0a 78 2d 74 69 2d 73 65 71 69 64 01 35 00 00 82 21 05 09 67 65 74 53 74 72 75 63 74 15 02 00",
+      "raw_size": 90,
       "seqid": 5,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 35,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 86,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          39
+          74
         ],
-        "type": "framed"
+        "payload_span": [
+          74,
+          90
+        ],
+        "type": "header"
       }
     },
     {
@@ -635,8 +662,8 @@
         "name": "getStruct",
         "seqid": 5,
         "span": [
-          4,
-          23
+          18,
+          31
         ],
         "type": "reply"
       },
@@ -656,8 +683,8 @@
                     "id": 1,
                     "name": "key",
                     "span": [
-                      36,
-                      49
+                      33,
+                      35
                     ],
                     "ttype": "i32",
                     "value": 1
@@ -667,8 +694,8 @@
                     "id": 2,
                     "name": "value",
                     "span": [
-                      49,
-                      64
+                      35,
+                      38
                     ],
                     "ttype": "string",
                     "value": "5"
@@ -677,8 +704,8 @@
                 "id": 0,
                 "name": "struct",
                 "span": [
-                  34,
-                  66
+                  33,
+                  39
                 ],
                 "ttype": "struct",
                 "value": null
@@ -687,43 +714,46 @@
             "id": 0,
             "name": "success",
             "span": [
-              24,
-              66
+              31,
+              39
             ],
             "ttype": "struct",
             "value": null
           }
         ],
         "span": [
-          23,
-          69
+          31,
+          40
         ],
         "struct": {
           "name": "args",
           "span": [
-            23,
-            69
+            31,
+            40
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 41 5b 31 2c 22 67 65 74 53 74 72 75 63 74 22 2c 32 2c 35 2c 7b 22 30 22 3a 7b 22 72 65 63 22 3a 7b 22 31 22 3a 7b 22 69 33 32 22 3a 31 7d 2c 22 32 22 3a 7b 22 73 74 72 22 3a 22 35 22 7d 7d 7d 7d 5d",
-      "raw_size": 69,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 24 0f ff 00 00 00 00 00 00 00 01 02 00 00 00 82 41 05 09 67 65 74 53 74 72 75 63 74 0c 00 15 02 18 01 35 00 00",
+      "raw_size": 40,
       "seqid": 5,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 65,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 36,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          69
+          18
         ],
-        "type": "framed"
+        "payload_span": [
+          18,
+          40
+        ],
+        "type": "header"
       }
     },
     {
@@ -733,8 +763,8 @@
         "name": "calculate",
         "seqid": 6,
         "span": [
-          4,
-          23
+          74,
+          87
         ],
         "type": "call"
       },
@@ -750,8 +780,8 @@
             "id": 1,
             "name": "logid",
             "span": [
-              24,
-              37
+              87,
+              89
             ],
             "ttype": "i32",
             "value": 1
@@ -765,8 +795,8 @@
                     "id": 1,
                     "name": "num1",
                     "span": [
-                      50,
-                      63
+                      90,
+                      92
                     ],
                     "ttype": "i32",
                     "value": 1
@@ -776,8 +806,8 @@
                     "id": 2,
                     "name": "num2",
                     "span": [
-                      63,
-                      77
+                      92,
+                      94
                     ],
                     "ttype": "i32",
                     "value": 0
@@ -787,8 +817,8 @@
                     "id": 3,
                     "name": "op",
                     "span": [
-                      77,
-                      91
+                      94,
+                      96
                     ],
                     "ttype": "i32",
                     "value": 4
@@ -797,8 +827,8 @@
                 "id": 2,
                 "name": "struct",
                 "span": [
-                  48,
-                  92
+                  90,
+                  97
                 ],
                 "ttype": "struct",
                 "value": null
@@ -807,43 +837,46 @@
             "id": 2,
             "name": "w",
             "span": [
-              37,
-              92
+              89,
+              97
             ],
             "ttype": "struct",
             "value": null
           }
         ],
         "span": [
-          23,
-          95
+          87,
+          98
         ],
         "struct": {
           "name": "args",
           "span": [
-            23,
-            95
+            87,
+            98
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 5b 5b 31 2c 22 63 61 6c 63 75 6c 61 74 65 22 2c 31 2c 36 2c 7b 22 31 22 3a 7b 22 69 33 32 22 3a 31 7d 2c 22 32 22 3a 7b 22 72 65 63 22 3a 7b 22 31 22 3a 7b 22 69 33 32 22 3a 31 7d 2c 22 32 22 3a 7b 22 69 33 32 22 3a 30 7d 2c 22 33 22 3a 7b 22 69 33 32 22 3a 34 7d 7d 7d 7d 5d",
-      "raw_size": 95,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 5e 0f ff 00 00 00 00 00 00 00 0f 02 00 01 03 09 78 2d 74 69 2d 66 6c 6f 77 08 74 75 74 6f 72 69 61 6c 0b 78 2d 74 69 2d 6d 65 74 68 6f 64 09 63 61 6c 63 75 6c 61 74 65 0a 78 2d 74 69 2d 73 65 71 69 64 01 36 00 00 82 21 06 09 63 61 6c 63 75 6c 61 74 65 15 02 1c 15 02 15 00 15 08 00 00",
+      "raw_size": 98,
       "seqid": 6,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 91,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 94,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          95
+          74
         ],
-        "type": "framed"
+        "payload_span": [
+          74,
+          98
+        ],
+        "type": "header"
       }
     },
     {
@@ -853,8 +886,8 @@
         "name": "calculate",
         "seqid": 6,
         "span": [
-          4,
-          23
+          18,
+          31
         ],
         "type": "reply"
       },
@@ -874,8 +907,8 @@
                     "id": 1,
                     "name": "whatOp",
                     "span": [
-                      36,
-                      49
+                      32,
+                      34
                     ],
                     "ttype": "i32",
                     "value": 4
@@ -885,8 +918,8 @@
                     "id": 2,
                     "name": "why",
                     "span": [
-                      49,
-                      81
+                      34,
+                      54
                     ],
                     "ttype": "string",
                     "value": "Cannot divide by 0"
@@ -895,8 +928,8 @@
                 "id": 1,
                 "name": "struct",
                 "span": [
-                  34,
-                  83
+                  32,
+                  55
                 ],
                 "ttype": "struct",
                 "value": null
@@ -905,43 +938,46 @@
             "id": 1,
             "name": "ouch",
             "span": [
-              24,
-              83
+              31,
+              55
             ],
             "ttype": "struct",
             "value": null
           }
         ],
         "span": [
-          23,
-          86
+          31,
+          56
         ],
         "struct": {
           "name": "args",
           "span": [
-            23,
-            86
+            31,
+            56
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 00 52 5b 31 2c 22 63 61 6c 63 75 6c 61 74 65 22 2c 32 2c 36 2c 7b 22 31 22 3a 7b 22 72 65 63 22 3a 7b 22 31 22 3a 7b 22 69 33 32 22 3a 34 7d 2c 22 32 22 3a 7b 22 73 74 72 22 3a 22 43 61 6e 6e 6f 74 20 64 69 76 69 64 65 20 62 79 20 30 22 7d 7d 7d 7d 5d",
-      "raw_size": 86,
+      "protocol": "compact",
+      "raw_hex": "00 00 00 34 0f ff 00 00 00 00 00 00 00 01 02 00 00 00 82 41 06 09 63 61 6c 63 75 6c 61 74 65 1c 15 08 18 12 43 61 6e 6e 6f 74 20 64 69 76 69 64 65 20 62 79 20 30 00 00",
+      "raw_size": 56,
       "seqid": 6,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 82,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 52,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          86
+          18
         ],
-        "type": "framed"
+        "payload_span": [
+          18,
+          56
+        ],
+        "type": "header"
       }
     },
     {
@@ -951,8 +987,8 @@
         "name": "zip",
         "seqid": 7,
         "span": [
-          4,
-          17
+          66,
+          73
         ],
         "type": "oneway"
       },
@@ -972,8 +1008,8 @@
                     "id": 1,
                     "name": "bool_value",
                     "span": [
-                      30,
-                      42
+                      74,
+                      75
                     ],
                     "ttype": "bool",
                     "value": true
@@ -983,8 +1019,8 @@
                     "id": 2,
                     "name": "byte_value",
                     "span": [
-                      42,
-                      56
+                      75,
+                      77
                     ],
                     "ttype": "byte",
                     "value": 42
@@ -994,8 +1030,8 @@
                     "id": 3,
                     "name": "i16_value",
                     "span": [
-                      56,
-                      74
+                      77,
+                      81
                     ],
                     "ttype": "i16",
                     "value": 12345
@@ -1005,8 +1041,8 @@
                     "id": 4,
                     "name": "i32_value",
                     "span": [
-                      74,
-                      97
+                      81,
+                      87
                     ],
                     "ttype": "i32",
                     "value": 1234567890
@@ -1016,8 +1052,8 @@
                     "id": 5,
                     "name": "i64_value",
                     "span": [
-                      97,
-                      123
+                      87,
+                      94
                     ],
                     "ttype": "i64",
                     "value": 1234567890123
@@ -1027,8 +1063,8 @@
                     "id": 6,
                     "name": "double_value",
                     "span": [
-                      123,
-                      153
+                      94,
+                      103
                     ],
                     "ttype": "double",
                     "value": 3.141592653589793
@@ -1038,8 +1074,8 @@
                     "id": 7,
                     "name": "string_value",
                     "span": [
-                      153,
-                      185
+                      103,
+                      123
                     ],
                     "ttype": "string",
                     "value": "thrift-illustrated"
@@ -1049,11 +1085,11 @@
                     "id": 8,
                     "name": "binary_value",
                     "span": [
-                      186,
-                      212
+                      123,
+                      134
                     ],
                     "ttype": "string",
-                    "value": "Ynl0ZXM6AAF/"
+                    "value": "bytes:\u0000\u0001"
                   },
                   {
                     "children": [
@@ -1062,8 +1098,8 @@
                         "id": 0,
                         "name": "list_0",
                         "span": [
-                          234,
-                          236
+                          136,
+                          137
                         ],
                         "ttype": "i32",
                         "value": 3
@@ -1073,8 +1109,8 @@
                         "id": 1,
                         "name": "list_1",
                         "span": [
-                          236,
-                          238
+                          137,
+                          138
                         ],
                         "ttype": "i32",
                         "value": 1
@@ -1084,8 +1120,8 @@
                         "id": 2,
                         "name": "list_2",
                         "span": [
-                          238,
-                          240
+                          138,
+                          139
                         ],
                         "ttype": "i32",
                         "value": 4
@@ -1095,8 +1131,8 @@
                         "id": 3,
                         "name": "list_3",
                         "span": [
-                          240,
-                          242
+                          139,
+                          140
                         ],
                         "ttype": "i32",
                         "value": 1
@@ -1106,8 +1142,8 @@
                         "id": 4,
                         "name": "list_4",
                         "span": [
-                          242,
-                          244
+                          140,
+                          141
                         ],
                         "ttype": "i32",
                         "value": 5
@@ -1116,8 +1152,8 @@
                     "id": 9,
                     "name": "list_value",
                     "span": [
-                      213,
-                      244
+                      134,
+                      141
                     ],
                     "ttype": "list",
                     "value": null
@@ -1129,8 +1165,8 @@
                         "id": 0,
                         "name": "set_0",
                         "span": [
-                          267,
-                          274
+                          143,
+                          149
                         ],
                         "ttype": "string",
                         "value": "alpha"
@@ -1140,8 +1176,8 @@
                         "id": 1,
                         "name": "set_1",
                         "span": [
-                          274,
-                          281
+                          149,
+                          154
                         ],
                         "ttype": "string",
                         "value": "beta"
@@ -1151,8 +1187,8 @@
                         "id": 2,
                         "name": "set_2",
                         "span": [
-                          281,
-                          289
+                          154,
+                          160
                         ],
                         "ttype": "string",
                         "value": "gamma"
@@ -1161,8 +1197,8 @@
                     "id": 10,
                     "name": "set_value",
                     "span": [
-                      245,
-                      290
+                      141,
+                      160
                     ],
                     "ttype": "set",
                     "value": null
@@ -1176,8 +1212,8 @@
                             "id": "key",
                             "name": "key",
                             "span": [
-                              320,
-                              330
+                              163,
+                              170
                             ],
                             "ttype": "string",
                             "value": "small"
@@ -1187,8 +1223,8 @@
                             "id": "value",
                             "name": "value",
                             "span": [
-                              320,
-                              330
+                              163,
+                              170
                             ],
                             "ttype": "i64",
                             "value": 7
@@ -1197,8 +1233,8 @@
                         "id": 0,
                         "name": "entry_0",
                         "span": [
-                          320,
-                          330
+                          163,
+                          170
                         ],
                         "ttype": "map_entry",
                         "value": null
@@ -1210,8 +1246,8 @@
                             "id": "key",
                             "name": "key",
                             "span": [
-                              330,
-                              349
+                              170,
+                              181
                             ],
                             "ttype": "string",
                             "value": "large"
@@ -1221,8 +1257,8 @@
                             "id": "value",
                             "name": "value",
                             "span": [
-                              330,
-                              349
+                              170,
+                              181
                             ],
                             "ttype": "i64",
                             "value": 7000000000
@@ -1231,8 +1267,8 @@
                         "id": 1,
                         "name": "entry_1",
                         "span": [
-                          330,
-                          349
+                          170,
+                          181
                         ],
                         "ttype": "map_entry",
                         "value": null
@@ -1241,8 +1277,8 @@
                     "id": 11,
                     "name": "map_value",
                     "span": [
-                      291,
-                      350
+                      160,
+                      181
                     ],
                     "ttype": "map",
                     "value": null
@@ -1256,8 +1292,8 @@
                             "id": 1,
                             "name": "key",
                             "span": [
-                              365,
-                              378
+                              182,
+                              184
                             ],
                             "ttype": "i32",
                             "value": 7
@@ -1267,8 +1303,8 @@
                             "id": 2,
                             "name": "value",
                             "span": [
-                              378,
-                              398
+                              184,
+                              192
                             ],
                             "ttype": "string",
                             "value": "nested"
@@ -1277,8 +1313,8 @@
                         "id": 12,
                         "name": "struct",
                         "span": [
-                          363,
-                          400
+                          182,
+                          193
                         ],
                         "ttype": "struct",
                         "value": null
@@ -1287,8 +1323,8 @@
                     "id": 12,
                     "name": "struct_value",
                     "span": [
-                      351,
-                      400
+                      181,
+                      193
                     ],
                     "ttype": "struct",
                     "value": null
@@ -1304,8 +1340,8 @@
                                 "id": 1,
                                 "name": "key",
                                 "span": [
-                                  424,
-                                  438
+                                  195,
+                                  197
                                 ],
                                 "ttype": "i32",
                                 "value": 11
@@ -1315,8 +1351,8 @@
                                 "id": 2,
                                 "name": "value",
                                 "span": [
-                                  438,
-                                  457
+                                  197,
+                                  204
                                 ],
                                 "ttype": "string",
                                 "value": "first"
@@ -1325,8 +1361,8 @@
                             "id": 0,
                             "name": "struct",
                             "span": [
-                              423,
-                              459
+                              195,
+                              205
                             ],
                             "ttype": "struct",
                             "value": null
@@ -1335,8 +1371,8 @@
                         "id": 0,
                         "name": "list_0",
                         "span": [
-                          423,
-                          459
+                          195,
+                          205
                         ],
                         "ttype": "struct",
                         "value": null
@@ -1350,8 +1386,8 @@
                                 "id": 1,
                                 "name": "key",
                                 "span": [
-                                  461,
-                                  475
+                                  205,
+                                  207
                                 ],
                                 "ttype": "i32",
                                 "value": 12
@@ -1361,8 +1397,8 @@
                                 "id": 2,
                                 "name": "value",
                                 "span": [
-                                  475,
-                                  495
+                                  207,
+                                  215
                                 ],
                                 "ttype": "string",
                                 "value": "second"
@@ -1371,8 +1407,8 @@
                             "id": 1,
                             "name": "struct",
                             "span": [
-                              459,
-                              497
+                              205,
+                              216
                             ],
                             "ttype": "struct",
                             "value": null
@@ -1381,8 +1417,8 @@
                         "id": 1,
                         "name": "list_1",
                         "span": [
-                          459,
-                          497
+                          205,
+                          216
                         ],
                         "ttype": "struct",
                         "value": null
@@ -1391,8 +1427,8 @@
                     "id": 13,
                     "name": "struct_list_value",
                     "span": [
-                      401,
-                      498
+                      193,
+                      216
                     ],
                     "ttype": "list",
                     "value": null
@@ -1406,8 +1442,8 @@
                             "id": "key",
                             "name": "key",
                             "span": [
-                              528,
-                              573
+                              219,
+                              234
                             ],
                             "ttype": "i32",
                             "value": 21
@@ -1421,8 +1457,8 @@
                                     "id": 1,
                                     "name": "key",
                                     "span": [
-                                      534,
-                                      548
+                                      220,
+                                      222
                                     ],
                                     "ttype": "i32",
                                     "value": 21
@@ -1432,8 +1468,8 @@
                                     "id": 2,
                                     "name": "value",
                                     "span": [
-                                      548,
-                                      571
+                                      222,
+                                      233
                                     ],
                                     "ttype": "string",
                                     "value": "map-first"
@@ -1442,8 +1478,8 @@
                                 "id": "value",
                                 "name": "struct",
                                 "span": [
-                                  532,
-                                  573
+                                  220,
+                                  234
                                 ],
                                 "ttype": "struct",
                                 "value": null
@@ -1452,8 +1488,8 @@
                             "id": "value",
                             "name": "value",
                             "span": [
-                              528,
-                              573
+                              219,
+                              234
                             ],
                             "ttype": "struct",
                             "value": null
@@ -1462,8 +1498,8 @@
                         "id": 0,
                         "name": "entry_0",
                         "span": [
-                          528,
-                          573
+                          219,
+                          234
                         ],
                         "ttype": "map_entry",
                         "value": null
@@ -1475,8 +1511,8 @@
                             "id": "key",
                             "name": "key",
                             "span": [
-                              573,
-                              620
+                              234,
+                              250
                             ],
                             "ttype": "i32",
                             "value": 22
@@ -1490,8 +1526,8 @@
                                     "id": 1,
                                     "name": "key",
                                     "span": [
-                                      580,
-                                      594
+                                      235,
+                                      237
                                     ],
                                     "ttype": "i32",
                                     "value": 22
@@ -1501,8 +1537,8 @@
                                     "id": 2,
                                     "name": "value",
                                     "span": [
-                                      594,
-                                      618
+                                      237,
+                                      249
                                     ],
                                     "ttype": "string",
                                     "value": "map-second"
@@ -1511,8 +1547,8 @@
                                 "id": "value",
                                 "name": "struct",
                                 "span": [
-                                  578,
-                                  620
+                                  235,
+                                  250
                                 ],
                                 "ttype": "struct",
                                 "value": null
@@ -1521,8 +1557,8 @@
                             "id": "value",
                             "name": "value",
                             "span": [
-                              573,
-                              620
+                              234,
+                              250
                             ],
                             "ttype": "struct",
                             "value": null
@@ -1531,8 +1567,8 @@
                         "id": 1,
                         "name": "entry_1",
                         "span": [
-                          573,
-                          620
+                          234,
+                          250
                         ],
                         "ttype": "map_entry",
                         "value": null
@@ -1541,8 +1577,8 @@
                     "id": 14,
                     "name": "struct_map_value",
                     "span": [
-                      499,
-                      622
+                      216,
+                      250
                     ],
                     "ttype": "map",
                     "value": null
@@ -1552,8 +1588,8 @@
                     "id": 15,
                     "name": "typedef_value",
                     "span": [
-                      623,
-                      642
+                      250,
+                      254
                     ],
                     "ttype": "i32",
                     "value": 98765
@@ -1563,8 +1599,8 @@
                     "id": 16,
                     "name": "enum_value",
                     "span": [
-                      642,
-                      657
+                      254,
+                      256
                     ],
                     "ttype": "i32",
                     "value": 3
@@ -1574,8 +1610,8 @@
                     "id": 17,
                     "name": "optional_text",
                     "span": [
-                      657,
-                      685
+                      256,
+                      271
                     ],
                     "ttype": "string",
                     "value": "optional-note"
@@ -1584,8 +1620,8 @@
                 "id": 1,
                 "name": "struct",
                 "span": [
-                  28,
-                  687
+                  74,
+                  272
                 ],
                 "ttype": "struct",
                 "value": null
@@ -1594,49 +1630,52 @@
             "id": 1,
             "name": "payload",
             "span": [
-              18,
-              687
+              73,
+              272
             ],
             "ttype": "struct",
             "value": null
           }
         ],
         "span": [
-          17,
-          690
+          73,
+          273
         ],
         "struct": {
           "name": "args",
           "span": [
-            17,
-            690
+            73,
+            273
           ],
           "ttype": "struct"
         }
       },
-      "protocol": "json",
-      "raw_hex": "00 00 02 ae 5b 31 2c 22 7a 69 70 22 2c 34 2c 37 2c 7b 22 31 22 3a 7b 22 72 65 63 22 3a 7b 22 31 22 3a 7b 22 74 66 22 3a 31 7d 2c 22 32 22 3a 7b 22 69 38 22 3a 34 32 7d 2c 22 33 22 3a 7b 22 69 31 36 22 3a 31 32 33 34 35 7d 2c 22 34 22 3a 7b 22 69 33 32 22 3a 31 32 33 34 35 36 37 38 39 30 7d 2c 22 35 22 3a 7b 22 69 36 34 22 3a 31 32 33 34 35 36 37 38 39 30 31 32 33 7d 2c 22 36 22 3a 7b 22 64 62 6c 22 3a 33 2e 31 34 31 35 39 32 36 35 33 35 38 39 37 39 33 7d 2c 22 37 22 3a 7b 22 73 74 72 22 3a 22 74 68 72 69 66 74 2d 69 6c 6c 75 73 74 72 61 74 65 64 22 7d 2c 22 38 22 3a 7b 22 73 74 72 22 3a 22 59 6e 6c 30 5a 58 4d 36 41 41 46 2f 22 7d 2c 22 39 22 3a 7b 22 6c 73 74 22 3a 5b 22 69 33 32 22 2c 35 2c 33 2c 31 2c 34 2c 31 2c 35 5d 7d 2c 22 31 30 22 3a 7b 22 73 65 74 22 3a 5b 22 73 74 72 22 2c 33 2c 22 61 6c 70 68 61 22 2c 22 62 65 74 61 22 2c 22 67 61 6d 6d 61 22 5d 7d 2c 22 31 31 22 3a 7b 22 6d 61 70 22 3a 5b 22 73 74 72 22 2c 22 69 36 34 22 2c 32 2c 7b 22 73 6d 61 6c 6c 22 3a 37 2c 22 6c 61 72 67 65 22 3a 37 30 30 30 30 30 30 30 30 30 7d 5d 7d 2c 22 31 32 22 3a 7b 22 72 65 63 22 3a 7b 22 31 22 3a 7b 22 69 33 32 22 3a 37 7d 2c 22 32 22 3a 7b 22 73 74 72 22 3a 22 6e 65 73 74 65 64 22 7d 7d 7d 2c 22 31 33 22 3a 7b 22 6c 73 74 22 3a 5b 22 72 65 63 22 2c 32 2c 7b 22 31 22 3a 7b 22 69 33 32 22 3a 31 31 7d 2c 22 32 22 3a 7b 22 73 74 72 22 3a 22 66 69 72 73 74 22 7d 7d 2c 7b 22 31 22 3a 7b 22 69 33 32 22 3a 31 32 7d 2c 22 32 22 3a 7b 22 73 74 72 22 3a 22 73 65 63 6f 6e 64 22 7d 7d 5d 7d 2c 22 31 34 22 3a 7b 22 6d 61 70 22 3a 5b 22 69 33 32 22 2c 22 72 65 63 22 2c 32 2c 7b 22 32 31 22 3a 7b 22 31 22 3a 7b 22 69 33 32 22 3a 32 31 7d 2c 22 32 22 3a 7b 22 73 74 72 22 3a 22 6d 61 70 2d 66 69 72 73 74 22 7d 7d 2c 22 32 32 22 3a 7b 22 31 22 3a 7b 22 69 33 32 22 3a 32 32 7d 2c 22 32 22 3a 7b 22 73 74 72 22 3a 22 6d 61 70 2d 73 65 63 6f 6e 64 22 7d 7d 7d 5d 7d 2c 22 31 35 22 3a 7b 22 69 33 32 22 3a 39 38 37 36 35 7d 2c 22 31 36 22 3a 7b 22 69 33 32 22 3a 33 7d 2c 22 31 37 22 3a 7b 22 73 74 72 22 3a 22 6f 70 74 69 6f 6e 61 6c 2d 6e 6f 74 65 22 7d 7d 7d 7d 5d",
-      "raw_size": 690,
+      "protocol": "compact",
+      "raw_hex": "00 00 01 0d 0f ff 00 00 00 00 00 00 00 0d 02 00 01 03 09 78 2d 74 69 2d 66 6c 6f 77 08 74 75 74 6f 72 69 61 6c 0b 78 2d 74 69 2d 6d 65 74 68 6f 64 03 7a 69 70 0a 78 2d 74 69 2d 73 65 71 69 64 01 37 82 81 07 03 7a 69 70 1c 11 13 2a 14 f2 c0 01 15 a4 8b b0 99 09 16 96 93 d8 9f ee 47 17 18 2d 44 54 fb 21 09 40 18 12 74 68 72 69 66 74 2d 69 6c 6c 75 73 74 72 61 74 65 64 18 09 62 79 74 65 73 3a 00 01 7f 19 55 06 02 08 02 0a 1a 38 05 61 6c 70 68 61 04 62 65 74 61 05 67 61 6d 6d 61 1b 02 86 05 73 6d 61 6c 6c 0e 05 6c 61 72 67 65 80 98 dc 93 34 1c 15 0e 18 06 6e 65 73 74 65 64 00 19 2c 15 16 18 05 66 69 72 73 74 00 15 18 18 06 73 65 63 6f 6e 64 00 1b 02 5c 2a 15 2a 18 09 6d 61 70 2d 66 69 72 73 74 00 2c 15 2c 18 0a 6d 61 70 2d 73 65 63 6f 6e 64 00 15 9a 87 0c 15 06 18 0d 6f 70 74 69 6f 6e 61 6c 2d 6e 6f 74 65 00 00",
+      "raw_size": 273,
       "seqid": 7,
       "transport": {
         "frame_header_span": [
           0,
           4
         ],
-        "frame_length": 686,
-        "header_protocol": null,
-        "header_span": null,
-        "payload_span": [
+        "frame_length": 269,
+        "header_protocol": "compact",
+        "header_span": [
           4,
-          690
+          66
         ],
-        "type": "framed"
+        "payload_span": [
+          66,
+          273
+        ],
+        "type": "header"
       }
     }
   ],
   "metadata": {
     "bundler_version": "4.0.6",
-    "capture_id": "70e45e08-5689-4795-87d9-dd31e9c72025",
+    "capture_id": "1b338f05-6afe-4343-8ca5-ac1877f6bdee",
     "captured_at_utc": "2026-02-16T21:19:29Z",
     "max_field_depth": 6,
     "max_highlights_per_message": 0,

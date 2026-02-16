@@ -17,14 +17,15 @@ const COMBO_IDS = [
   "compact-buffered",
   "compact-framed",
   "json-buffered",
-  "json-framed"
+  "json-framed",
+  "header-header"
 ]
 
 const MESSAGE_TYPES = new Set(["call", "reply", "exception", "oneway"])
 const ACTORS = new Set(["client", "server"])
 const DIRECTIONS = new Set(["client->server", "server->client"])
-const PROTOCOLS = new Set(["binary", "compact", "json"])
-const TRANSPORTS = new Set(["buffered", "framed"])
+const PROTOCOLS = new Set(["binary", "compact", "json", "header"])
+const TRANSPORTS = new Set(["buffered", "framed", "header"])
 
 const DATASET_ERROR_CODES = new Set([
   "E_TUTORIAL_FLOW_MISMATCH",
@@ -88,6 +89,8 @@ async function bootstrap() {
       void applyNavigationFromHash().then(render).catch(handleRuntimeError)
     })
     window.addEventListener("resize", scheduleResponsiveRerender)
+    rawHexEl.addEventListener("pointermove", handleHexPointerMove)
+    rawHexEl.addEventListener("pointerleave", clearInteraction)
   } catch (error) {
     handleRuntimeError(error)
   }
@@ -255,27 +258,29 @@ function renderComboPicker() {
   comboPickerEl.append(
     buildComboRow({
       label: "Transport",
-      options: ["buffered", "framed"],
+      options: ["buffered", "framed", "header"],
       selected: selectedTransport,
       onPick: (transport) => {
         const nextCombo = resolveComboId({
           protocol: selectedProtocol,
           transport,
-          fallbackId: selectedCombo.id
+          fallbackId: selectedCombo.id,
+          prefer: "transport"
         })
         updateSelection(nextCombo, state.messageIndex)
       }
     }),
     buildComboRow({
       label: "Protocol",
-      options: ["binary", "compact", "json"],
+      options: ["binary", "compact", "json", "header"],
       selected: selectedProtocol,
       formatOptionLabel: protocolLabel,
       onPick: (protocol) => {
         const nextCombo = resolveComboId({
           protocol,
           transport: selectedTransport,
-          fallbackId: selectedCombo.id
+          fallbackId: selectedCombo.id,
+          prefer: "protocol"
         })
         updateSelection(nextCombo, state.messageIndex)
       }
@@ -311,9 +316,14 @@ function buildComboRow({ label, options, selected, onPick, formatOptionLabel = (
   return row
 }
 
-function resolveComboId({ protocol, transport, fallbackId }) {
+function resolveComboId({ protocol, transport, fallbackId, prefer }) {
   const exact = state.manifest.combos.find((combo) => combo.protocol === protocol && combo.transport === transport)
   if (exact) return exact.id
+
+  if (prefer === "transport") {
+    const transportOnly = state.manifest.combos.find((combo) => combo.transport === transport)
+    if (transportOnly) return transportOnly.id
+  }
 
   const protocolOnly = state.manifest.combos.find((combo) => combo.protocol === protocol)
   if (protocolOnly) return protocolOnly.id
@@ -326,6 +336,7 @@ function resolveComboId({ protocol, transport, fallbackId }) {
 
 function protocolLabel(protocol) {
   if (protocol === "json") return "JSON"
+  if (protocol === "header") return "Header"
   return protocol
 }
 
@@ -404,6 +415,7 @@ function renderMessageDetails() {
   const message = state.dataset.messages[state.messageIndex]
   const transport = message.transport || {}
   const envelope = message.envelope || {}
+  const messageProtocol = message.protocol || state.dataset.combo.protocol
 
   summaryEl.innerHTML = ""
   addSummary("Actor", message.actor)
@@ -412,12 +424,12 @@ function renderMessageDetails() {
   addSummary("Type", message.message_type)
   addSummary("SeqID", String(message.seqid))
   addSummary("Raw Size", String(message.raw_size))
-  addSummary("Protocol", protocolLabel(state.dataset.combo.protocol))
+  addSummary("Protocol", protocolLabel(messageProtocol))
   addSummary("Transport", `${transport.type}${transport.frame_length != null ? ` (${transport.frame_length})` : ""}`)
   addSummary("Envelope Span", spanToString(envelope.span))
   addSummary("Payload Span", spanToString(message.payload?.span))
 
-  state.interaction = createInteractionModel(message, state.dataset.combo.protocol)
+  state.interaction = createInteractionModel(message, messageProtocol)
   renderRawBytes(message, state.interaction)
   renderFieldTree(message.payload?.fields || [], state.interaction)
   renderByteExplanation(state.interaction)
@@ -578,7 +590,6 @@ function createByteToken({ interaction, index, text, variant }) {
   token.dataset.byteIndex = String(index)
   token.tabIndex = 0
   token.addEventListener("mouseenter", () => activateByteInteraction(index))
-  token.addEventListener("mouseleave", clearInteraction)
   token.addEventListener("focus", () => activateByteInteraction(index))
   token.addEventListener("blur", clearInteraction)
   token.addEventListener("click", () => selectByteGroup(index))
@@ -590,6 +601,51 @@ function createByteToken({ interaction, index, text, variant }) {
   })
   registerByteElement(interaction, index, token)
   return token
+}
+
+function handleHexPointerMove(event) {
+  if (!state.interaction || !state.dataset || state.blockingError) return
+
+  const byteToken = event.target instanceof Element
+    ? event.target.closest(".byte-token[data-byte-index]")
+    : null
+  if (byteToken) {
+    const directIndex = Number.parseInt(byteToken.dataset.byteIndex || "", 10)
+    if (Number.isInteger(directIndex) && directIndex >= 0) {
+      activateByteInteraction(directIndex)
+      return
+    }
+  }
+
+  const inferredIndex = nearestByteIndexForPoint(event.clientX, event.clientY)
+  if (Number.isInteger(inferredIndex)) {
+    activateByteInteraction(inferredIndex)
+  }
+}
+
+function nearestByteIndexForPoint(clientX, clientY) {
+  if (!state.interaction) return null
+
+  let bestIndex = null
+  let bestDistance = Number.POSITIVE_INFINITY
+
+  for (const [byteIndex, elements] of state.interaction.byteElements.entries()) {
+    for (const element of elements) {
+      const rect = element.getBoundingClientRect()
+      const centerX = (rect.left + rect.right) / 2
+      const centerY = (rect.top + rect.bottom) / 2
+      const dx = clientX - centerX
+      const dy = clientY - centerY
+      const distance = (dx * dx) + (dy * dy)
+
+      if (distance < bestDistance) {
+        bestDistance = distance
+        bestIndex = byteIndex
+      }
+    }
+  }
+
+  return bestIndex
 }
 
 function createHexdumpPlaceholder(variant) {
@@ -620,6 +676,8 @@ function createInteractionModel(message, protocol) {
   const payloadSpan = clampSpan(message.payload?.span, message.raw_size)
   const envelopeSpan = clampSpan(message.envelope?.span, message.raw_size)
   const frameHeaderSpan = clampSpan(message.transport?.frame_header_span, message.raw_size)
+  const headerSpan = clampSpan(message.transport?.header_span, message.raw_size)
+  const headerProtocol = message.transport?.header_protocol || null
   const interaction = {
     message,
     protocol,
@@ -630,12 +688,15 @@ function createInteractionModel(message, protocol) {
     fieldByByte: new Array(message.raw_size).fill(null),
     activeFieldKey: null,
     activeByteIndex: null,
+    activeGroupId: null,
     activeSubfieldId: null,
+    selectedSubfieldId: null,
     selectedGroupId: null,
     hexdumpRowBytes: null,
     groupByByte: new Array(message.raw_size).fill(null),
     groups: new Map(),
-    subfields: new Map()
+    subfields: new Map(),
+    subfieldToGroup: new Map()
   }
 
   for (const field of fields) {
@@ -716,6 +777,7 @@ function createInteractionModel(message, protocol) {
     })
     for (const subfield of subfields) {
       interaction.subfields.set(subfield.id, subfield)
+      interaction.subfieldToGroup.set(subfield.id, groupId)
     }
     for (let index = start; index < end; index += 1) {
       interaction.groupByByte[index] = groupId
@@ -742,19 +804,39 @@ function createInteractionModel(message, protocol) {
   assignGroupIfUnassigned(interaction, {
     id: "frame-header",
     type: "frame-header",
-    label: "Framed transport header",
-    description: "Encodes the 4-byte big-endian framed-transport payload length prefix.",
+    label: (message.transport?.type === "header") ? "Header transport length prefix" : "Framed transport header",
+    description: (message.transport?.type === "header")
+      ? "Encodes the 4-byte big-endian header-transport frame length prefix."
+      : "Encodes the 4-byte big-endian framed-transport payload length prefix.",
     start: frameHeaderSpan[0],
     end: frameHeaderSpan[1]
   })
+
+  if (message.transport?.type === "header") {
+    assignGroupIfUnassigned(interaction, {
+      id: "header-transport",
+      type: "header-transport",
+      label: "Header transport metadata",
+      description: "Header transport metadata between the length prefix and protocol payload; subfields break down fixed header fields and metadata varints.",
+      start: headerSpan[0],
+      end: headerSpan[1],
+      subfields: buildHeaderTransportSubfields({
+        rawBytes,
+        headerSpan,
+        headerProtocol
+      })
+    })
+  }
 
   assignPayloadStructuralGroups(interaction, payloadSpan)
   assignFallbackGroups(interaction)
 
   if (payloadSpan[0] < payloadSpan[1]) {
     interaction.selectedGroupId = interaction.groupByByte[payloadSpan[0]]
+    interaction.selectedSubfieldId = subfieldIdForByte(interaction, interaction.selectedGroupId, payloadSpan[0])
   } else {
     interaction.selectedGroupId = interaction.groupByByte[0]
+    interaction.selectedSubfieldId = subfieldIdForByte(interaction, interaction.selectedGroupId, 0)
   }
 
   return interaction
@@ -786,35 +868,67 @@ function fieldKeyFromGroupId(groupId) {
   return groupId.startsWith("field:") ? groupId.slice("field:".length) : null
 }
 
+function subfieldIdForByte(interaction, groupId, byteIndex) {
+  if (!interaction || !Number.isInteger(byteIndex) || byteIndex < 0) return null
+  if (typeof groupId !== "string") return null
+
+  const group = interaction.groups.get(groupId)
+  if (!group || !Array.isArray(group.subfields)) return null
+
+  let bestId = null
+  let bestSpan = Number.POSITIVE_INFINITY
+  for (const subfield of group.subfields) {
+    if (byteIndex < subfield.start || byteIndex >= subfield.end) continue
+    const span = subfield.end - subfield.start
+    if (span < bestSpan) {
+      bestSpan = span
+      bestId = subfield.id
+    }
+  }
+  return bestId
+}
+
 function activateFieldInteraction(fieldKey) {
   if (!state.interaction) return
+  const groupId = groupIdForFieldKey(fieldKey)
   state.interaction.activeFieldKey = fieldKey
+  state.interaction.activeGroupId = state.interaction.groups.has(groupId) ? groupId : null
   state.interaction.activeByteIndex = null
+  state.interaction.activeSubfieldId = null
   applyInteractionClasses()
 }
 
 function activateByteInteraction(byteIndex) {
   if (!state.interaction) return
+  const groupId = state.interaction.groupByByte[byteIndex] || null
   const fieldKey = state.interaction.fieldByByte[byteIndex] || null
+  const subfieldId = subfieldIdForByte(state.interaction, groupId, byteIndex)
+  state.interaction.activeGroupId = groupId
   state.interaction.activeFieldKey = fieldKey
   state.interaction.activeByteIndex = byteIndex
+  state.interaction.activeSubfieldId = subfieldId
   applyInteractionClasses()
 }
 
 function clearInteraction() {
   if (!state.interaction) return
+  state.interaction.activeGroupId = null
   state.interaction.activeFieldKey = null
   state.interaction.activeByteIndex = null
+  state.interaction.activeSubfieldId = null
   applyInteractionClasses()
 }
 
 function selectByteGroup(byteIndex) {
   if (!state.interaction) return
   const selectedGroupId = state.interaction.groupByByte[byteIndex] || null
+  const selectedSubfieldId = subfieldIdForByte(state.interaction, selectedGroupId, byteIndex)
   state.interaction.selectedGroupId = selectedGroupId
+  state.interaction.selectedSubfieldId = selectedSubfieldId
+  state.interaction.activeGroupId = selectedGroupId
   state.interaction.activeFieldKey = fieldKeyFromGroupId(selectedGroupId) || null
   state.interaction.activeByteIndex = byteIndex
-  state.interaction.activeSubfieldId = null
+  state.interaction.activeSubfieldId = selectedSubfieldId
   renderByteExplanation(state.interaction)
   applyInteractionClasses()
 }
@@ -824,10 +938,15 @@ function selectFieldGroup(fieldKey) {
   const selectedGroupId = groupIdForFieldKey(fieldKey)
   if (!state.interaction.groups.has(selectedGroupId)) return
   const fieldBytes = state.interaction.bytesByField.get(fieldKey) || []
+  const focusByte = fieldBytes.length > 0 ? fieldBytes[0] : null
   state.interaction.selectedGroupId = selectedGroupId
+  state.interaction.selectedSubfieldId = Number.isInteger(focusByte)
+    ? subfieldIdForByte(state.interaction, selectedGroupId, focusByte)
+    : null
+  state.interaction.activeGroupId = selectedGroupId
   state.interaction.activeFieldKey = fieldKey
-  state.interaction.activeByteIndex = fieldBytes.length > 0 ? fieldBytes[0] : null
-  state.interaction.activeSubfieldId = null
+  state.interaction.activeByteIndex = focusByte
+  state.interaction.activeSubfieldId = state.interaction.selectedSubfieldId
   renderByteExplanation(state.interaction)
   applyInteractionClasses()
 }
@@ -841,6 +960,27 @@ function activateSubfield(subfieldId) {
 function clearSubfield() {
   if (!state.interaction) return
   state.interaction.activeSubfieldId = null
+  applyInteractionClasses()
+}
+
+function toggleSubfieldSelection(subfieldId) {
+  if (!state.interaction) return
+  if (!state.interaction.subfields.has(subfieldId)) return
+
+  if (state.interaction.selectedSubfieldId === subfieldId) {
+    state.interaction.selectedSubfieldId = null
+    state.interaction.activeSubfieldId = null
+    applyInteractionClasses()
+    return
+  }
+
+  const groupId = state.interaction.subfieldToGroup.get(subfieldId) || state.interaction.selectedGroupId
+  state.interaction.selectedGroupId = groupId || state.interaction.selectedGroupId
+  state.interaction.selectedSubfieldId = subfieldId
+  state.interaction.activeSubfieldId = subfieldId
+  state.interaction.activeGroupId = groupId || state.interaction.activeGroupId
+  state.interaction.activeFieldKey = fieldKeyFromGroupId(state.interaction.selectedGroupId) || null
+  renderByteExplanation(state.interaction)
   applyInteractionClasses()
 }
 
@@ -871,10 +1011,13 @@ function renderByteExplanation(interaction) {
   if (Array.isArray(group.subfields) && group.subfields.length > 0) {
     const breakdownTitle = document.createElement("div")
     breakdownTitle.className = "byte-subfields-title"
-    breakdownTitle.textContent =
-      group.type === "envelope"
-        ? "Envelope subfields (hover to highlight bytes):"
-        : "Field subfields (hover to highlight bytes):"
+    if (group.type === "envelope") {
+      breakdownTitle.textContent = "Envelope subfields (hover to preview bytes, click to lock):"
+    } else if (group.type === "field") {
+      breakdownTitle.textContent = "Field subfields (hover to preview bytes, click to lock):"
+    } else {
+      breakdownTitle.textContent = "Subfields (hover to preview bytes, click to lock):"
+    }
     byteExplainerEl.append(breakdownTitle)
 
     const list = document.createElement("ul")
@@ -891,6 +1034,7 @@ function renderByteExplanation(interaction) {
       button.addEventListener("mouseleave", clearSubfield)
       button.addEventListener("focus", () => activateSubfield(subfield.id))
       button.addEventListener("blur", clearSubfield)
+      button.addEventListener("click", () => toggleSubfieldSelection(subfield.id))
 
       const description = document.createElement("div")
       description.className = "byte-subfield-description"
@@ -909,6 +1053,12 @@ function applyInteractionClasses() {
 
   const activeFieldKey = state.interaction.activeFieldKey
   const highlightedBytes = new Set(activeFieldKey ? state.interaction.bytesByField.get(activeFieldKey) || [] : [])
+  const hoverGroup = state.interaction.activeGroupId
+    ? state.interaction.groups.get(state.interaction.activeGroupId)
+    : null
+  const hoverGroupBytes = hoverGroup
+    ? new Set(rangeIndices(hoverGroup.start, hoverGroup.end))
+    : new Set()
   const selectedGroup = state.interaction.selectedGroupId
     ? state.interaction.groups.get(state.interaction.selectedGroupId)
     : null
@@ -916,9 +1066,19 @@ function applyInteractionClasses() {
   const selectedBytes = selectedGroup
     ? new Set(rangeIndices(selectedGroup.start, selectedGroup.end))
     : new Set()
+  const selectedSubfield = state.interaction.selectedSubfieldId
+    ? state.interaction.subfields.get(state.interaction.selectedSubfieldId)
+    : null
   const activeSubfield = state.interaction.activeSubfieldId
     ? state.interaction.subfields.get(state.interaction.activeSubfieldId)
     : null
+  const suppressSelectedSubfield =
+    Boolean(activeSubfield) &&
+    Boolean(selectedSubfield) &&
+    activeSubfield.id !== selectedSubfield.id
+  const selectedSubfieldBytes = (!suppressSelectedSubfield && selectedSubfield)
+    ? new Set(rangeIndices(selectedSubfield.start, selectedSubfield.end))
+    : new Set()
   const activeSubfieldBytes = activeSubfield
     ? new Set(rangeIndices(activeSubfield.start, activeSubfield.end))
     : new Set()
@@ -932,7 +1092,9 @@ function applyInteractionClasses() {
     for (const element of elements) {
       element.classList.toggle("is-hover-active", highlightedBytes.has(byteIndex))
       element.classList.toggle("is-byte-focus", byteIndex === state.interaction.activeByteIndex)
+      element.classList.toggle("is-group-hover", hoverGroupBytes.has(byteIndex))
       element.classList.toggle("is-group-selected", selectedBytes.has(byteIndex))
+      element.classList.toggle("is-subfield-selected", selectedSubfieldBytes.has(byteIndex))
       element.classList.toggle("is-subfield-active", activeSubfieldBytes.has(byteIndex))
     }
   }
@@ -941,6 +1103,7 @@ function applyInteractionClasses() {
   for (const button of subfieldButtons) {
     const id = button.dataset.subfieldId || ""
     button.classList.toggle("is-active", id === state.interaction.activeSubfieldId)
+    button.classList.toggle("is-selected", id === state.interaction.selectedSubfieldId)
   }
 }
 
@@ -950,6 +1113,7 @@ function assignGroupIfUnassigned(interaction, group) {
   if (Array.isArray(group.subfields)) {
     for (const subfield of group.subfields) {
       interaction.subfields.set(subfield.id, subfield)
+      interaction.subfieldToGroup.set(subfield.id, group.id)
     }
   }
   for (let index = group.start; index < group.end; index += 1) {
@@ -1176,6 +1340,274 @@ function fillSubfieldGaps(subfields, span, idPrefix, label) {
       gapStart = null
     }
   }
+}
+
+function buildHeaderTransportSubfields({ rawBytes, headerSpan, headerProtocol }) {
+  if (headerSpan[0] >= headerSpan[1]) return []
+
+  const subfields = []
+  const pushSubfield = (id, label, description, start, end) => {
+    if (start >= end) return
+    subfields.push({ id, label, description, start, end })
+  }
+
+  const start = headerSpan[0]
+  const end = headerSpan[1]
+  const magic = (start + 2 <= end) ? readInt16BE(rawBytes, start) : null
+  const flags = (start + 4 <= end) ? readInt16BE(rawBytes, start + 2) : null
+  const seqid = (start + 8 <= end) ? readInt32BE(rawBytes, start + 4) : null
+  const headerWords = (start + 10 <= end) ? readInt16BE(rawBytes, start + 8) : null
+  const metadataStart = Math.min(start + 10, end)
+
+  pushSubfield(
+    "header.transport.magic",
+    "Header magic",
+    magic === null
+      ? "2-byte header-transport magic marker (expected 0x0fff)."
+      : `2-byte header-transport magic marker: ${hexWord(magic & 0xffff)}.`,
+    start,
+    Math.min(start + 2, end)
+  )
+  pushSubfield(
+    "header.transport.flags",
+    "Flags",
+    flags === null
+      ? "2-byte header-transport flags field."
+      : `2-byte header-transport flags field: ${hexWord(flags & 0xffff)}.`,
+    start + 2,
+    Math.min(start + 4, end)
+  )
+  pushSubfield(
+    "header.transport.seqid",
+    "Header sequence id",
+    seqid === null
+      ? "4-byte unsigned sequence id in the transport header."
+      : `4-byte unsigned sequence id in the transport header: ${seqid >>> 0}.`,
+    start + 4,
+    Math.min(start + 8, end)
+  )
+  pushSubfield(
+    "header.transport.header_words",
+    "Header words",
+    headerWords === null
+      ? "2-byte count of metadata 32-bit words."
+      : `2-byte count of metadata 32-bit words: ${headerWords}.`,
+    start + 8,
+    Math.min(start + 10, end)
+  )
+
+  const protocolVarint = decodeCompactVarint(rawBytes, metadataStart, end)
+  if (protocolVarint.length > 0) {
+    const protocolId = protocolVarint.value
+    const protocolName = headerProtocol || headerSubprotocolName(protocolId)
+    pushSubfield(
+      "header.transport.protocol_id",
+      "Payload protocol id varint",
+      `Varint protocol id in header metadata. Decoded value: ${protocolId}${protocolName ? ` (${protocolName})` : ""}.`,
+      metadataStart,
+      metadataStart + protocolVarint.length
+    )
+  }
+
+  let cursor = metadataStart + protocolVarint.length
+  const transformCountVarint = decodeCompactVarint(rawBytes, cursor, end)
+  if (transformCountVarint.length > 0) {
+    pushSubfield(
+      "header.transport.transform_count",
+      "Transform count varint",
+      `Varint count of payload transforms declared in header metadata: ${transformCountVarint.value}.`,
+      cursor,
+      cursor + transformCountVarint.length
+    )
+    cursor += transformCountVarint.length
+  }
+
+  const transformsToRead = clamp(transformCountVarint.value || 0, 0, 16)
+  for (let index = 0; index < transformsToRead && cursor < end; index += 1) {
+    const transformVarint = decodeCompactVarint(rawBytes, cursor, end)
+    if (transformVarint.length <= 0) break
+    pushSubfield(
+      `header.transport.transform.${index}`,
+      `Transform id ${index}`,
+      `Varint transport transform identifier ${transformVarint.value}.`,
+      cursor,
+      cursor + transformVarint.length
+    )
+    cursor += transformVarint.length
+  }
+
+  let infoIndex = 0
+  while (cursor < end) {
+    const infoTypeStart = cursor
+    const infoTypeVarint = decodeCompactVarint(rawBytes, cursor, end)
+    if (infoTypeVarint.length <= 0) break
+
+    const infoType = infoTypeVarint.value
+    cursor += infoTypeVarint.length
+    pushSubfield(
+      `header.transport.info_type.${infoIndex}`,
+      `Info type ${infoIndex}`,
+      `Varint info section type identifier: ${infoType}.`,
+      infoTypeStart,
+      cursor
+    )
+
+    if (infoType === 0) {
+      // Type 0 marks padding start to the end of metadata words.
+      pushHeaderPaddingSubfields({
+        subfields,
+        rawBytes,
+        start: cursor,
+        end
+      })
+      cursor = end
+      break
+    }
+
+    if (infoType !== 1) {
+      pushSubfield(
+        `header.transport.info_payload_unknown.${infoIndex}`,
+        `Info payload ${infoIndex}`,
+        "Unknown info section type payload bytes.",
+        cursor,
+        end
+      )
+      cursor = end
+      break
+    }
+
+    const kvCountStart = cursor
+    const kvCountVarint = decodeCompactVarint(rawBytes, cursor, end)
+    if (kvCountVarint.length <= 0) break
+    cursor += kvCountVarint.length
+    pushSubfield(
+      `header.transport.kv_count.${infoIndex}`,
+      `KV pair count ${infoIndex}`,
+      `Varint count of key/value headers in this section: ${kvCountVarint.value}.`,
+      kvCountStart,
+      cursor
+    )
+
+    const kvPairs = clamp(kvCountVarint.value, 0, 64)
+    for (let kvIndex = 0; kvIndex < kvPairs && cursor < end; kvIndex += 1) {
+      const keyLengthStart = cursor
+      const keyLengthVarint = decodeCompactVarint(rawBytes, cursor, end)
+      if (keyLengthVarint.length <= 0) break
+      cursor += keyLengthVarint.length
+      pushSubfield(
+        `header.transport.kv_key_len.${infoIndex}.${kvIndex}`,
+        `Key length ${kvIndex}`,
+        `Varint byte length of header key ${kvIndex}: ${keyLengthVarint.value}.`,
+        keyLengthStart,
+        cursor
+      )
+
+      const keyLength = clamp(keyLengthVarint.value, 0, Math.max(0, end - cursor))
+      const keyStart = cursor
+      const keyEnd = cursor + keyLength
+      const keyPreview = decodeHeaderString(rawBytes, keyStart, keyEnd)
+      pushSubfield(
+        `header.transport.kv_key.${infoIndex}.${kvIndex}`,
+        `Key bytes ${kvIndex}`,
+        `UTF-8 key bytes for header ${kvIndex}: "${keyPreview}".`,
+        keyStart,
+        keyEnd
+      )
+      cursor = keyEnd
+
+      const valueLengthStart = cursor
+      const valueLengthVarint = decodeCompactVarint(rawBytes, cursor, end)
+      if (valueLengthVarint.length <= 0) break
+      cursor += valueLengthVarint.length
+      pushSubfield(
+        `header.transport.kv_value_len.${infoIndex}.${kvIndex}`,
+        `Value length ${kvIndex}`,
+        `Varint byte length of header value ${kvIndex}: ${valueLengthVarint.value}.`,
+        valueLengthStart,
+        cursor
+      )
+
+      const valueLength = clamp(valueLengthVarint.value, 0, Math.max(0, end - cursor))
+      const valueStart = cursor
+      const valueEnd = cursor + valueLength
+      const valuePreview = decodeHeaderString(rawBytes, valueStart, valueEnd)
+      pushSubfield(
+        `header.transport.kv_value.${infoIndex}.${kvIndex}`,
+        `Value bytes ${kvIndex}`,
+        `UTF-8 value bytes for header ${kvIndex}: "${valuePreview}".`,
+        valueStart,
+        valueEnd
+      )
+      cursor = valueEnd
+    }
+
+    infoIndex += 1
+  }
+
+  if (cursor < end) {
+    pushHeaderPaddingSubfields({
+      subfields,
+      rawBytes,
+      start: cursor,
+      end
+    })
+  }
+
+  fillSubfieldGaps(subfields, headerSpan, "header.transport.unknown", "Header metadata bytes")
+  return subfields.sort((left, right) => left.start - right.start || left.end - right.end)
+}
+
+function headerSubprotocolName(protocolId) {
+  if (protocolId === 0) return "binary"
+  if (protocolId === 2) return "compact"
+  return null
+}
+
+function pushHeaderPaddingSubfields({ subfields, rawBytes, start, end }) {
+  if (start >= end) return
+
+  let cursor = start
+  while (cursor < end) {
+    const byte = byteAt(rawBytes, cursor)
+    const paddingStart = cursor
+    const isZero = byte === 0
+    cursor += 1
+    while (cursor < end) {
+      const next = byteAt(rawBytes, cursor)
+      if ((next === 0) !== isZero) break
+      cursor += 1
+    }
+    subfields.push({
+      id: `header.transport.padding.${paddingStart}-${cursor}`,
+      label: isZero ? "Padding bytes" : "Padding/unused bytes",
+      description: isZero
+        ? "Zero padding used to align header metadata to a 4-byte boundary."
+        : "Non-zero trailing metadata/padding bytes.",
+      start: paddingStart,
+      end: cursor
+    })
+  }
+}
+
+function decodeHeaderString(rawBytes, start, end) {
+  if (start >= end) return ""
+
+  const bytes = Uint8Array.from(rawBytes.slice(start, end))
+  try {
+    const decoded = new TextDecoder("utf-8", { fatal: true }).decode(bytes)
+    return shortenHeaderString(decoded)
+  } catch {
+    let ascii = ""
+    for (const value of bytes) {
+      ascii += (value >= 0x20 && value <= 0x7e) ? String.fromCharCode(value) : "."
+    }
+    return shortenHeaderString(ascii)
+  }
+}
+
+function shortenHeaderString(value) {
+  if (value.length <= 48) return value
+  return `${value.slice(0, 45)}...`
 }
 
 function buildEnvelopeSubfields({ protocol, rawBytes, envelopeSpan, envelopeName }) {
@@ -2420,6 +2852,10 @@ function byteAt(bytes, index) {
 
 function hexByte(value) {
   return `0x${value.toString(16).padStart(2, "0")}`
+}
+
+function hexWord(value) {
+  return `0x${value.toString(16).padStart(4, "0")}`
 }
 
 function binaryMessageTypeLabel(value) {

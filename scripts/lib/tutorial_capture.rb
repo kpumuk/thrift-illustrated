@@ -136,22 +136,25 @@ module ThriftIllustrated
       protocol = build_protocol(wrapped)
       client = Calculator::Client.new(protocol)
 
-      client.ping
+      with_request_headers(protocol, method: "ping", seqid: 1) { client.ping }
 
-      raise "Unexpected add(1, 1) response" unless client.add(1, 1) == 2
-      raise "Unexpected add(1, 4) response" unless client.add(1, 4) == 5
+      add_result_one = with_request_headers(protocol, method: "add", seqid: 2) { client.add(1, 1) }
+      raise "Unexpected add(1, 1) response" unless add_result_one == 2
+      add_result_two = with_request_headers(protocol, method: "add", seqid: 3) { client.add(1, 4) }
+      raise "Unexpected add(1, 4) response" unless add_result_two == 5
 
       subtract = Work.new(op: Operation::SUBTRACT, num1: 15, num2: 10)
-      raise "Unexpected calculate subtract response" unless client.calculate(1, subtract) == 5
+      subtract_result = with_request_headers(protocol, method: "calculate", seqid: 4) { client.calculate(1, subtract) }
+      raise "Unexpected calculate subtract response" unless subtract_result == 5
 
-      shared = client.getStruct(1)
+      shared = with_request_headers(protocol, method: "getStruct", seqid: 5) { client.getStruct(1) }
       unless shared.is_a?(SharedStruct) && shared.key == 1 && shared.value == "5"
         raise "Unexpected getStruct response"
       end
 
       divide = Work.new(op: Operation::DIVIDE, num1: 1, num2: 0)
       begin
-        client.calculate(1, divide)
+        with_request_headers(protocol, method: "calculate", seqid: 6) { client.calculate(1, divide) }
         raise "Expected InvalidOperation for divide-by-zero"
       rescue InvalidOperation => error
         unless error.whatOp == Operation::DIVIDE && error.why == "Cannot divide by 0"
@@ -159,7 +162,7 @@ module ThriftIllustrated
         end
       end
 
-      client.zip(build_zip_payload)
+      with_request_headers(protocol, method: "zip", seqid: 7) { client.zip(build_zip_payload) }
 
       {
         records: recording.records
@@ -175,6 +178,8 @@ module ThriftIllustrated
         Thrift::BufferedTransport.new(base_transport)
       when "framed"
         Thrift::FramedTransport.new(base_transport)
+      when "header"
+        Thrift::HeaderTransport.new(base_transport, nil, header_subprotocol_id)
       else
         raise ArgumentError, "Unsupported transport #{@transport.inspect}"
       end
@@ -188,8 +193,33 @@ module ThriftIllustrated
         Thrift::CompactProtocol.new(transport)
       when "json"
         Thrift::JsonProtocol.new(transport)
+      when "header"
+        Thrift::HeaderProtocol.new(transport, nil, header_subprotocol_id)
       else
         raise ArgumentError, "Unsupported protocol #{@protocol.inspect}"
+      end
+    end
+
+    def with_request_headers(protocol, method:, seqid:)
+      set_request_headers(protocol, method: method, seqid: seqid)
+      yield
+    end
+
+    def set_request_headers(protocol, method:, seqid:)
+      return unless @protocol == "header"
+      return unless protocol.respond_to?(:set_header)
+
+      protocol.set_header("x-ti-flow", "tutorial")
+      protocol.set_header("x-ti-method", method.to_s)
+      protocol.set_header("x-ti-seqid", seqid.to_s)
+    end
+
+    def header_subprotocol_id
+      case @protocol
+      when "binary"
+        Thrift::HeaderSubprotocolID::BINARY
+      else
+        Thrift::HeaderSubprotocolID::COMPACT
       end
     end
 
