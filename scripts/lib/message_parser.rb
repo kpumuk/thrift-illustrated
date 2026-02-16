@@ -34,6 +34,7 @@ module ThriftIllustrated
       max_string_bytes: 65_536,
       max_highlights: 1000
     }.freeze
+    GENERATED_STUB_DIR = File.expand_path("../../thrift/gen-rb", __dir__)
 
     class LimitExceeded < StandardError
       attr_reader :code, :offset, :severity
@@ -77,6 +78,7 @@ module ThriftIllustrated
       @max_recursion_depth = max_recursion_depth
       @max_string_bytes = max_string_bytes
       @max_highlights = max_highlights
+      @message_struct_registry = build_message_struct_registry
     end
 
     def parse_records(records:, protocol:, transport:, actor:, starting_index: 0)
@@ -289,12 +291,14 @@ module ThriftIllustrated
         payload_start = reader.position
 
         thrift_protocol.read_struct_begin
+        root_struct_class = resolve_message_struct_class(method: name, message_type: message_type)
         fields = read_struct_fields(
           protocol: thrift_protocol,
           reader: reader,
           depth: 0,
           stats: stats,
-          parse_errors: parse_errors
+          parse_errors: parse_errors,
+          struct_class: root_struct_class
         )
         thrift_protocol.read_struct_end
         thrift_protocol.read_message_end
@@ -432,7 +436,7 @@ module ThriftIllustrated
       }
     end
 
-    def read_struct_fields(protocol:, reader:, depth:, stats:, parse_errors:)
+    def read_struct_fields(protocol:, reader:, depth:, stats:, parse_errors:, struct_class:)
       ensure_depth!(depth: depth, offset: reader.position)
       stats[:max_depth] = [stats[:max_depth], depth].max
 
@@ -441,6 +445,7 @@ module ThriftIllustrated
         field_start = reader.position
         _name, field_type, field_id = protocol.read_field_begin
         break if field_type == Thrift::Types::STOP
+        field_schema = field_schema_for(struct_class, field_id)
 
         value = read_typed_value(
           protocol: protocol,
@@ -449,7 +454,8 @@ module ThriftIllustrated
           depth: depth + 1,
           stats: stats,
           parse_errors: parse_errors,
-          element_id: field_id
+          element_id: field_id,
+          schema: field_schema
         )
         field_end = reader.position
 
@@ -457,7 +463,7 @@ module ThriftIllustrated
 
         fields << build_field_node(
           id: field_id,
-          name: "field_#{field_id}",
+          name: field_name_for(field_id: field_id, field_schema: field_schema),
           ttype: type_name(field_type),
           span: [field_start, field_end],
           value: value[:value],
@@ -469,7 +475,7 @@ module ThriftIllustrated
       fields
     end
 
-    def read_typed_value(protocol:, reader:, type:, depth:, stats:, parse_errors:, element_id:)
+    def read_typed_value(protocol:, reader:, type:, depth:, stats:, parse_errors:, element_id:, schema:)
       ensure_depth!(depth: depth, offset: reader.position)
       stats[:max_depth] = [stats[:max_depth], depth].max
 
@@ -504,12 +510,14 @@ module ThriftIllustrated
       when Thrift::Types::STRUCT
         struct_start = reader.position
         protocol.read_struct_begin
+        child_struct_class = schema.is_a?(Hash) ? schema[:class] : nil
         children = read_struct_fields(
           protocol: protocol,
           reader: reader,
           depth: depth + 1,
           stats: stats,
-          parse_errors: parse_errors
+          parse_errors: parse_errors,
+          struct_class: child_struct_class
         )
         protocol.read_struct_end
         struct_end = reader.position
@@ -517,6 +525,7 @@ module ThriftIllustrated
         { value: nil, children: [build_field_node(id: element_id, name: "struct", ttype: "struct", span: [struct_start, struct_end], value: nil, children: children)] }
       when Thrift::Types::LIST
         etype, size = protocol.read_list_begin
+        element_schema = schema.is_a?(Hash) ? schema[:element] : nil
         children = read_collection_children(
           protocol: protocol,
           reader: reader,
@@ -525,12 +534,14 @@ module ThriftIllustrated
           depth: depth + 1,
           stats: stats,
           parse_errors: parse_errors,
-          label: "list"
+          label: "list",
+          item_schema: element_schema
         )
         protocol.read_list_end
         { value: nil, children: children }
       when Thrift::Types::SET
         etype, size = protocol.read_set_begin
+        element_schema = schema.is_a?(Hash) ? schema[:element] : nil
         children = read_collection_children(
           protocol: protocol,
           reader: reader,
@@ -539,12 +550,15 @@ module ThriftIllustrated
           depth: depth + 1,
           stats: stats,
           parse_errors: parse_errors,
-          label: "set"
+          label: "set",
+          item_schema: element_schema
         )
         protocol.read_set_end
         { value: nil, children: children }
       when Thrift::Types::MAP
         key_type, value_type, size = protocol.read_map_begin
+        key_schema = schema.is_a?(Hash) ? schema[:key] : nil
+        value_schema = schema.is_a?(Hash) ? schema[:value] : nil
         children = []
 
         size.times do |entry_index|
@@ -556,7 +570,8 @@ module ThriftIllustrated
             depth: depth + 1,
             stats: stats,
             parse_errors: parse_errors,
-            element_id: "key"
+            element_id: "key",
+            schema: key_schema
           )
           mapped_value = read_typed_value(
             protocol: protocol,
@@ -565,7 +580,8 @@ module ThriftIllustrated
             depth: depth + 1,
             stats: stats,
             parse_errors: parse_errors,
-            element_id: "value"
+            element_id: "value",
+            schema: value_schema
           )
           entry_end = reader.position
 
@@ -614,7 +630,7 @@ module ThriftIllustrated
       end
     end
 
-    def read_collection_children(protocol:, reader:, child_type:, size:, depth:, stats:, parse_errors:, label:)
+    def read_collection_children(protocol:, reader:, child_type:, size:, depth:, stats:, parse_errors:, label:, item_schema:)
       children = []
       size.times do |index|
         child_start = reader.position
@@ -625,7 +641,8 @@ module ThriftIllustrated
           depth: depth,
           stats: stats,
           parse_errors: parse_errors,
-          element_id: index
+          element_id: index,
+          schema: item_schema
         )
         child_end = reader.position
 
@@ -640,6 +657,54 @@ module ThriftIllustrated
         increment_field_count!(stats: stats, offset: child_end)
       end
       children
+    end
+
+    def resolve_message_struct_class(method:, message_type:)
+      @message_struct_registry[[method.to_s, message_type.to_s]]
+    end
+
+    def field_schema_for(struct_class, field_id)
+      return nil unless struct_class && field_id.is_a?(Integer)
+      return nil unless struct_class.const_defined?(:FIELDS)
+
+      fields = struct_class.const_get(:FIELDS)
+      fields[field_id]
+    rescue StandardError
+      nil
+    end
+
+    def field_name_for(field_id:, field_schema:)
+      schema_name = field_schema.is_a?(Hash) ? field_schema[:name] : nil
+      return schema_name.to_s unless schema_name.to_s.empty?
+
+      "field_#{field_id}"
+    end
+
+    def build_message_struct_registry
+      return {} unless File.file?(File.join(GENERATED_STUB_DIR, "calculator.rb"))
+
+      $LOAD_PATH.unshift(GENERATED_STUB_DIR) unless $LOAD_PATH.include?(GENERATED_STUB_DIR)
+      require "calculator"
+      require "shared_service"
+
+      registry = {}
+      register_message_struct(registry, "ping", "call", Calculator::Ping_args)
+      register_message_struct(registry, "add", "call", Calculator::Add_args)
+      register_message_struct(registry, "calculate", "call", Calculator::Calculate_args)
+      register_message_struct(registry, "zip", "oneway", Calculator::Zip_args)
+      register_message_struct(registry, "ping", "reply", Calculator::Ping_result)
+      register_message_struct(registry, "add", "reply", Calculator::Add_result)
+      register_message_struct(registry, "calculate", "reply", Calculator::Calculate_result)
+      register_message_struct(registry, "zip", "reply", Calculator::Zip_result)
+      register_message_struct(registry, "getStruct", "call", SharedService::GetStruct_args)
+      register_message_struct(registry, "getStruct", "reply", SharedService::GetStruct_result)
+      registry
+    rescue LoadError, StandardError
+      {}
+    end
+
+    def register_message_struct(registry, method, message_type, struct_class)
+      registry[[method, message_type]] = struct_class if struct_class
     end
 
     def build_field_node(id:, name:, ttype:, span:, value:, children:)

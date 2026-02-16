@@ -26,6 +26,25 @@ class IntegrationCaptureTest < Minitest::Test
   ].freeze
   EXPECTED_CLIENT_SEQIDS = [1, 2, 3, 4, 5, 6, 7].freeze
   EXPECTED_SERVER_SEQIDS = [1, 2, 3, 4, 5, 6].freeze
+  EXPECTED_ZIP_FIELD_NAMES = %w[
+    bool_value
+    byte_value
+    i16_value
+    i32_value
+    i64_value
+    double_value
+    string_value
+    binary_value
+    list_value
+    set_value
+    map_value
+    struct_value
+    struct_list_value
+    struct_map_value
+    typedef_value
+    enum_value
+    optional_text
+  ].freeze
 
   def test_capture_all_generates_expected_combo_artifacts_and_tutorial_flow
     Dir.mktmpdir("capture-integration", File.join(repo_root, "tmp")) do |output_dir|
@@ -70,6 +89,7 @@ class IntegrationCaptureTest < Minitest::Test
           .fetch("children")
           .fetch(0)
         assert_equal((1..17).to_a, zip_payload_struct.fetch("children").map { |field| field.fetch("id") })
+        assert_equal EXPECTED_ZIP_FIELD_NAMES, zip_payload_struct.fetch("children").map { |field| field.fetch("name") }
         zip_types = zip_payload_struct.fetch("children").map { |field| field.fetch("ttype") }
         %w[bool byte i16 i32 i64 double string list set map struct].each do |ttype|
           assert_includes zip_types, ttype

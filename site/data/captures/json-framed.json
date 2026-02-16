@@ -124,7 +124,7 @@
           {
             "children": [],
             "id": 1,
-            "name": "field_1",
+            "name": "num1",
             "span": [
               18,
               31
@@ -135,7 +135,7 @@
           {
             "children": [],
             "id": 2,
-            "name": "field_2",
+            "name": "num2",
             "span": [
               31,
               45
@@ -195,7 +195,7 @@
           {
             "children": [],
             "id": 0,
-            "name": "field_0",
+            "name": "success",
             "span": [
               18,
               31
@@ -255,7 +255,7 @@
           {
             "children": [],
             "id": 1,
-            "name": "field_1",
+            "name": "num1",
             "span": [
               18,
               31
@@ -266,7 +266,7 @@
           {
             "children": [],
             "id": 2,
-            "name": "field_2",
+            "name": "num2",
             "span": [
               31,
               45
@@ -326,7 +326,7 @@
           {
             "children": [],
             "id": 0,
-            "name": "field_0",
+            "name": "success",
             "span": [
               18,
               31
@@ -386,7 +386,7 @@
           {
             "children": [],
             "id": 1,
-            "name": "field_1",
+            "name": "logid",
             "span": [
               24,
               37
@@ -401,7 +401,7 @@
                   {
                     "children": [],
                     "id": 1,
-                    "name": "field_1",
+                    "name": "num1",
                     "span": [
                       50,
                       64
@@ -412,7 +412,7 @@
                   {
                     "children": [],
                     "id": 2,
-                    "name": "field_2",
+                    "name": "num2",
                     "span": [
                       64,
                       79
@@ -423,7 +423,7 @@
                   {
                     "children": [],
                     "id": 3,
-                    "name": "field_3",
+                    "name": "op",
                     "span": [
                       79,
                       93
@@ -443,7 +443,7 @@
               }
             ],
             "id": 2,
-            "name": "field_2",
+            "name": "w",
             "span": [
               37,
               94
@@ -503,7 +503,7 @@
           {
             "children": [],
             "id": 0,
-            "name": "field_0",
+            "name": "success",
             "span": [
               24,
               37
@@ -563,7 +563,7 @@
           {
             "children": [],
             "id": 1,
-            "name": "field_1",
+            "name": "key",
             "span": [
               24,
               37
@@ -627,7 +627,7 @@
                   {
                     "children": [],
                     "id": 1,
-                    "name": "field_1",
+                    "name": "key",
                     "span": [
                       36,
                       49
@@ -638,7 +638,7 @@
                   {
                     "children": [],
                     "id": 2,
-                    "name": "field_2",
+                    "name": "value",
                     "span": [
                       49,
                       64
@@ -658,7 +658,7 @@
               }
             ],
             "id": 0,
-            "name": "field_0",
+            "name": "success",
             "span": [
               24,
               66
@@ -718,7 +718,7 @@
           {
             "children": [],
             "id": 1,
-            "name": "field_1",
+            "name": "logid",
             "span": [
               24,
               37
@@ -733,7 +733,7 @@
                   {
                     "children": [],
                     "id": 1,
-                    "name": "field_1",
+                    "name": "num1",
                     "span": [
                       50,
                       63
@@ -744,7 +744,7 @@
                   {
                     "children": [],
                     "id": 2,
-                    "name": "field_2",
+                    "name": "num2",
                     "span": [
                       63,
                       77
@@ -755,7 +755,7 @@
                   {
                     "children": [],
                     "id": 3,
-                    "name": "field_3",
+                    "name": "op",
                     "span": [
                       77,
                       91
@@ -775,7 +775,7 @@
               }
             ],
             "id": 2,
-            "name": "field_2",
+            "name": "w",
             "span": [
               37,
               92
@@ -839,7 +839,7 @@
                   {
                     "children": [],
                     "id": 1,
-                    "name": "field_1",
+                    "name": "whatOp",
                     "span": [
                       36,
                       49
@@ -850,7 +850,7 @@
                   {
                     "children": [],
                     "id": 2,
-                    "name": "field_2",
+                    "name": "why",
                     "span": [
                       49,
                       81
@@ -870,7 +870,7 @@
               }
             ],
             "id": 1,
-            "name": "field_1",
+            "name": "ouch",
             "span": [
               24,
               83
@@ -934,7 +934,7 @@
                   {
                     "children": [],
                     "id": 1,
-                    "name": "field_1",
+                    "name": "bool_value",
                     "span": [
                       30,
                       42
@@ -945,7 +945,7 @@
                   {
                     "children": [],
                     "id": 2,
-                    "name": "field_2",
+                    "name": "byte_value",
                     "span": [
                       42,
                       56
@@ -956,7 +956,7 @@
                   {
                     "children": [],
                     "id": 3,
-                    "name": "field_3",
+                    "name": "i16_value",
                     "span": [
                       56,
                       74
@@ -967,7 +967,7 @@
                   {
                     "children": [],
                     "id": 4,
-                    "name": "field_4",
+                    "name": "i32_value",
                     "span": [
                       74,
                       97
@@ -978,7 +978,7 @@
                   {
                     "children": [],
                     "id": 5,
-                    "name": "field_5",
+                    "name": "i64_value",
                     "span": [
                       97,
                       123
@@ -989,7 +989,7 @@
                   {
                     "children": [],
                     "id": 6,
-                    "name": "field_6",
+                    "name": "double_value",
                     "span": [
                       123,
                       153
@@ -1000,7 +1000,7 @@
                   {
                     "children": [],
                     "id": 7,
-                    "name": "field_7",
+                    "name": "string_value",
                     "span": [
                       153,
                       185
@@ -1011,7 +1011,7 @@
                   {
                     "children": [],
                     "id": 8,
-                    "name": "field_8",
+                    "name": "binary_value",
                     "span": [
                       186,
                       212
@@ -1078,7 +1078,7 @@
                       }
                     ],
                     "id": 9,
-                    "name": "field_9",
+                    "name": "list_value",
                     "span": [
                       213,
                       244
@@ -1123,7 +1123,7 @@
                       }
                     ],
                     "id": 10,
-                    "name": "field_10",
+                    "name": "set_value",
                     "span": [
                       245,
                       290
@@ -1203,7 +1203,7 @@
                       }
                     ],
                     "id": 11,
-                    "name": "field_11",
+                    "name": "map_value",
                     "span": [
                       291,
                       350
@@ -1218,7 +1218,7 @@
                           {
                             "children": [],
                             "id": 1,
-                            "name": "field_1",
+                            "name": "key",
                             "span": [
                               365,
                               378
@@ -1229,7 +1229,7 @@
                           {
                             "children": [],
                             "id": 2,
-                            "name": "field_2",
+                            "name": "value",
                             "span": [
                               378,
                               398
@@ -1249,7 +1249,7 @@
                       }
                     ],
                     "id": 12,
-                    "name": "field_12",
+                    "name": "struct_value",
                     "span": [
                       351,
                       400
@@ -1266,7 +1266,7 @@
                               {
                                 "children": [],
                                 "id": 1,
-                                "name": "field_1",
+                                "name": "key",
                                 "span": [
                                   424,
                                   438
@@ -1277,7 +1277,7 @@
                               {
                                 "children": [],
                                 "id": 2,
-                                "name": "field_2",
+                                "name": "value",
                                 "span": [
                                   438,
                                   457
@@ -1312,7 +1312,7 @@
                               {
                                 "children": [],
                                 "id": 1,
-                                "name": "field_1",
+                                "name": "key",
                                 "span": [
                                   461,
                                   475
@@ -1323,7 +1323,7 @@
                               {
                                 "children": [],
                                 "id": 2,
-                                "name": "field_2",
+                                "name": "value",
                                 "span": [
                                   475,
                                   495
@@ -1353,7 +1353,7 @@
                       }
                     ],
                     "id": 13,
-                    "name": "field_13",
+                    "name": "struct_list_value",
                     "span": [
                       401,
                       498
@@ -1383,7 +1383,7 @@
                                   {
                                     "children": [],
                                     "id": 1,
-                                    "name": "field_1",
+                                    "name": "key",
                                     "span": [
                                       534,
                                       548
@@ -1394,7 +1394,7 @@
                                   {
                                     "children": [],
                                     "id": 2,
-                                    "name": "field_2",
+                                    "name": "value",
                                     "span": [
                                       548,
                                       571
@@ -1452,7 +1452,7 @@
                                   {
                                     "children": [],
                                     "id": 1,
-                                    "name": "field_1",
+                                    "name": "key",
                                     "span": [
                                       580,
                                       594
@@ -1463,7 +1463,7 @@
                                   {
                                     "children": [],
                                     "id": 2,
-                                    "name": "field_2",
+                                    "name": "value",
                                     "span": [
                                       594,
                                       618
@@ -1503,7 +1503,7 @@
                       }
                     ],
                     "id": 14,
-                    "name": "field_14",
+                    "name": "struct_map_value",
                     "span": [
                       499,
                       622
@@ -1514,7 +1514,7 @@
                   {
                     "children": [],
                     "id": 15,
-                    "name": "field_15",
+                    "name": "typedef_value",
                     "span": [
                       623,
                       642
@@ -1525,7 +1525,7 @@
                   {
                     "children": [],
                     "id": 16,
-                    "name": "field_16",
+                    "name": "enum_value",
                     "span": [
                       642,
                       657
@@ -1536,7 +1536,7 @@
                   {
                     "children": [],
                     "id": 17,
-                    "name": "field_17",
+                    "name": "optional_text",
                     "span": [
                       657,
                       685
@@ -1556,7 +1556,7 @@
               }
             ],
             "id": 1,
-            "name": "field_1",
+            "name": "payload",
             "span": [
               18,
               687
@@ -1597,8 +1597,8 @@
   ],
   "metadata": {
     "bundler_version": "4.0.6",
-    "capture_id": "2a4aa942-4b63-44aa-a147-854a8283ae84",
-    "captured_at_utc": "2026-02-16T03:33:08Z",
+    "capture_id": "282e6b2d-cfbf-4ff0-b703-d5695e68c7eb",
+    "captured_at_utc": "2026-02-16T04:43:48Z",
     "max_field_depth": 6,
     "max_highlights_per_message": 0,
     "max_string_value_bytes": 18,
