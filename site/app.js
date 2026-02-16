@@ -685,7 +685,7 @@ function createInteractionModel(message, protocol) {
     id: "envelope",
     type: "envelope",
     label: "Protocol envelope",
-    description: "Encodes method name, message type, and sequence id; expand subfields below for byte-level breakdown.",
+    description: "Encodes message metadata (method name, message type, and sequence id); expand subfields below for byte-level breakdown.",
     start: envelopeSpan[0],
     end: envelopeSpan[1],
     subfields: envelopeSubfields
@@ -695,7 +695,7 @@ function createInteractionModel(message, protocol) {
     id: "frame-header",
     type: "frame-header",
     label: "Framed transport header",
-    description: "Encodes the 4-byte framed-transport length prefix.",
+    description: "Encodes the 4-byte big-endian framed-transport payload length prefix.",
     start: frameHeaderSpan[0],
     end: frameHeaderSpan[1]
   })
@@ -900,8 +900,8 @@ function assignPayloadStructuralGroups(interaction, payloadSpan) {
       assignGroupIfUnassigned(interaction, {
         id: groupId,
         type: "payload-structural",
-        label: "write_struct structural bytes",
-        description: "Payload bytes outside field spans, typically struct framing, field headers, or stop markers emitted by write_struct-style encoding.",
+        label: "Struct structural bytes",
+        description: "Payload bytes outside parsed field spans. For valid struct payloads this is typically the terminating STOP marker (0x00).",
         start: segmentStart,
         end: segmentEnd
       })
@@ -925,7 +925,7 @@ function assignFallbackGroups(interaction) {
         id: groupId,
         type: "wire",
         label: "Wire bytes",
-        description: "Wire-level bytes that are outside payload field spans.",
+        description: "Unclassified wire-level bytes outside parsed envelope, frame-header, and payload-field groups.",
         start: segmentStart,
         end: segmentEnd
       })
@@ -939,12 +939,12 @@ function buildFieldGroupDescription({ protocol, field, previousFieldId }) {
   const fieldId = Number.isInteger(field.node.id) ? field.node.id : "?"
 
   if (protocol === "binary") {
-    return `Binary field layout: 1-byte type tag, 2-byte big-endian field id (index = ${fieldId}), then ${ttype} value bytes.`
+    return `Binary field layout: 1-byte type tag, 2-byte big-endian field id (${fieldId}), then ${ttype} value bytes.`
   }
 
   if (protocol === "compact") {
-    const previousText = Number.isInteger(previousFieldId) ? String(previousFieldId) : "previous field id"
-    return `Compact field layout: header byte carries type and id delta (from ${previousText}); when delta is 0, the field id follows as a zigzag varint, then ${ttype} value bytes.`
+    const previousText = Number.isInteger(previousFieldId) ? String(previousFieldId) : "0 at struct start"
+    return `Compact field layout: header byte carries type and id delta (from ${previousText}); when delta is 0, the field id follows as an i16 zigzag-varint, then ${ttype} value bytes.`
   }
 
   return "Encodes this field on the wire, including field header bytes and value bytes."
@@ -978,7 +978,7 @@ function buildFieldSubfields({ protocol, rawBytes, field, groupId, start, end, p
       const idText = decodedId === null ? "unknown" : String(decodedId)
       pushSubfield(
         `${groupId}.field_id`,
-        "Field id (index)",
+        "Field id",
         `2-byte big-endian field id bytes. Decoded id: ${idText}.`,
         idStart,
         idEnd
@@ -1017,7 +1017,7 @@ function buildFieldSubfields({ protocol, rawBytes, field, groupId, start, end, p
         pushSubfield(
           `${groupId}.field_id_varint`,
           "Field id varint",
-          `Explicit zigzag varint field id bytes. Decoded id: ${decodedFieldId}.`,
+          `Explicit compact field id bytes (i16 zigzag-varint). Decoded id: ${decodedFieldId}.`,
           cursor,
           cursor + idVarint.length
         )
@@ -1145,10 +1145,10 @@ function buildEnvelopeSubfields({ protocol, rawBytes, envelopeSpan, envelopeName
     )
     pushSubfield(
       "envelope.binary.header_byte2",
-      "Header byte 2 (reserved)",
+      "Header byte 2 (version/type high byte)",
       headerByte2 === null
-        ? "Reserved byte in VERSION_1 strict header word (normally 0x00)."
-        : `Reserved byte in VERSION_1 strict header word: ${hexByte(headerByte2)} (normally 0x00).`,
+        ? "Third byte of the strict VERSION_1 header word (normally 0x00)."
+        : `Third byte of the strict VERSION_1 header word: ${hexByte(headerByte2)} (normally 0x00).`,
       headerStart + 2,
       Math.min(headerStart + 3, headerEnd)
     )
@@ -1221,7 +1221,7 @@ function buildEnvelopeSubfields({ protocol, rawBytes, envelopeSpan, envelopeName
     pushSubfield(
       "envelope.compact.seqid_varint",
       "Sequence id varint",
-      "Varint-encoded sequence id used to correlate requests and responses.",
+      "Unsigned varint-encoded sequence id used to correlate requests and responses.",
       cursor,
       cursor + seqidVarint.length
     )
@@ -1231,7 +1231,7 @@ function buildEnvelopeSubfields({ protocol, rawBytes, envelopeSpan, envelopeName
     pushSubfield(
       "envelope.compact.name_length_varint",
       "Method name length varint",
-      "Varint-encoded byte length of the method name.",
+      "Unsigned varint byte length of the method name.",
       cursor,
       cursor + nameLenVarint.length
     )
@@ -2434,7 +2434,7 @@ function compactValueHint(ttype) {
     case "i64":
       return `Compact ${ttype} value bytes (zigzag varint).`
     case "bool":
-      return "Compact boolean value is typically encoded in the header nibble."
+      return "Compact boolean struct fields encode true/false directly in the field-header type nibble."
     case "string":
       return "Compact string value bytes (length varint followed by UTF-8 bytes)."
     case "double":
