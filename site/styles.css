@@ -657,15 +657,54 @@ p {
 }
 
 .byte-subfield-tree-heading {
-  font-size: 0.76rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.86rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  text-transform: uppercase;
   color: var(--ink-muted);
 }
 
-.byte-subfield-tree-entry {
-  margin-top: 1px;
+.byte-subfield-tree-title {
+  color: var(--ink-muted);
+}
+
+.byte-subfield-tree-heading-button {
+  justify-content: flex-start;
+  border-color: transparent;
+  background: transparent;
+  padding: 2px 4px;
+}
+
+.byte-subfield-tree-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.byte-subfield-badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  letter-spacing: 0;
+}
+
+.byte-subfield-inline-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 0.74rem;
+  letter-spacing: 0;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+}
+
+.byte-subfield-tree-description {
+  margin-top: 0;
 }
 
 .field-tree {

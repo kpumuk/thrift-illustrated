@@ -1043,16 +1043,7 @@ function renderByteExplanation(interaction) {
 
 function buildSubfieldEntry(subfield) {
   const wrapper = document.createElement("div")
-  const button = document.createElement("button")
-  button.type = "button"
-  button.className = "byte-subfield-button"
-  button.dataset.subfieldId = subfield.id
-  button.textContent = `${subfield.label} [${subfield.start}-${subfield.end - 1}]`
-  button.addEventListener("mouseenter", () => activateSubfield(subfield.id))
-  button.addEventListener("mouseleave", clearSubfield)
-  button.addEventListener("focus", () => activateSubfield(subfield.id))
-  button.addEventListener("blur", clearSubfield)
-  button.addEventListener("click", () => toggleSubfieldSelection(subfield.id))
+  const button = buildSubfieldButton(subfield, "full")
 
   const description = document.createElement("div")
   description.className = "byte-subfield-description"
@@ -1060,6 +1051,52 @@ function buildSubfieldEntry(subfield) {
 
   wrapper.append(button, description)
   return wrapper
+}
+
+function buildSubfieldButton(subfield, mode = "full") {
+  const button = document.createElement("button")
+  button.type = "button"
+  button.className = "byte-subfield-button"
+  if (mode === "badge") button.classList.add("byte-subfield-badge")
+  button.dataset.subfieldId = subfield.id
+  const spanLabel = formatByteSpan(subfield.start, subfield.end)
+  button.textContent = (mode === "badge")
+    ? spanLabel
+    : `${subfield.label} [${spanLabel}]`
+  attachSubfieldInteractions(button, subfield.id)
+  return button
+}
+
+function buildSubfieldTreeHeadingButton(label, subfield) {
+  const button = document.createElement("button")
+  button.type = "button"
+  button.className = "byte-subfield-button byte-subfield-tree-heading byte-subfield-tree-heading-button"
+  button.dataset.subfieldId = subfield.id
+
+  const title = document.createElement("span")
+  title.className = "byte-subfield-tree-title"
+  title.textContent = label
+
+  const badge = document.createElement("span")
+  badge.className = "byte-subfield-inline-badge"
+  badge.textContent = formatByteSpan(subfield.start, subfield.end)
+
+  button.append(title, badge)
+  attachSubfieldInteractions(button, subfield.id)
+  return button
+}
+
+function attachSubfieldInteractions(element, subfieldId) {
+  element.addEventListener("mouseenter", () => activateSubfield(subfieldId))
+  element.addEventListener("mouseleave", clearSubfield)
+  element.addEventListener("focus", () => activateSubfield(subfieldId))
+  element.addEventListener("blur", clearSubfield)
+  element.addEventListener("click", () => toggleSubfieldSelection(subfieldId))
+}
+
+function formatByteSpan(start, endExclusive) {
+  const end = endExclusive - 1
+  return (start === end) ? String(start) : `${start}-${end}`
 }
 
 function renderSubfieldTree(subfields, groupType) {
@@ -1077,16 +1114,36 @@ function renderSubfieldTreeNode(node, depth) {
   wrapper.className = "byte-subfield-tree-node"
   wrapper.style.marginLeft = `${depth * 10}px`
 
-  const heading = document.createElement("div")
-  heading.className = "byte-subfield-tree-heading"
-  heading.textContent = node.label
-  wrapper.append(heading)
-
   const ownSubfields = [...node.subfields].sort((left, right) => left.start - right.start || left.end - right.end)
+  if (ownSubfields.length === 1) {
+    wrapper.append(buildSubfieldTreeHeadingButton(node.label, ownSubfields[0]))
+  } else {
+    const heading = document.createElement("div")
+    heading.className = "byte-subfield-tree-heading"
+    const headingLabel = document.createElement("span")
+    headingLabel.className = "byte-subfield-tree-title"
+    headingLabel.textContent = node.label
+    heading.append(headingLabel)
+
+    if (ownSubfields.length > 0) {
+      const badgeRow = document.createElement("span")
+      badgeRow.className = "byte-subfield-tree-badges"
+      for (const subfield of ownSubfields) {
+        badgeRow.append(buildSubfieldButton(subfield, "badge"))
+      }
+      heading.append(badgeRow)
+    }
+
+    wrapper.append(heading)
+  }
+
   for (const subfield of ownSubfields) {
-    const entry = buildSubfieldEntry(subfield)
-    entry.classList.add("byte-subfield-tree-entry")
-    wrapper.append(entry)
+    const description = document.createElement("div")
+    description.className = "byte-subfield-description byte-subfield-tree-description"
+    description.textContent = (ownSubfields.length > 1)
+      ? `${subfield.label}: ${subfield.description}`
+      : subfield.description
+    wrapper.append(description)
   }
 
   const children = [...node.children].sort((left, right) => {
