@@ -1017,52 +1017,15 @@ function renderByteExplanation(interaction) {
     if (group.type === "envelope") {
       breakdownTitle.textContent = "Envelope header tree (hover to preview bytes, click to lock):"
     } else if (group.type === "field") {
-      breakdownTitle.textContent = "Field subfields (hover to preview bytes, click to lock):"
+      breakdownTitle.textContent = "Field subfields tree (hover to preview bytes, click to lock):"
     } else if (group.type === "header-transport") {
       breakdownTitle.textContent = "Header subfields tree (hover to preview bytes, click to lock):"
     } else {
-      breakdownTitle.textContent = "Subfields (hover to preview bytes, click to lock):"
+      breakdownTitle.textContent = "Subfields tree (hover to preview bytes, click to lock):"
     }
     byteExplainerEl.append(breakdownTitle)
-
-    if (group.type === "header-transport" || group.type === "envelope") {
-      byteExplainerEl.append(renderSubfieldTree(group.subfields, group.type))
-    } else {
-      const list = document.createElement("ul")
-      list.className = "byte-subfields"
-
-      for (const subfield of group.subfields) {
-        const item = document.createElement("li")
-        item.append(buildSubfieldEntry(subfield))
-        list.append(item)
-      }
-
-      byteExplainerEl.append(list)
-    }
+    byteExplainerEl.append(renderSubfieldTree(group.subfields, group.type))
   }
-}
-
-function buildSubfieldEntry(subfield) {
-  const wrapper = document.createElement("div")
-  const button = buildSubfieldButton(subfield)
-
-  const description = document.createElement("div")
-  description.className = "byte-subfield-description"
-  description.textContent = subfield.description
-
-  wrapper.append(button, description)
-  return wrapper
-}
-
-function buildSubfieldButton(subfield) {
-  const button = document.createElement("button")
-  button.type = "button"
-  button.className = "byte-subfield-button"
-  button.dataset.subfieldId = subfield.id
-  const spanLabel = formatByteSpan(subfield.start, subfield.end)
-  button.textContent = `${subfield.label} [${spanLabel}]`
-  attachSubfieldInteractions(button, subfield.id, { withKeyboard: false })
-  return button
 }
 
 function attachSubfieldInteractions(element, subfieldId, options = {}) {
@@ -1217,7 +1180,26 @@ function stripTreeIndexMaps(nodes) {
 function subfieldTreePathFor(groupType, subfield) {
   if (groupType === "header-transport") return headerTreePathForSubfield(subfield)
   if (groupType === "envelope") return envelopeTreePathForSubfield(subfield)
+  if (groupType === "field") return fieldTreePathForSubfield(subfield)
   return ["Subfields"]
+}
+
+function fieldTreePathForSubfield(subfield) {
+  if (!subfield || typeof subfield.id !== "string") return ["Field layout", "Other"]
+  const id = subfield.id
+
+  if (id.endsWith(".type_tag")) return ["Field layout", "Type tag"]
+  if (id.endsWith(".header")) return ["Field layout", "Header byte"]
+  if (id.endsWith(".field_id")) return ["Field layout", "Field id"]
+  if (id.endsWith(".field_id_varint")) return ["Field layout", "Field id varint"]
+  if (id.endsWith(".field_id_delta")) return ["Field layout", "Field id delta"]
+  if (id.endsWith(".bool_value")) return ["Field layout", "Boolean value (in header)"]
+  if (id.endsWith(".value")) return ["Field layout", "Value bytes"]
+  if (id.endsWith(".value_remainder")) return ["Field layout", "Additional value bytes"]
+  if (id.endsWith(".bytes")) return ["Field layout", "Field bytes"]
+  if (/\.unknown\.\d+-\d+$/.test(id)) return ["Field layout", "Unclassified bytes"]
+
+  return ["Field layout", "Other"]
 }
 
 function headerTreePathForSubfield(subfield) {

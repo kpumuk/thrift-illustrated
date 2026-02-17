@@ -589,7 +589,7 @@ p {
   padding-top: 10px;
   border-top: 1px dashed var(--line);
   color: var(--ink-muted);
-  font-size: 0.86rem;
+  font-size: 1rem;
   line-height: 1.45;
 }
 
@@ -659,7 +659,16 @@ p {
   display: grid;
   gap: 6px;
   font-family: inherit;
-  font-size: 0.83rem;
+  font-size: 1rem;
+}
+
+#field-tree {
+  gap: 10px;
+}
+
+#field-tree .field-node {
+  display: grid;
+  gap: 6px;
 }
 
 .field-node {
