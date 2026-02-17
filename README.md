@@ -6,6 +6,8 @@ It shows Apache Thrift bytes from real local traffic.
 The goal is simple: make Thrift wire data easy to see and easy to learn.
 This project takes design ideas from [illustrated-tls12](https://tls12.xargs.org/).
 
+![Thrift Illustrated screenshot](site/assets/screenshot.png)
+
 ## Why We Made This
 
 Thrift tutorials often show only method calls and return values.
