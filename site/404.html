@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>404 - Thrift Illustrated</title>
+    <meta name="robots" content="noindex" />
+    <style>
+      @font-face {
+        font-family: "Atkinson Hyperlegible";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url("https://fonts.gstatic.com/s/atkinsonhyperlegible/v12/9Bt23C1KxNDXMspQ1lPyU89-1h6ONRlW45GE5Q.ttf")
+          format("truetype");
+      }
+
+      @font-face {
+        font-family: "Atkinson Hyperlegible";
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url("https://fonts.gstatic.com/s/atkinsonhyperlegible/v12/9Bt73C1KxNDXMspQ1lPyU89-1h6ONRlW45G8WbcNcw.ttf")
+          format("truetype");
+      }
+
+      :root {
+        --bg-a: #f7f1e8;
+        --bg-b: #ece3d6;
+        --ink: #1f2229;
+        --ink-muted: #575f6d;
+        --accent: #146c5f;
+        --warning: #9f3418;
+        --warning-strong: #8a2b12;
+        --line: rgba(31, 34, 41, 0.14);
+        --line-strong: rgba(31, 34, 41, 0.18);
+        --surface-panel: rgba(255, 255, 255, 0.78);
+        --surface-soft: rgba(255, 255, 255, 0.72);
+        --accent-splash: rgba(20, 108, 95, 0.08);
+        --warning-bg-faint: rgba(159, 52, 24, 0.08);
+        --warning-bg-default: rgba(159, 52, 24, 0.16);
+        --warning-bg-strong: rgba(159, 52, 24, 0.18);
+        --warning-border-focus: rgba(159, 52, 24, 0.58);
+        --warning-border-strong: rgba(159, 52, 24, 0.72);
+        --warning-splash: rgba(159, 52, 24, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family: "Atkinson Hyperlegible", "Helvetica Neue", sans-serif;
+      }
+
+      .bg {
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(1200px 900px at 90% -20%, rgba(20, 108, 95, 0.24), transparent 62%),
+          radial-gradient(900px 700px at -10% 110%, var(--warning-splash), transparent 58%),
+          linear-gradient(180deg, var(--bg-a), var(--bg-b));
+        z-index: -1;
+      }
+
+      .not-found-layout {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 22px 18px 40px;
+        min-height: calc(100vh - 40px);
+        display: grid;
+        align-content: center;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface-panel);
+        backdrop-filter: blur(2px);
+        padding: 14px;
+        box-shadow:
+          0 1px 1px rgba(31, 34, 41, 0.04),
+          0 4px 10px rgba(31, 34, 41, 0.035);
+      }
+
+      .not-found-card {
+        max-width: 760px;
+        margin-inline: auto;
+        display: grid;
+        gap: 14px;
+        position: relative;
+        overflow: hidden;
+        padding: clamp(22px, 3.4vw, 34px);
+      }
+
+      .not-found-card::before,
+      .not-found-card::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .not-found-card::before {
+        width: 220px;
+        height: 220px;
+        right: -92px;
+        top: -94px;
+        background: var(--accent-splash);
+      }
+
+      .not-found-card::after {
+        width: 180px;
+        height: 180px;
+        left: -82px;
+        bottom: -92px;
+        background: var(--warning-splash);
+      }
+
+      .not-found-head {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+      }
+
+      .not-found-code {
+        display: inline-block;
+        color: var(--warning-strong);
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        font-size: clamp(2.8rem, 9vw, 5.2rem);
+        line-height: 1;
+        margin-block: 0.1em 0.2em;
+      }
+
+      .not-found-icon {
+        position: absolute;
+        top: clamp(8px, 1.2vw, 10px);
+        right: clamp(4px, 0.8vw, 8px);
+        width: clamp(46px, 5.2vw, 64px);
+        height: auto;
+        display: block;
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0.92;
+        animation: not-found-float 3.8s ease-in-out infinite;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        letter-spacing: 0.01em;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .not-found-copy {
+        max-width: 56ch;
+        color: var(--ink-muted);
+      }
+
+      .not-found-tip {
+        max-width: 56ch;
+        color: var(--ink-muted);
+      }
+
+      .not-found-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+        justify-content: center;
+      }
+
+      .not-found-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: var(--surface-soft);
+        color: var(--ink);
+        padding: 8px 12px;
+        font-weight: 700;
+        transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+      }
+
+      .not-found-button:hover,
+      .not-found-button:focus-visible {
+        transform: translateY(-1px);
+        border-color: var(--warning-border-focus);
+        outline: none;
+      }
+
+      .not-found-button.is-primary {
+        border-color: var(--warning-border-strong);
+        background: var(--warning-bg-strong);
+        color: var(--warning-strong);
+      }
+
+      .not-found-button.is-ghost {
+        border-color: var(--line-strong);
+        background: var(--surface-panel);
+      }
+
+      .not-found-button:visited {
+        color: var(--ink);
+      }
+
+      .not-found-button.is-primary:visited {
+        color: var(--warning-strong);
+      }
+
+      @keyframes not-found-float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .not-found-card {
+          max-width: 100%;
+          padding: 22px 20px;
+        }
+
+        .not-found-icon {
+          top: 29px;
+          right: 16px;
+        }
+
+        .not-found-actions {
+          gap: 8px;
+        }
+
+        .not-found-button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body class="not-found-page">
+    <div class="bg"></div>
+    <main class="layout not-found-layout">
+      <section class="card not-found-card">
+        <div class="not-found-head">
+          <span class="not-found-code">404</span>
+          <img src="./assets/feather.svg" alt="" aria-hidden="true" class="not-found-icon" />
+        </div>
+
+        <h1>Page Not Found</h1>
+        <p class="not-found-copy">
+          We could not find that address. The link may be outdated, or the URL may have a typo.
+        </p>
+        <p class="not-found-tip">
+          Jump back to the explorer and pick a protocol + transport to keep browsing.
+        </p>
+
+        <div class="not-found-actions">
+          <a class="not-found-button is-primary" href="/">Back to Explorer</a>
+          <a
+            class="not-found-button is-ghost"
+            href="https://github.com/kpumuk/thrift-illustrated"
+            target="_blank"
+            rel="noreferrer"
+          >
+            View on GitHub
+          </a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

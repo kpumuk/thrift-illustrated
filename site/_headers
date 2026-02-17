@@ -16,3 +16,15 @@
 
 /data/captures/*
   Cache-Control: no-cache, max-age=0, must-revalidate
+
+/robots.txt
+  Cache-Control: no-cache, max-age=0, must-revalidate
+
+/sitemap.xml
+  Cache-Control: no-cache, max-age=0, must-revalidate
+
+/llms.txt
+  Cache-Control: no-cache, max-age=0, must-revalidate
+
+/ai.txt
+  Cache-Control: no-cache, max-age=0, must-revalidate

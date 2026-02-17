@@ -1,0 +1,3 @@
+Thrift Illustrated provides an interactive explanation of Apache Thrift wire bytes.
+URL: https://thrift.dmytro.sh/
+Repository: https://github.com/kpumuk/thrift-illustrated

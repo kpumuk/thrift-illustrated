@@ -1,0 +1,5 @@
+# Keep canonical root URL.
+/index.html / 301
+
+# Unknown paths must return real 404 instead of app-shell fallback.
+/* /404.html 404

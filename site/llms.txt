@@ -1,0 +1,9 @@
+# Thrift Illustrated
+
+Thrift Illustrated is an interactive, byte-level explainer for Apache Thrift message encoding.
+
+Primary URL: https://thrift.dmytro.sh/
+Repository: https://github.com/kpumuk/thrift-illustrated
+
+The site demonstrates protocol and transport structure by mapping raw bytes to semantic groups,
+envelope fields, and payload trees.
