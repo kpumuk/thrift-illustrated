@@ -268,7 +268,6 @@ function renderComboPicker() {
       label: "Protocol",
       options: ["binary", "compact", "json", "header"],
       selected: selectedProtocol,
-      formatOptionLabel: protocolLabel,
       onPick: (protocol) => {
         const nextCombo = resolveComboId({
           protocol,
@@ -326,12 +325,6 @@ function resolveComboId({ protocol, transport, fallbackId, prefer }) {
   if (transportOnly) return transportOnly.id
 
   return fallbackId || state.manifest.combos[0].id
-}
-
-function protocolLabel(protocol) {
-  if (protocol === "json") return "JSON"
-  if (protocol === "header") return "Header"
-  return protocol
 }
 
 function renderMessageNav() {
@@ -418,7 +411,7 @@ function renderMessageDetails() {
   addSummary("Type", message.message_type)
   addSummary("SeqID", String(message.seqid))
   addSummary("Raw Size", String(message.raw_size))
-  addSummary("Protocol", protocolLabel(messageProtocol))
+  addSummary("Protocol", messageProtocol)
   addSummary("Transport", `${transport.type}${transport.frame_length != null ? ` (${transport.frame_length})` : ""}`)
   addSummary("Envelope Span", spanToString(envelope.span))
   addSummary("Payload Span", spanToString(message.payload?.span))
