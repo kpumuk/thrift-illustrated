@@ -1,3 +1,11 @@
-Thrift Illustrated provides an interactive explanation of Apache Thrift wire bytes.
-URL: https://thrift.dmytro.sh/
+Thrift Illustrated
+Canonical URL: https://thrift.dmytro.sh/
 Repository: https://github.com/kpumuk/thrift-illustrated
+
+Summary:
+Interactive static site for understanding Apache Thrift wire messages byte by byte.
+
+Key facts:
+- Every message view links raw hex bytes to protocol envelope and payload field spans.
+- Dataset captures are generated from real localhost Ruby Thrift tutorial traffic.
+- Supported combinations: binary+buffered, binary+framed, compact+buffered, compact+framed, json+buffered, json+framed, header+header.

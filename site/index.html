@@ -8,6 +8,12 @@
       name="description"
       content="Understand Apache Thrift messages byte by byte with an interactive protocol and transport explorer."
     />
+    <meta
+      name="keywords"
+      content="apache thrift, thrift protocol, thrift transport, binary protocol, compact protocol, json protocol, header protocol, wire format, framed transport, buffered transport"
+    />
+    <meta name="author" content="Dmytro Shteflyuk" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <link rel="canonical" href="https://thrift.dmytro.sh/" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Thrift Illustrated" />
@@ -17,7 +23,10 @@
     />
     <meta property="og:url" content="https://thrift.dmytro.sh/" />
     <meta property="og:site_name" content="Thrift Illustrated" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:image" content="https://thrift.dmytro.sh/assets/screenshot.png" />
+    <meta property="og:image:width" content="2496" />
+    <meta property="og:image:height" content="1860" />
     <meta property="og:image:alt" content="Thrift Illustrated message explorer screenshot" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Thrift Illustrated" />
@@ -26,6 +35,83 @@
       content="Understand Apache Thrift messages byte by byte with an interactive protocol and transport explorer."
     />
     <meta name="twitter:image" content="https://thrift.dmytro.sh/assets/screenshot.png" />
+    <meta name="twitter:image:alt" content="Thrift Illustrated message explorer screenshot" />
+    <meta name="theme-color" content="#146c5f" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://thrift.dmytro.sh/#website",
+            "url": "https://thrift.dmytro.sh/",
+            "name": "Thrift Illustrated",
+            "description": "Interactive byte-level explorer for Apache Thrift protocol and transport traffic."
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://thrift.dmytro.sh/#application",
+            "name": "Thrift Illustrated",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Any",
+            "url": "https://thrift.dmytro.sh/",
+            "description": "Explore Apache Thrift wire bytes from real localhost Ruby tutorial traffic with linked transport, envelope, and payload views.",
+            "isAccessibleForFree": true,
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "screenshot": "https://thrift.dmytro.sh/assets/screenshot.png",
+            "codeRepository": "https://github.com/kpumuk/thrift-illustrated",
+            "author": {
+              "@type": "Person",
+              "name": "Dmytro Shteflyuk"
+            },
+            "keywords": [
+              "Apache Thrift",
+              "binary protocol",
+              "compact protocol",
+              "json protocol",
+              "header protocol",
+              "buffered transport",
+              "framed transport",
+              "byte-level protocol analysis"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://thrift.dmytro.sh/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is Thrift Illustrated?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Thrift Illustrated is a static interactive site that explains Apache Thrift wire messages byte by byte, including transport framing, protocol envelope fields, and payload field spans."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Which protocol and transport combinations are available?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The site includes seven combinations: binary+buffered, binary+framed, compact+buffered, compact+framed, json+buffered, json+framed, and header+header."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Where does the byte data come from?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "All datasets are captured from real localhost Ruby Apache Thrift tutorial client and server traffic and committed as reproducible JSON artifacts."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -91,7 +177,7 @@
             class="site-footer-link"
             href="https://github.com/kpumuk/thrift-illustrated"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             title="GitHub"
             aria-label="GitHub project"
           >
@@ -101,7 +187,7 @@
             class="site-footer-link"
             href="https://dmytro.sh"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             title="dmytro.sh"
             aria-label="dmytro.sh"
           >
@@ -111,7 +197,7 @@
             class="site-footer-link"
             href="https://x.com/kpumuk"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             title="X"
             aria-label="X profile"
           >
@@ -121,7 +207,7 @@
             class="site-footer-link"
             href="https://ruby.social/@kpumuk"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             title="Mastodon"
             aria-label="Mastodon profile"
           >

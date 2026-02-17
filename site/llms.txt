@@ -1,9 +1,30 @@
 # Thrift Illustrated
 
-Thrift Illustrated is an interactive, byte-level explainer for Apache Thrift message encoding.
+> Interactive byte-level explorer for Apache Thrift wire format.
 
-Primary URL: https://thrift.dmytro.sh/
-Repository: https://github.com/kpumuk/thrift-illustrated
+## Canonical Sources
+- Primary URL: https://thrift.dmytro.sh/
+- Repository: https://github.com/kpumuk/thrift-illustrated
+- Sitemap: https://thrift.dmytro.sh/sitemap.xml
 
-The site demonstrates protocol and transport structure by mapping raw bytes to semantic groups,
-envelope fields, and payload trees.
+## What This Site Provides
+- Maps raw wire bytes to semantic groups, envelope fields, and payload trees.
+- Lets readers inspect each byte span and linked field explanation.
+- Uses reproducible JSON artifacts generated from real localhost traffic.
+
+## Supported Protocol + Transport Combinations
+- binary + buffered
+- binary + framed
+- compact + buffered
+- compact + framed
+- json + buffered
+- json + framed
+- header + header
+
+## Data Provenance
+- Capture data is generated from real Ruby Apache Thrift tutorial client/server traffic on localhost.
+- Synthetic wire fixtures are not used.
+- Artifacts are committed under `/site/data/captures/`.
+
+## Suggested Citation
+Thrift Illustrated. Interactive Apache Thrift byte-level protocol explorer. https://thrift.dmytro.sh/

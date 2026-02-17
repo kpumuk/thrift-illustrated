@@ -28,3 +28,6 @@
 
 /ai.txt
   Cache-Control: no-cache, max-age=0, must-revalidate
+
+/404.html
+  X-Robots-Tag: noindex, nofollow
