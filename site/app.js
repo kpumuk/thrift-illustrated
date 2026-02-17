@@ -74,6 +74,18 @@ async function bootstrap() {
       void applyNavigationFromHash().then(render).catch(handleRuntimeError)
     })
     window.addEventListener("resize", scheduleResponsiveRerender)
+    fieldTreeEl.addEventListener("pointerover", handleFieldTreePointerOver)
+    fieldTreeEl.addEventListener("pointerleave", clearInteraction)
+    fieldTreeEl.addEventListener("focusin", handleFieldTreeFocusIn)
+    fieldTreeEl.addEventListener("focusout", handleFieldTreeFocusOut)
+    fieldTreeEl.addEventListener("click", handleFieldTreeClick)
+    fieldTreeEl.addEventListener("keydown", handleFieldTreeKeyDown)
+    byteExplainerEl.addEventListener("pointerover", handleSubfieldPointerOver)
+    byteExplainerEl.addEventListener("pointerleave", clearSubfield)
+    byteExplainerEl.addEventListener("focusin", handleSubfieldFocusIn)
+    byteExplainerEl.addEventListener("focusout", handleSubfieldFocusOut)
+    byteExplainerEl.addEventListener("click", handleSubfieldClick)
+    byteExplainerEl.addEventListener("keydown", handleSubfieldKeyDown)
     rawHexEl.addEventListener("pointermove", handleHexPointerMove)
     rawHexEl.addEventListener("pointerleave", clearInteraction)
   } catch (error) {
@@ -455,21 +467,6 @@ function renderFieldNode(field, depth, interaction) {
     wrapper.setAttribute("role", "button")
     wrapper.setAttribute("aria-label", `Select field ${String(field.name ?? "")}`)
     interaction.fieldElements.set(fieldKey, wrapper)
-    wrapper.addEventListener("mouseenter", () => activateFieldInteraction(fieldKey))
-    wrapper.addEventListener("mouseleave", clearInteraction)
-    wrapper.addEventListener("focusin", () => activateFieldInteraction(fieldKey))
-    wrapper.addEventListener("focusout", clearInteraction)
-    wrapper.addEventListener("click", (event) => {
-      event.stopPropagation()
-      selectFieldGroup(fieldKey)
-    })
-    wrapper.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault()
-        event.stopPropagation()
-        selectFieldGroup(fieldKey)
-      }
-    })
   }
 
   const line = document.createElement("div")
@@ -602,6 +599,53 @@ function handleHexPointerMove(event) {
   if (Number.isInteger(inferredIndex)) {
     activateByteInteraction(inferredIndex)
   }
+}
+
+function findFieldNodeFromTarget(target) {
+  if (!(target instanceof Element)) return null
+  return target.closest(".field-node[data-field-key]")
+}
+
+function fieldKeyFromNode(node) {
+  if (!(node instanceof Element)) return null
+  return node.dataset.fieldKey || null
+}
+
+function handleFieldTreePointerOver(event) {
+  const fieldNode = findFieldNodeFromTarget(event.target)
+  const fieldKey = fieldKeyFromNode(fieldNode)
+  if (!fieldKey) return
+  activateFieldInteraction(fieldKey)
+}
+
+function handleFieldTreeFocusIn(event) {
+  const fieldNode = findFieldNodeFromTarget(event.target)
+  const fieldKey = fieldKeyFromNode(fieldNode)
+  if (!fieldKey) return
+  activateFieldInteraction(fieldKey)
+}
+
+function handleFieldTreeFocusOut(event) {
+  if (fieldTreeEl.contains(event.relatedTarget)) return
+  clearInteraction()
+}
+
+function handleFieldTreeClick(event) {
+  const fieldNode = findFieldNodeFromTarget(event.target)
+  const fieldKey = fieldKeyFromNode(fieldNode)
+  if (!fieldKey) return
+  event.stopPropagation()
+  selectFieldGroup(fieldKey)
+}
+
+function handleFieldTreeKeyDown(event) {
+  if (event.key !== "Enter" && event.key !== " ") return
+  const fieldNode = findFieldNodeFromTarget(event.target)
+  const fieldKey = fieldKeyFromNode(fieldNode)
+  if (!fieldKey) return
+  event.preventDefault()
+  event.stopPropagation()
+  selectFieldGroup(fieldKey)
 }
 
 function nearestByteIndexForPoint(clientX, clientY) {
@@ -872,8 +916,10 @@ function subfieldIdForByte(interaction, groupId, byteIndex) {
 function activateFieldInteraction(fieldKey) {
   if (!state.interaction) return
   const groupId = groupIdForFieldKey(fieldKey)
+  const nextGroupId = state.interaction.groups.has(groupId) ? groupId : null
+  if (state.interaction.activeFieldKey === fieldKey && state.interaction.activeGroupId === nextGroupId) return
   state.interaction.activeFieldKey = fieldKey
-  state.interaction.activeGroupId = state.interaction.groups.has(groupId) ? groupId : null
+  state.interaction.activeGroupId = nextGroupId
   state.interaction.activeByteIndex = null
   state.interaction.activeSubfieldId = null
   applyInteractionClasses()
@@ -884,6 +930,12 @@ function activateByteInteraction(byteIndex) {
   const groupId = state.interaction.groupByByte[byteIndex] || null
   const fieldKey = state.interaction.fieldByByte[byteIndex] || null
   const subfieldId = subfieldIdForByte(state.interaction, groupId, byteIndex)
+  if (
+    state.interaction.activeGroupId === groupId &&
+    state.interaction.activeFieldKey === fieldKey &&
+    state.interaction.activeByteIndex === byteIndex &&
+    state.interaction.activeSubfieldId === subfieldId
+  ) return
   state.interaction.activeGroupId = groupId
   state.interaction.activeFieldKey = fieldKey
   state.interaction.activeByteIndex = byteIndex
@@ -893,6 +945,12 @@ function activateByteInteraction(byteIndex) {
 
 function clearInteraction() {
   if (!state.interaction) return
+  if (
+    state.interaction.activeGroupId === null &&
+    state.interaction.activeFieldKey === null &&
+    state.interaction.activeByteIndex === null &&
+    state.interaction.activeSubfieldId === null
+  ) return
   state.interaction.activeGroupId = null
   state.interaction.activeFieldKey = null
   state.interaction.activeByteIndex = null
@@ -934,12 +992,14 @@ function selectFieldGroup(fieldKey) {
 
 function activateSubfield(subfieldId) {
   if (!state.interaction) return
+  if (state.interaction.activeSubfieldId === subfieldId) return
   state.interaction.activeSubfieldId = subfieldId
   applyInteractionClasses()
 }
 
 function clearSubfield() {
   if (!state.interaction) return
+  if (state.interaction.activeSubfieldId === null) return
   state.interaction.activeSubfieldId = null
   applyInteractionClasses()
 }
@@ -1008,21 +1068,50 @@ function renderByteExplanation(interaction) {
   }
 }
 
-function attachSubfieldInteractions(element, subfieldId, options = {}) {
-  const withKeyboard = options.withKeyboard !== false
-  element.addEventListener("mouseenter", () => activateSubfield(subfieldId))
-  element.addEventListener("mouseleave", clearSubfield)
-  element.addEventListener("focusin", () => activateSubfield(subfieldId))
-  element.addEventListener("focusout", clearSubfield)
-  element.addEventListener("click", () => toggleSubfieldSelection(subfieldId))
-  if (!withKeyboard) return
-  element.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault()
-      event.stopPropagation()
-      toggleSubfieldSelection(subfieldId)
-    }
-  })
+function findSubfieldNodeFromTarget(target) {
+  if (!(target instanceof Element)) return null
+  return target.closest(".subfield-node[data-subfield-id]")
+}
+
+function subfieldIdFromNode(node) {
+  if (!(node instanceof Element)) return null
+  return node.dataset.subfieldId || null
+}
+
+function handleSubfieldPointerOver(event) {
+  const subfieldNode = findSubfieldNodeFromTarget(event.target)
+  const subfieldId = subfieldIdFromNode(subfieldNode)
+  if (!subfieldId) return
+  activateSubfield(subfieldId)
+}
+
+function handleSubfieldFocusIn(event) {
+  const subfieldNode = findSubfieldNodeFromTarget(event.target)
+  const subfieldId = subfieldIdFromNode(subfieldNode)
+  if (!subfieldId) return
+  activateSubfield(subfieldId)
+}
+
+function handleSubfieldFocusOut(event) {
+  if (byteExplainerEl.contains(event.relatedTarget)) return
+  clearSubfield()
+}
+
+function handleSubfieldClick(event) {
+  const subfieldNode = findSubfieldNodeFromTarget(event.target)
+  const subfieldId = subfieldIdFromNode(subfieldNode)
+  if (!subfieldId) return
+  toggleSubfieldSelection(subfieldId)
+}
+
+function handleSubfieldKeyDown(event) {
+  if (event.key !== "Enter" && event.key !== " ") return
+  const subfieldNode = findSubfieldNodeFromTarget(event.target)
+  const subfieldId = subfieldIdFromNode(subfieldNode)
+  if (!subfieldId) return
+  event.preventDefault()
+  event.stopPropagation()
+  toggleSubfieldSelection(subfieldId)
 }
 
 function formatByteSpan(start, endExclusive) {
@@ -1087,7 +1176,6 @@ function renderSubfieldTreeLeaf({ label, subfield, depth }) {
   leaf.tabIndex = 0
   leaf.setAttribute("role", "button")
   leaf.setAttribute("aria-label", `Select subfield ${label}`)
-  attachSubfieldInteractions(leaf, subfield.id)
 
   const line = document.createElement("div")
   const name = document.createElement("strong")
@@ -1324,13 +1412,6 @@ function applyInteractionClasses() {
       element.classList.toggle("is-subfield-selected", selectedSubfieldBytes.has(byteIndex))
       element.classList.toggle("is-subfield-active", activeSubfieldBytes.has(byteIndex))
     }
-  }
-
-  const subfieldButtons = byteExplainerEl.querySelectorAll(".byte-subfield-button")
-  for (const button of subfieldButtons) {
-    const id = button.dataset.subfieldId || ""
-    button.classList.toggle("is-active", id === state.interaction.activeSubfieldId)
-    button.classList.toggle("is-selected", id === state.interaction.selectedSubfieldId)
   }
 
   const subfieldNodes = byteExplainerEl.querySelectorAll(".subfield-node[data-subfield-id]")
