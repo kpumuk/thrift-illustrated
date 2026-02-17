@@ -642,75 +642,23 @@ p {
   color: var(--ink-muted);
 }
 
-.byte-subfields-tree {
+.subfield-tree {
   margin-top: 8px;
-  display: grid;
-  gap: 6px;
-  font-family: "IBM Plex Mono", "Menlo", monospace;
 }
 
-.byte-subfield-tree-node {
-  border-left: 1px solid var(--line);
-  padding-left: 10px;
+.subfield-branch {
   display: grid;
   gap: 6px;
 }
 
-.byte-subfield-tree-heading {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 0.86rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  color: var(--ink-muted);
-}
-
-.byte-subfield-tree-title {
-  color: var(--ink-muted);
-}
-
-.byte-subfield-tree-heading-button {
-  justify-content: flex-start;
-  border-color: transparent;
-  background: transparent;
-  padding: 2px 4px;
-}
-
-.byte-subfield-tree-badges {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.byte-subfield-badge {
-  padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 0.74rem;
-  letter-spacing: 0;
-}
-
-.byte-subfield-inline-badge {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 1px 8px;
-  font-size: 0.74rem;
-  letter-spacing: 0;
-  background: rgba(255, 255, 255, 0.72);
-  color: var(--ink);
-}
-
-.byte-subfield-tree-description {
-  margin-top: 0;
+.subfield-meta {
+  margin-top: 3px;
 }
 
 .field-tree {
   display: grid;
   gap: 6px;
-  font-family: "IBM Plex Mono", "Menlo", monospace;
+  font-family: inherit;
   font-size: 0.83rem;
 }
 
@@ -719,11 +667,13 @@ p {
   padding-left: 10px;
 }
 
-.field-node[data-field-key] {
+.field-node[data-field-key],
+.field-node[data-subfield-id] {
   cursor: pointer;
 }
 
-.field-node[data-field-key]:focus-visible {
+.field-node[data-field-key]:focus-visible,
+.field-node[data-subfield-id]:focus-visible {
   outline: 2px solid rgba(20, 108, 95, 0.55);
   outline-offset: 2px;
 }
@@ -740,6 +690,24 @@ p {
 
 .field-node .meta {
   color: var(--ink-muted);
+}
+
+.tree-span-badge {
+  display: inline;
+  margin-left: 8px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(20, 108, 95, 0.12);
+  color: var(--ink);
+  font-size: 1em;
+  font-weight: 600;
+  line-height: inherit;
+  vertical-align: baseline;
+}
+
+.field-node.is-group-selected .tree-span-badge {
+  background: rgba(159, 52, 24, 0.2);
 }
 
 .stack {

@@ -497,8 +497,9 @@ function renderFieldNode(field, depth, interaction) {
   name.textContent = String(field.name ?? "")
   const meta = document.createElement("span")
   meta.className = "meta"
-  meta.textContent = ` ${field.ttype} id=${field.id} span=${spanToString(field.span)}`
+  meta.textContent = ` ${field.ttype} id=${field.id}`
   line.append(name, meta)
+  line.append(createTreeSpanBadgeForSpan(field.span))
   wrapper.append(line)
 
   if (field.value !== null && field.value !== undefined && String(field.value) !== "") {
@@ -1043,7 +1044,7 @@ function renderByteExplanation(interaction) {
 
 function buildSubfieldEntry(subfield) {
   const wrapper = document.createElement("div")
-  const button = buildSubfieldButton(subfield, "full")
+  const button = buildSubfieldButton(subfield)
 
   const description = document.createElement("div")
   description.className = "byte-subfield-description"
@@ -1053,45 +1054,32 @@ function buildSubfieldEntry(subfield) {
   return wrapper
 }
 
-function buildSubfieldButton(subfield, mode = "full") {
+function buildSubfieldButton(subfield) {
   const button = document.createElement("button")
   button.type = "button"
   button.className = "byte-subfield-button"
-  if (mode === "badge") button.classList.add("byte-subfield-badge")
   button.dataset.subfieldId = subfield.id
   const spanLabel = formatByteSpan(subfield.start, subfield.end)
-  button.textContent = (mode === "badge")
-    ? spanLabel
-    : `${subfield.label} [${spanLabel}]`
-  attachSubfieldInteractions(button, subfield.id)
+  button.textContent = `${subfield.label} [${spanLabel}]`
+  attachSubfieldInteractions(button, subfield.id, { withKeyboard: false })
   return button
 }
 
-function buildSubfieldTreeHeadingButton(label, subfield) {
-  const button = document.createElement("button")
-  button.type = "button"
-  button.className = "byte-subfield-button byte-subfield-tree-heading byte-subfield-tree-heading-button"
-  button.dataset.subfieldId = subfield.id
-
-  const title = document.createElement("span")
-  title.className = "byte-subfield-tree-title"
-  title.textContent = label
-
-  const badge = document.createElement("span")
-  badge.className = "byte-subfield-inline-badge"
-  badge.textContent = formatByteSpan(subfield.start, subfield.end)
-
-  button.append(title, badge)
-  attachSubfieldInteractions(button, subfield.id)
-  return button
-}
-
-function attachSubfieldInteractions(element, subfieldId) {
+function attachSubfieldInteractions(element, subfieldId, options = {}) {
+  const withKeyboard = options.withKeyboard !== false
   element.addEventListener("mouseenter", () => activateSubfield(subfieldId))
   element.addEventListener("mouseleave", clearSubfield)
-  element.addEventListener("focus", () => activateSubfield(subfieldId))
-  element.addEventListener("blur", clearSubfield)
+  element.addEventListener("focusin", () => activateSubfield(subfieldId))
+  element.addEventListener("focusout", clearSubfield)
   element.addEventListener("click", () => toggleSubfieldSelection(subfieldId))
+  if (!withKeyboard) return
+  element.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      event.stopPropagation()
+      toggleSubfieldSelection(subfieldId)
+    }
+  })
 }
 
 function formatByteSpan(start, endExclusive) {
@@ -1102,7 +1090,7 @@ function formatByteSpan(start, endExclusive) {
 function renderSubfieldTree(subfields, groupType) {
   const tree = buildSubfieldTree(subfields, (subfield) => subfieldTreePathFor(groupType, subfield))
   const root = document.createElement("div")
-  root.className = "byte-subfields-tree"
+  root.className = "field-tree subfield-tree"
   for (const node of tree) {
     root.append(renderSubfieldTreeNode(node, 0))
   }
@@ -1110,40 +1098,31 @@ function renderSubfieldTree(subfields, groupType) {
 }
 
 function renderSubfieldTreeNode(node, depth) {
-  const wrapper = document.createElement("div")
-  wrapper.className = "byte-subfield-tree-node"
-  wrapper.style.marginLeft = `${depth * 10}px`
-
   const ownSubfields = [...node.subfields].sort((left, right) => left.start - right.start || left.end - right.end)
-  if (ownSubfields.length === 1) {
-    wrapper.append(buildSubfieldTreeHeadingButton(node.label, ownSubfields[0]))
-  } else {
-    const heading = document.createElement("div")
-    heading.className = "byte-subfield-tree-heading"
-    const headingLabel = document.createElement("span")
-    headingLabel.className = "byte-subfield-tree-title"
-    headingLabel.textContent = node.label
-    heading.append(headingLabel)
-
-    if (ownSubfields.length > 0) {
-      const badgeRow = document.createElement("span")
-      badgeRow.className = "byte-subfield-tree-badges"
-      for (const subfield of ownSubfields) {
-        badgeRow.append(buildSubfieldButton(subfield, "badge"))
-      }
-      heading.append(badgeRow)
-    }
-
-    wrapper.append(heading)
+  if (node.children.length === 0 && ownSubfields.length === 1) {
+    return renderSubfieldTreeLeaf({
+      label: node.label,
+      subfield: ownSubfields[0],
+      depth
+    })
   }
 
+  const wrapper = document.createElement("div")
+  wrapper.className = "field-node subfield-branch"
+  wrapper.style.marginLeft = `${depth * 10}px`
+
+  const heading = document.createElement("div")
+  const headingLabel = document.createElement("strong")
+  headingLabel.textContent = node.label
+  heading.append(headingLabel)
+  wrapper.append(heading)
+
   for (const subfield of ownSubfields) {
-    const description = document.createElement("div")
-    description.className = "byte-subfield-description byte-subfield-tree-description"
-    description.textContent = (ownSubfields.length > 1)
-      ? `${subfield.label}: ${subfield.description}`
-      : subfield.description
-    wrapper.append(description)
+    wrapper.append(renderSubfieldTreeLeaf({
+      label: subfield.label,
+      subfield,
+      depth: depth + 1
+    }))
   }
 
   const children = [...node.children].sort((left, right) => {
@@ -1155,6 +1134,30 @@ function renderSubfieldTreeNode(node, depth) {
   }
 
   return wrapper
+}
+
+function renderSubfieldTreeLeaf({ label, subfield, depth }) {
+  const leaf = document.createElement("div")
+  leaf.className = "field-node subfield-node"
+  leaf.style.marginLeft = `${depth * 10}px`
+  leaf.dataset.subfieldId = subfield.id
+  leaf.tabIndex = 0
+  leaf.setAttribute("role", "button")
+  leaf.setAttribute("aria-label", `Select subfield ${label}`)
+  attachSubfieldInteractions(leaf, subfield.id)
+
+  const line = document.createElement("div")
+  const name = document.createElement("strong")
+  name.textContent = label
+  line.append(name, createTreeSpanBadge(formatByteSpan(subfield.start, subfield.end)))
+  leaf.append(line)
+
+  const description = document.createElement("div")
+  description.className = "meta subfield-meta"
+  description.textContent = subfield.description
+  leaf.append(description)
+
+  return leaf
 }
 
 function buildSubfieldTree(subfields, pathForSubfield) {
@@ -1190,6 +1193,18 @@ function buildSubfieldTree(subfields, pathForSubfield) {
 
   stripTreeIndexMaps(root)
   return root
+}
+
+function createTreeSpanBadgeForSpan(span) {
+  if (!Array.isArray(span) || span.length !== 2) return createTreeSpanBadge("?")
+  return createTreeSpanBadge(formatByteSpan(span[0], span[1]))
+}
+
+function createTreeSpanBadge(text) {
+  const badge = document.createElement("span")
+  badge.className = "tree-span-badge"
+  badge.textContent = text
+  return badge
 }
 
 function stripTreeIndexMaps(nodes) {
@@ -1354,6 +1369,13 @@ function applyInteractionClasses() {
     const id = button.dataset.subfieldId || ""
     button.classList.toggle("is-active", id === state.interaction.activeSubfieldId)
     button.classList.toggle("is-selected", id === state.interaction.selectedSubfieldId)
+  }
+
+  const subfieldNodes = byteExplainerEl.querySelectorAll(".subfield-node[data-subfield-id]")
+  for (const node of subfieldNodes) {
+    const id = node.dataset.subfieldId || ""
+    node.classList.toggle("is-hover-active", id === state.interaction.activeSubfieldId)
+    node.classList.toggle("is-group-selected", id === state.interaction.selectedSubfieldId)
   }
 }
 
