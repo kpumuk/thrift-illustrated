@@ -17,6 +17,9 @@
 /data/captures/*
   Cache-Control: no-cache, max-age=0, must-revalidate
 
+/data/schemas/*
+  Cache-Control: no-cache, max-age=0, must-revalidate
+
 /robots.txt
   Cache-Control: no-cache, max-age=0, must-revalidate
 
