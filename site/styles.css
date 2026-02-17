@@ -591,12 +591,12 @@ p {
 
 .byte-token.is-byte-focus {
   color: var(--ink-strong);
-  border-color: var(--warning-border-default);
+  border-color: var(--accent-border-strong);
 }
 
 .byte-token.is-group-selected {
-  background: var(--warning-bg-default);
-  border-color: var(--warning-border-soft);
+  background: var(--accent-bg-default);
+  border-color: var(--accent-border-focus);
 }
 
 .byte-token.is-group-hover {
@@ -610,13 +610,13 @@ p {
 
 .byte-token.is-subfield-selected {
   box-shadow:
-    inset 0 0 0 2px var(--warning-inset),
-    0 0 0 2px var(--warning-glow);
+    inset 0 0 0 2px var(--accent-inset),
+    0 0 0 2px var(--accent-splash);
 }
 
 .byte-token.is-subfield-selected:not(.is-subfield-active) {
-  background: var(--warning-bg-default);
-  border-color: var(--warning-border-default);
+  background: var(--accent-bg-default);
+  border-color: var(--accent-border-strong);
 }
 
 .byte-token.is-subfield-selected.is-subfield-active {
@@ -680,8 +680,8 @@ p {
 }
 
 .byte-subfield-button.is-selected {
-  border-color: var(--warning-border-strong);
-  background: var(--warning-bg-default);
+  border-color: var(--accent-border-strong);
+  background: var(--accent-bg-strong);
 }
 
 .byte-subfield-description {
@@ -740,8 +740,8 @@ p {
 }
 
 .field-node.is-group-selected {
-  border-left-color: var(--warning-border-strong);
-  background: var(--warning-bg-soft);
+  border-left-color: var(--accent-border-strong);
+  background: var(--accent-bg-default);
 }
 
 .field-node .meta {
@@ -763,7 +763,7 @@ p {
 }
 
 .field-node.is-group-selected .tree-span-badge {
-  background: var(--warning-bg-badge);
+  background: var(--accent-bg-strong);
 }
 
 .stack {
