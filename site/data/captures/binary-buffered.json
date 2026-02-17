@@ -18,11 +18,9 @@
         ],
         "type": "call"
       },
-      "highlights": [],
       "index": 0,
       "message_type": "call",
       "method": "ping",
-      "parse_errors": [],
       "payload": {
         "fields": [],
         "span": [
@@ -66,11 +64,9 @@
         ],
         "type": "reply"
       },
-      "highlights": [],
       "index": 1,
       "message_type": "reply",
       "method": "ping",
-      "parse_errors": [],
       "payload": {
         "fields": [],
         "span": [
@@ -114,11 +110,9 @@
         ],
         "type": "call"
       },
-      "highlights": [],
       "index": 2,
       "message_type": "call",
       "method": "add",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -185,11 +179,9 @@
         ],
         "type": "reply"
       },
-      "highlights": [],
       "index": 3,
       "message_type": "reply",
       "method": "add",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -245,11 +237,9 @@
         ],
         "type": "call"
       },
-      "highlights": [],
       "index": 4,
       "message_type": "call",
       "method": "add",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -316,11 +306,9 @@
         ],
         "type": "reply"
       },
-      "highlights": [],
       "index": 5,
       "message_type": "reply",
       "method": "add",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -376,11 +364,9 @@
         ],
         "type": "call"
       },
-      "highlights": [],
       "index": 6,
       "message_type": "call",
       "method": "calculate",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -493,11 +479,9 @@
         ],
         "type": "reply"
       },
-      "highlights": [],
       "index": 7,
       "message_type": "reply",
       "method": "calculate",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -553,11 +537,9 @@
         ],
         "type": "call"
       },
-      "highlights": [],
       "index": 8,
       "message_type": "call",
       "method": "getStruct",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -613,11 +595,9 @@
         ],
         "type": "reply"
       },
-      "highlights": [],
       "index": 9,
       "message_type": "reply",
       "method": "getStruct",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -708,11 +688,9 @@
         ],
         "type": "call"
       },
-      "highlights": [],
       "index": 10,
       "message_type": "call",
       "method": "calculate",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -825,11 +803,9 @@
         ],
         "type": "reply"
       },
-      "highlights": [],
       "index": 11,
       "message_type": "reply",
       "method": "calculate",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -920,11 +896,9 @@
         ],
         "type": "oneway"
       },
-      "highlights": [],
       "index": 12,
       "message_type": "oneway",
       "method": "zip",
-      "parse_errors": [],
       "payload": {
         "fields": [
           {
@@ -1597,10 +1571,9 @@
   ],
   "metadata": {
     "bundler_version": "4.0.6",
-    "capture_id": "b04a163b-cd22-498f-baec-81cd975d1c64",
-    "captured_at_utc": "2026-02-16T21:19:29Z",
+    "capture_id": "59b58f07-41c9-4fa3-a58c-e904fb1941ff",
+    "captured_at_utc": "2026-02-17T12:20:03Z",
     "max_field_depth": 6,
-    "max_highlights_per_message": 0,
     "max_string_value_bytes": 18,
     "message_count": 13,
     "platform": "arm64-darwin25",

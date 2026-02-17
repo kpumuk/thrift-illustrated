@@ -106,8 +106,7 @@ class ValidationPipelineTest < Minitest::Test
         "wire_chunk_count" => methods.length,
         "max_field_depth" => 0,
         "total_field_nodes" => 0,
-        "max_string_value_bytes" => 0,
-        "max_highlights_per_message" => 0
+        "max_string_value_bytes" => 0
       },
       "dataset_errors" => [],
       "messages" => methods.each_with_index.map do |method, idx|
@@ -143,9 +142,7 @@ class ValidationPipelineTest < Minitest::Test
             },
             "span" => [1, 2],
             "fields" => []
-          },
-          "highlights" => [],
-          "parse_errors" => []
+          }
         }
       end
     }

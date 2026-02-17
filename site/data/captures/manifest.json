@@ -1,76 +1,76 @@
 {
   "combos": [
     {
-      "bytes": 44666,
+      "bytes": 43979,
       "file": "binary-buffered.json",
       "id": "binary-buffered",
       "message_count": 13,
       "protocol": "binary",
-      "sha256": "9dc9ea54ef8b3e8a83dffe46aa79e91e9f0cd854c64507b836dc9b689abd3713",
+      "sha256": "7401adae610b6fe62b4f1f6d4cf5d74b2c78654fa5873876d0f1b47deafda1e7",
       "transport": "buffered"
     },
     {
-      "bytes": 45183,
+      "bytes": 44496,
       "file": "binary-framed.json",
       "id": "binary-framed",
       "message_count": 13,
       "protocol": "binary",
-      "sha256": "261703dd3542249b19b5e1aa26b1da6d64d68dc609d84823af68124c75c64298",
+      "sha256": "26119e76475ecdb8990c59bf2f7aa25b817a30b520cd1a71c8904cdf0e1eefa9",
       "transport": "framed"
     },
     {
-      "bytes": 43492,
+      "bytes": 42805,
       "file": "compact-buffered.json",
       "id": "compact-buffered",
       "message_count": 13,
       "protocol": "compact",
-      "sha256": "be243a8a5a552e104c312b7d07da9978726227a01458235e959c49c848b089cd",
+      "sha256": "a7949677264843a8abe36a7051b10834c225f5ecdf2ac523fbbae854972e9c4c",
       "transport": "buffered"
     },
     {
-      "bytes": 44052,
+      "bytes": 43365,
       "file": "compact-framed.json",
       "id": "compact-framed",
       "message_count": 13,
       "protocol": "compact",
-      "sha256": "dcae859763752c540377ec32aacb7d099b1a9de59e019cdedad83675240a5795",
+      "sha256": "ac16c383b2846b98a0d2147b64c9823af2f7737a85257823f28a92f3bc01ab7d",
       "transport": "framed"
     },
     {
-      "bytes": 46072,
+      "bytes": 45385,
       "file": "json-buffered.json",
       "id": "json-buffered",
       "message_count": 13,
       "protocol": "json",
-      "sha256": "fcf9da724564f91975359f848dc7232048973c36499f21f6bcb736cdeb7839fa",
+      "sha256": "05eb64fb8905de76bcd034c43e701cdad202030bc0267fe8a94a43d7eaf6f414",
       "transport": "buffered"
     },
     {
-      "bytes": 46589,
+      "bytes": 45902,
       "file": "json-framed.json",
       "id": "json-framed",
       "message_count": 13,
       "protocol": "json",
-      "sha256": "09c10fa089d88f85b17a11615c13bec45d35fc4abfa4cb63aeed009da6840f9a",
+      "sha256": "155ea07834af14b6b5c7e478f6473e42e1c2c24dcc548c373ffcf97346a43859",
       "transport": "framed"
     },
     {
-      "bytes": 46236,
+      "bytes": 45549,
       "file": "header-header.json",
       "id": "header-header",
       "message_count": 13,
       "protocol": "header",
-      "sha256": "3067de1bae89eb5321fca7f4fedcd20e8c8da0a8b38aad6cb7b32be74cbae348",
+      "sha256": "3f47d6ac63af8bce8f85199ec395c7c82a69006012fc2d8ff3c6bb4a87e4d41f",
       "transport": "header"
     }
   ],
-  "generated_at_utc": "2026-02-16T21:19:29Z",
+  "generated_at_utc": "2026-02-17T12:20:03Z",
   "generated_with": {
     "bundler_version": "4.0.6",
     "platform": "arm64-darwin25",
     "ruby_version": "4.0.1",
     "thrift_ref": "git:fd9756c19d1ea5763ffd8be88fff1db1ccd0d6ba"
   },
-  "release_id": "0332981860e65c604420ee7c4a7a124de1e9f5dc",
+  "release_id": "0a5c3f709b38c58bf3c266ee2a5e447dd7260299",
   "schema_version": "1.0.0"
 }

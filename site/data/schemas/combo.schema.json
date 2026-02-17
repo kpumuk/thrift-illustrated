@@ -60,8 +60,7 @@
         "wire_chunk_count",
         "max_field_depth",
         "total_field_nodes",
-        "max_string_value_bytes",
-        "max_highlights_per_message"
+        "max_string_value_bytes"
       ],
       "properties": {
         "capture_id": {
@@ -111,11 +110,6 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 65536
-        },
-        "max_highlights_per_message": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 1000
         }
       }
     },
@@ -213,99 +207,6 @@
           "items": {
             "$ref": "#/$defs/fieldNode"
           }
-        }
-      }
-    },
-    "highlight": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "label",
-        "kind",
-        "start",
-        "end"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "label": {
-          "type": "string",
-          "minLength": 1
-        },
-        "kind": {
-          "type": "string",
-          "enum": [
-            "transport",
-            "envelope",
-            "field",
-            "error",
-            "custom"
-          ]
-        },
-        "start": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "end": {
-          "type": "integer",
-          "minimum": 1
-        }
-      }
-    },
-    "parseError": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "code",
-        "message",
-        "offset",
-        "severity",
-        "span"
-      ],
-      "properties": {
-        "code": {
-          "type": "string",
-          "enum": [
-            "E_FRAME_TRUNCATED",
-            "E_FRAME_LENGTH_MISMATCH",
-            "E_PROTOCOL_DECODE",
-            "E_STRUCT_UNEXPECTED_STOP",
-            "E_FIELD_TYPE_UNKNOWN",
-            "E_SEQID_MISMATCH",
-            "E_FIELD_NODE_LIMIT",
-            "E_RECURSION_LIMIT",
-            "E_STRING_TOO_LARGE",
-            "E_HIGHLIGHT_LIMIT"
-          ]
-        },
-        "message": {
-          "type": "string",
-          "minLength": 1
-        },
-        "offset": {
-          "anyOf": [
-            {
-              "type": "integer",
-              "minimum": 0
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "severity": {
-          "type": "string",
-          "enum": [
-            "warning",
-            "error",
-            "fatal"
-          ]
-        },
-        "span": {
-          "$ref": "#/$defs/nullableSpan"
         }
       }
     },
@@ -524,9 +425,7 @@
         "raw_size",
         "transport",
         "envelope",
-        "payload",
-        "highlights",
-        "parse_errors"
+        "payload"
       ],
       "properties": {
         "index": {
@@ -661,20 +560,6 @@
                 "$ref": "#/$defs/fieldNode"
               }
             }
-          }
-        },
-        "highlights": {
-          "type": "array",
-          "maxItems": 1000,
-          "items": {
-            "$ref": "#/$defs/highlight"
-          }
-        },
-        "parse_errors": {
-          "type": "array",
-          "maxItems": 100,
-          "items": {
-            "$ref": "#/$defs/parseError"
           }
         }
       }

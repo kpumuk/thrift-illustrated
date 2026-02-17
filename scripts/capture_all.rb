@@ -248,14 +248,16 @@ class CaptureAll
     )
 
     merged = interleave_messages(client.fetch(:messages), server.fetch(:messages))
+    parse_errors = merged.flat_map { |message| Array(message[:parse_errors]) }
+
     merged.each_with_index do |message, idx|
       message[:index] = idx
+      message.delete(:highlights)
+      message.delete(:parse_errors)
       message.delete(:_field_node_count)
       message.delete(:_max_field_depth)
       message.delete(:_max_string_value_bytes)
     end
-
-    parse_errors = merged.flat_map { |message| Array(message[:parse_errors]) }
 
     if @options[:strict]
       parse_errors.each_with_index do |error, idx|
@@ -279,8 +281,7 @@ class CaptureAll
     stats = {
       "max_field_depth" => [client.fetch(:max_field_depth), server.fetch(:max_field_depth)].max,
       "total_field_nodes" => client.fetch(:total_field_nodes) + server.fetch(:total_field_nodes),
-      "max_string_value_bytes" => [client.fetch(:max_string_value_bytes), server.fetch(:max_string_value_bytes)].max,
-      "max_highlights_per_message" => merged.map { |message| Array(message[:highlights]).length }.max || 0
+      "max_string_value_bytes" => [client.fetch(:max_string_value_bytes), server.fetch(:max_string_value_bytes)].max
     }
 
     state.merge(
@@ -443,8 +444,7 @@ class CaptureAll
         "wire_chunk_count" => state.fetch("wire_chunk_count"),
         "max_field_depth" => stats.fetch("max_field_depth"),
         "total_field_nodes" => stats.fetch("total_field_nodes"),
-        "max_string_value_bytes" => stats.fetch("max_string_value_bytes"),
-        "max_highlights_per_message" => stats.fetch("max_highlights_per_message")
+        "max_string_value_bytes" => stats.fetch("max_string_value_bytes")
       },
       "dataset_errors" => [],
       "messages" => state.fetch("messages").map { |message| stringify_keys(message) }

@@ -32,19 +32,6 @@ const DATASET_ERROR_CODES = new Set([
   "E_MESSAGE_COUNT_MISMATCH"
 ])
 
-const PARSE_ERROR_CODES = new Set([
-  "E_FRAME_TRUNCATED",
-  "E_FRAME_LENGTH_MISMATCH",
-  "E_PROTOCOL_DECODE",
-  "E_STRUCT_UNEXPECTED_STOP",
-  "E_FIELD_TYPE_UNKNOWN",
-  "E_SEQID_MISMATCH",
-  "E_FIELD_NODE_LIMIT",
-  "E_RECURSION_LIMIT",
-  "E_STRING_TOO_LARGE",
-  "E_HIGHLIGHT_LIMIT"
-])
-
 const state = {
   manifest: null,
   combo: null,
@@ -68,8 +55,6 @@ const summaryEl = document.querySelector("#message-summary")
 const rawHexEl = document.querySelector("#raw-hex")
 const byteExplainerEl = document.querySelector("#byte-explainer")
 const fieldTreeEl = document.querySelector("#field-tree")
-const parseErrorsEl = document.querySelector("#parse-errors")
-const highlightsEl = document.querySelector("#highlights")
 let responsiveRenderFrame = 0
 
 initObservability()
@@ -227,9 +212,6 @@ function renderBlockingState() {
   blocked.className = "field-node"
   blocked.textContent = "Detail view is unavailable while a blocking runtime check fails."
   fieldTreeEl.append(blocked)
-
-  renderList(parseErrorsEl, [{ text: `${error.code}: ${error.message}` }], (item) => item.text, "warn")
-  renderList(highlightsEl, [], () => "")
 }
 
 function showRuntimeMessage(message, level) {
@@ -434,8 +416,6 @@ function renderMessageDetails() {
   renderFieldTree(message.payload?.fields || [], state.interaction)
   renderByteExplanation(state.interaction)
   applyInteractionClasses()
-  renderList(parseErrorsEl, message.parse_errors || [], (item) => `${item.code}: ${item.message}`, "warn")
-  renderList(highlightsEl, message.highlights || [], (item) => `${item.kind} ${item.label} ${item.start}-${item.end}`)
 }
 
 function addSummary(label, value) {
@@ -2069,24 +2049,6 @@ function decodeCompactVarint(bytes, start, limit) {
   return { length: Math.max(0, cursor - start), value: 0 }
 }
 
-function renderList(container, items, formatter, itemClass = "") {
-  container.innerHTML = ""
-
-  if (items.length === 0) {
-    const li = document.createElement("li")
-    li.textContent = "None"
-    container.append(li)
-    return
-  }
-
-  for (const item of items) {
-    const li = document.createElement("li")
-    li.textContent = formatter(item)
-    if (itemClass) li.classList.add(itemClass)
-    container.append(li)
-  }
-}
-
 function updateSelection(combo, msg) {
   beginErrorCycle()
   state.combo = combo
@@ -2787,10 +2749,6 @@ function validateDatasetFull(dataset, entry) {
     throw invalidDataset(entry.id, "metadata.total_field_nodes is out of bounds.")
   }
 
-  if (!Number.isInteger(metadata.max_highlights_per_message) || metadata.max_highlights_per_message < 0 || metadata.max_highlights_per_message > 1000) {
-    throw invalidDataset(entry.id, "metadata.max_highlights_per_message is out of bounds.")
-  }
-
   if (!Number.isInteger(metadata.max_string_value_bytes) || metadata.max_string_value_bytes < 0 || metadata.max_string_value_bytes > 65536) {
     throw invalidDataset(entry.id, "metadata.max_string_value_bytes is out of bounds.")
   }
@@ -2844,19 +2802,6 @@ function validateDatasetFull(dataset, entry) {
       throw invalidDataset(entry.id, "raw_hex byte count does not match raw_size.")
     }
 
-    if (!Array.isArray(message.parse_errors) || message.parse_errors.length > 100) {
-      throw invalidDataset(entry.id, "parse_errors length exceeds maximum.")
-    }
-
-    for (const parseError of message.parse_errors) {
-      if (!isObject(parseError) || !PARSE_ERROR_CODES.has(parseError.code)) {
-        throw invalidDataset(entry.id, "parse_errors contains an invalid code.")
-      }
-    }
-
-    if (!Array.isArray(message.highlights) || message.highlights.length > 1000) {
-      throw invalidDataset(entry.id, "highlights length exceeds maximum.")
-    }
   }
 }
 
