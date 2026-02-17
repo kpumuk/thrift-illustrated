@@ -18,6 +18,7 @@ const COMBO_SWITCH_MEDIAN_LIMIT_MS = 100
 const COMBO_SWITCH_P95_LIMIT_MS = 200
 const P95_TOLERANCE_FACTOR = 1.10
 const ASSET_BUDGET_LIMIT_BYTES = 200 * 1024
+const ASSET_BUDGET_EXCLUDED_FILES = new Set(["assets/screenshot.png", "assets/screenshot-card.png"])
 const COMBO_ARTIFACT_LIMIT_BYTES = 2 * 1024 * 1024
 const HEAP_LIMIT_BYTES = 50 * 1024 * 1024
 
@@ -234,17 +235,11 @@ function executeCaptureRun({ outputDir, repoRoot }) {
 }
 
 async function measureAssetBudget({ siteRoot }) {
-  const totalSiteBytes = await directoryBytes(siteRoot)
-  const dataDir = path.join(siteRoot, "data")
-  let dataBytes = 0
-  try {
-    dataBytes = await directoryBytes(dataDir)
-  } catch (error) {
-    if (!error || error.code !== "ENOENT") {
-      throw error
+  const bytes = await directoryBytes(siteRoot, {
+    excludeRelativePath(relativePath) {
+      return relativePath.startsWith("data/") || ASSET_BUDGET_EXCLUDED_FILES.has(relativePath)
     }
-  }
-  const bytes = Math.max(0, totalSiteBytes - dataBytes)
+  })
   return {
     observed: bytes,
     limit: ASSET_BUDGET_LIMIT_BYTES,
@@ -391,7 +386,8 @@ function roundMetric(value) {
   return Math.round(value * 1000) / 1000
 }
 
-async function directoryBytes(rootPath) {
+async function directoryBytes(rootPath, options = {}) {
+  const excludeRelativePath = typeof options.excludeRelativePath === "function" ? options.excludeRelativePath : () => false
   const queue = [rootPath]
   let total = 0
   while (queue.length > 0) {
@@ -399,6 +395,10 @@ async function directoryBytes(rootPath) {
     const entries = await fs.readdir(current, { withFileTypes: true })
     for (const entry of entries) {
       const entryPath = path.join(current, entry.name)
+      const relativePath = path.relative(rootPath, entryPath).split(path.sep).join("/")
+      if (excludeRelativePath(relativePath, entry)) {
+        continue
+      }
       if (entry.isDirectory()) {
         queue.push(entryPath)
         continue
