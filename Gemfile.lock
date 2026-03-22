@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/apache/thrift.git
-  revision: fd9756c19d1ea5763ffd8be88fff1db1ccd0d6ba
+  revision: 0de53c48a7d101382d17490d265ac2d023938d3a
   branch: master
   glob: lib/rb/*.gemspec
   specs:
