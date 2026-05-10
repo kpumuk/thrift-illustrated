@@ -5,7 +5,6 @@ require "timeout"
 require "thrift"
 
 require_relative "recording_transport"
-require_relative "thrift_client_seqid_patch"
 
 module ThriftIllustrated
   class TutorialCapture
@@ -136,25 +135,25 @@ module ThriftIllustrated
       protocol = build_protocol(wrapped)
       client = Calculator::Client.new(protocol)
 
-      with_request_headers(protocol, method: "ping", seqid: 1) { client.ping }
+      with_request_headers(protocol, method: "ping", seqid: 0) { client.ping }
 
-      add_result_one = with_request_headers(protocol, method: "add", seqid: 2) { client.add(1, 1) }
+      add_result_one = with_request_headers(protocol, method: "add", seqid: 1) { client.add(1, 1) }
       raise "Unexpected add(1, 1) response" unless add_result_one == 2
-      add_result_two = with_request_headers(protocol, method: "add", seqid: 3) { client.add(1, 4) }
+      add_result_two = with_request_headers(protocol, method: "add", seqid: 2) { client.add(1, 4) }
       raise "Unexpected add(1, 4) response" unless add_result_two == 5
 
       subtract = Work.new(op: Operation::SUBTRACT, num1: 15, num2: 10)
-      subtract_result = with_request_headers(protocol, method: "calculate", seqid: 4) { client.calculate(1, subtract) }
+      subtract_result = with_request_headers(protocol, method: "calculate", seqid: 3) { client.calculate(1, subtract) }
       raise "Unexpected calculate subtract response" unless subtract_result == 5
 
-      shared = with_request_headers(protocol, method: "getStruct", seqid: 5) { client.getStruct(1) }
+      shared = with_request_headers(protocol, method: "getStruct", seqid: 4) { client.getStruct(1) }
       unless shared.is_a?(SharedStruct) && shared.key == 1 && shared.value == "5"
         raise "Unexpected getStruct response"
       end
 
       divide = Work.new(op: Operation::DIVIDE, num1: 1, num2: 0)
       begin
-        with_request_headers(protocol, method: "calculate", seqid: 6) { client.calculate(1, divide) }
+        with_request_headers(protocol, method: "calculate", seqid: 5) { client.calculate(1, divide) }
         raise "Expected InvalidOperation for divide-by-zero"
       rescue InvalidOperation => error
         unless error.whatOp == Operation::DIVIDE && error.why == "Cannot divide by 0"
@@ -162,7 +161,7 @@ module ThriftIllustrated
         end
       end
 
-      with_request_headers(protocol, method: "zip", seqid: 7) { client.zip(build_zip_payload) }
+      with_request_headers(protocol, method: "zip", seqid: 6) { client.zip(build_zip_payload) }
 
       {
         records: recording.records

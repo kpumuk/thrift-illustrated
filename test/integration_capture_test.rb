@@ -25,8 +25,8 @@ class IntegrationCaptureTest < Minitest::Test
     "calculate:call",
     "zip:oneway"
   ].freeze
-  EXPECTED_CLIENT_SEQIDS = [1, 2, 3, 4, 5, 6, 7].freeze
-  EXPECTED_SERVER_SEQIDS = [1, 2, 3, 4, 5, 6].freeze
+  EXPECTED_CLIENT_SEQIDS = [0, 1, 2, 3, 4, 5, 6].freeze
+  EXPECTED_SERVER_SEQIDS = [0, 1, 2, 3, 4, 5].freeze
   EXPECTED_ZIP_FIELD_NAMES = %w[
     bool_value
     byte_value
