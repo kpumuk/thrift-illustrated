@@ -9,7 +9,7 @@
     "health:browser": "bun scripts/health_check_browser.mjs"
   },
   "dependencies": {
-    "playwright-core": "^1.56.1"
+    "playwright-core": "^1.59.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
