@@ -1,5 +1,6 @@
 fix: false
 parallel: true
 ignore:
+  - "thrift/gen-rb/*.rb"
   - "thrift/gen-rb/**/*.rb"
   - "tmp/**/*.rb"

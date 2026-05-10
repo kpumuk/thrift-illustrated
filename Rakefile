@@ -6,6 +6,7 @@ require "rake"
 
 BENCHMARK_REPORT_PATH = "tmp/benchmarks/latest.json"
 BENCHMARK_SCHEMA_PATH = "site/data/schemas/benchmark.schema.json"
+RUBY_LINT_PATHS = %w[Gemfile Rakefile scripts test].freeze
 
 desc "Capture tutorial traffic and generate artifacts"
 task :capture do
@@ -14,7 +15,7 @@ end
 
 desc "Run Ruby linter"
 task :lint do
-  sh "bundle exec standardrb"
+  sh "bundle exec standardrb #{RUBY_LINT_PATHS.join(" ")}"
 end
 
 desc "Run project tests"
