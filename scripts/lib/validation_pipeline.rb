@@ -6,7 +6,7 @@ module ThriftIllustrated
   class ValidationPipeline
     EXPECTED_CALL_SEQUENCE = %w[ping add add calculate getStruct calculate zip].freeze
 
-    Result = Struct.new(:errors, keyword_init: true) do
+    Result = Struct.new(:errors) do
       def ok?
         errors.empty?
       end
