@@ -1,10 +1,10 @@
 GIT
   remote: https://github.com/apache/thrift.git
-  revision: 349c5f6afd9616c9f3484839c8328c4501df32f3
+  revision: 43ea5d0e32d38e53d8b98ba43a5eeea84079630e
   branch: master
   glob: lib/rb/*.gemspec
   specs:
-    thrift (0.25.0)
+    thrift (0.26.0)
       logger
 
 GEM
@@ -112,7 +112,7 @@ CHECKSUMS
   standard (1.56.0) sha256=ae2af4d9669589162ac69ed5ef59dcf9f346d4afc81f7e62b84339310dfcb787
   standard-custom (1.0.2) sha256=424adc84179a074f1a2a309bb9cf7cd6bfdb2b6541f20c6bf9436c0ba22a652b
   standard-performance (1.9.0) sha256=49483d31be448292951d80e5e67cdcb576c2502103c7b40aec6f1b6e9c88e3f2
-  thrift (0.25.0)
+  thrift (0.26.0)
   unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42
   unicode-emoji (4.2.0) sha256=519e69150f75652e40bf736106cfbc8f0f73aa3fb6a65afe62fefa7f80b0f80f
 
