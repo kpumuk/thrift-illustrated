@@ -3,7 +3,7 @@ source "https://rubygems.org"
 ruby "4.0.1"
 
 gem "rake", "~> 13.4"
-gem "minitest", "~> 6.0"
+gem "minitest", "~> 6.1"
 gem "base64", "~> 0.3"
 gem "json_schemer", "~> 2.4"
 gem "standard"
