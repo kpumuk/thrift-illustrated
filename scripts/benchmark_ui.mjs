@@ -367,7 +367,7 @@ function summarizeDistribution(values, warmupRuns) {
     }
   }
 
-  const sorted = [...values].sort((left, right) => left - right)
+  const sorted = values.toSorted((left, right) => left - right)
   return {
     runs: values.length,
     warmup_runs: warmupRuns,

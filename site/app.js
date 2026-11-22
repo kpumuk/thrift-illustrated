@@ -724,7 +724,7 @@ function createInteractionModel(message, protocol) {
 
   const previousFieldIdByKey = new Map()
   const lastFieldIdByParent = new Map()
-  const fieldsInWireOrder = [...fields].sort((left, right) => {
+  const fieldsInWireOrder = fields.toSorted((left, right) => {
     if (left.span[0] !== right.span[0]) return left.span[0] - right.span[0]
     if (left.depth !== right.depth) return left.depth - right.depth
     return left.key.localeCompare(right.key)
@@ -737,7 +737,7 @@ function createInteractionModel(message, protocol) {
     }
   }
 
-  const ordered = [...fields].sort((left, right) => {
+  const ordered = fields.toSorted((left, right) => {
     if (left.depth !== right.depth) return right.depth - left.depth
     const leftLen = left.span[1] - left.span[0]
     const rightLen = right.span[1] - right.span[0]
@@ -1123,7 +1123,7 @@ function renderSubfieldTree(subfields, groupType) {
 }
 
 function renderSubfieldTreeNode(node, depth) {
-  const ownSubfields = [...node.subfields].sort((left, right) => left.start - right.start || left.end - right.end)
+  const ownSubfields = node.subfields.toSorted((left, right) => left.start - right.start || left.end - right.end)
   if (node.children.length === 0 && ownSubfields.length === 1) {
     return renderSubfieldTreeLeaf({
       label: node.label,
@@ -1150,7 +1150,7 @@ function renderSubfieldTreeNode(node, depth) {
     }))
   }
 
-  const children = [...node.children].sort((left, right) => {
+  const children = node.children.toSorted((left, right) => {
     if (left.orderStart !== right.orderStart) return left.orderStart - right.orderStart
     return left.label.localeCompare(right.label)
   })
@@ -1615,7 +1615,7 @@ function buildFieldSubfields({ protocol, rawBytes, field, groupId, start, end, p
   }
 
   fillSubfieldGaps(subfields, [start, end], `${groupId}.unknown`, "Unclassified field bytes")
-  return subfields.sort((left, right) => left.start - right.start || left.end - right.end)
+  return subfields.toSorted((left, right) => left.start - right.start || left.end - right.end)
 }
 
 function fillSubfieldGaps(subfields, span, idPrefix, label) {
@@ -1862,7 +1862,7 @@ function buildHeaderTransportSubfields({ rawBytes, headerSpan, headerProtocol })
   }
 
   fillSubfieldGaps(subfields, headerSpan, "header.transport.unknown", "Header metadata bytes")
-  return subfields.sort((left, right) => left.start - right.start || left.end - right.end)
+  return subfields.toSorted((left, right) => left.start - right.start || left.end - right.end)
 }
 
 function headerSubprotocolName(protocolId) {
@@ -2070,7 +2070,7 @@ function buildEnvelopeSubfields({ protocol, rawBytes, envelopeSpan, envelopeName
   }
 
   fillEnvelopeGaps(subfields, envelopeSpan)
-  return subfields.sort((left, right) => left.start - right.start || left.end - right.end)
+  return subfields.toSorted((left, right) => left.start - right.start || left.end - right.end)
 }
 
 function fillEnvelopeGaps(subfields, envelopeSpan) {

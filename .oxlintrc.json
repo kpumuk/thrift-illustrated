@@ -2,7 +2,9 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["eslint", "unicorn", "oxc"],
   "categories": {
-    "correctness": "error"
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
   },
   "env": {
     "es2026": true,
@@ -10,6 +12,7 @@
   },
   "ignorePatterns": ["site/data/**", "tmp/**"],
   "rules": {
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
     "no-case-declarations": "error",
     "no-empty": "error",
     "no-fallthrough": "error",
@@ -17,10 +20,10 @@
     "no-redeclare": "error",
     "no-regex-spaces": "error",
     "no-undef": "error",
-    "no-unexpected-multiline": "error",
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "no-useless-assignment": "error",
-    "preserve-caught-error": "error"
+    "no-await-in-loop": "off",
+    "no-underscore-dangle": "off"
   },
   "overrides": [
     {
