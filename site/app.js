@@ -703,7 +703,7 @@ function createInteractionModel(message, protocol) {
     fieldElements: new Map(),
     byteElements: new Map(),
     bytesByField: new Map(),
-    fieldByByte: new Array(message.raw_size).fill(null),
+    fieldByByte: Array.from({ length: message.raw_size }, () => null),
     activeFieldKey: null,
     activeByteIndex: null,
     activeGroupId: null,
@@ -711,7 +711,7 @@ function createInteractionModel(message, protocol) {
     selectedSubfieldId: null,
     selectedGroupId: null,
     hexdumpRowBytes: null,
-    groupByByte: new Array(message.raw_size).fill(null),
+    groupByByte: Array.from({ length: message.raw_size }, () => null),
     groups: new Map(),
     subfields: new Map(),
     subfieldToGroup: new Map()
@@ -1620,7 +1620,7 @@ function buildFieldSubfields({ protocol, rawBytes, field, groupId, start, end, p
 
 function fillSubfieldGaps(subfields, span, idPrefix, label) {
   const [start, end] = span
-  const covered = new Array(Math.max(0, end - start)).fill(false)
+  const covered = Array.from({ length: Math.max(0, end - start) }, () => false)
   for (const subfield of subfields) {
     for (let index = subfield.start; index < subfield.end; index += 1) {
       if (index >= start && index < end) {
@@ -2074,7 +2074,7 @@ function buildEnvelopeSubfields({ protocol, rawBytes, envelopeSpan, envelopeName
 }
 
 function fillEnvelopeGaps(subfields, envelopeSpan) {
-  const covered = new Array(envelopeSpan[1] - envelopeSpan[0]).fill(false)
+  const covered = Array.from({ length: envelopeSpan[1] - envelopeSpan[0] }, () => false)
   for (const subfield of subfields) {
     for (let index = subfield.start; index < subfield.end; index += 1) {
       if (index >= envelopeSpan[0] && index < envelopeSpan[1]) {

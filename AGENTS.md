@@ -29,6 +29,7 @@
 - `bundle exec rake test`
 - `bundle exec rake schema`
 - `bundle exec rake check`
+- `bun run lint:js`
 - `mise run ci`
 
 ## Rules
